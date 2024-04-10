@@ -17,9 +17,7 @@ import { NewEntryAction, Record, ActionHash, EntryHash, AgentPubKey } from '@hol
 import { HouseholdClient } from './household-client.js';
 
 export class HouseholdStore {
-
-
-  constructor(public client: HouseholdClient) {}
+constructor(public client: HouseholdClient) {}
   
   /** Household */
 
@@ -28,7 +26,46 @@ export class HouseholdStore {
       original: immutableEntryStore(() => this.client.getOriginalHousehold(householdHash)),
       allRevisions: allRevisionsOfEntryStore(this.client, () => this.client.getAllRevisionsForHousehold(householdHash)),
       deletes: deletesForEntryStore(this.client, householdHash, () => this.client.getAllDeletesForHousehold(householdHash)),
+      requestors: {
+        live: pipe(
+          liveLinksStore(
+            this.client,
+            householdHash,
+            () => this.client.getRequestorsForHousehold(householdHash),
+            'HouseholdToRequestors'
+          ), 
+          links => links.map(l => retype(l.target, HashType.AGENT))
+        ),
+        deleted: pipe(
+          deletedLinksStore(
+            this.client,
+            householdHash,
+            () => this.client.getDeletedRequestorsForHousehold(householdHash),
+            'HouseholdToRequestors'
+          ),
+          links => links.map(l => retype(l.target, HashType.AGENT))
+        ),
+      },
+      members: {
+        live: pipe(
+          liveLinksStore(
+            this.client,
+            householdHash,
+            () => this.client.getMembersForHousehold(householdHash),
+            'HouseholdToMembers'
+          ), 
+          links => links.map(l => retype(l.target, HashType.AGENT))
+        ),
+        deleted: pipe(
+          deletedLinksStore(
+            this.client,
+            householdHash,
+            () => this.client.getDeletedMembersForHousehold(householdHash),
+            'HouseholdToMembers'
+          ),
+          links => links.map(l => retype(l.target, HashType.AGENT))
+        ),
+      },
     })
   );
-
 }

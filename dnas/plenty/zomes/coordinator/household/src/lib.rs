@@ -1,3 +1,6 @@
+pub mod household_to_members;
+
+pub mod household_to_requestors;
 pub mod household;
 use hdk::prelude::*;
 use household_integrity::*;

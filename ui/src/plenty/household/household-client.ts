@@ -62,5 +62,53 @@ export class HouseholdClient extends ZomeClient<HouseholdSignal> {
   getOldestDeleteForHousehold(originalHouseholdHash: ActionHash): Promise<SignedActionHashed<Delete> | undefined> {
     return this.callZome('get_oldest_delete_for_household', originalHouseholdHash);
   }
+
+  /** Requestors for Household */
+
+  async getRequestorsForHousehold(householdHash: ActionHash): Promise<Array<Link>> {
+    return this.callZome('get_requestors_for_household', householdHash);
+  }
+
+  async getDeletedRequestorsForHousehold(householdHash: ActionHash): Promise<Array<[SignedActionHashed<CreateLink>, SignedActionHashed<DeleteLink>[]]>> {
+    return this.callZome('get_deleted_requestors_for_household', householdHash);
+  }
   
+  addRequestorForHousehold(householdHash: ActionHash, requestor: AgentPubKey): Promise<void> {
+    return this.callZome('add_requestor_for_household', {
+      base_household_hash: householdHash,
+      target_requestor: requestor,
+    });
+  }
+
+  removeRequestorForHousehold(householdHash: ActionHash, requestor: AgentPubKey): Promise<void> {
+    return this.callZome('remove_requestor_for_household', {
+      base_household_hash: householdHash,
+      target_requestor: requestor,
+    });
+  }
+
+  /** Members for Household */
+
+  async getMembersForHousehold(householdHash: ActionHash): Promise<Array<Link>> {
+    return this.callZome('get_members_for_household', householdHash);
+  }
+
+  async getDeletedMembersForHousehold(householdHash: ActionHash): Promise<Array<[SignedActionHashed<CreateLink>, SignedActionHashed<DeleteLink>[]]>> {
+    return this.callZome('get_deleted_members_for_household', householdHash);
+  }
+  
+  addMemberForHousehold(householdHash: ActionHash, member: AgentPubKey): Promise<void> {
+    return this.callZome('add_member_for_household', {
+      base_household_hash: householdHash,
+      target_member: member,
+    });
+  }
+
+  removeMemberForHousehold(householdHash: ActionHash, member: AgentPubKey): Promise<void> {
+    return this.callZome('remove_member_for_household', {
+      base_household_hash: householdHash,
+      target_member: member,
+    });
+  }
+
 }

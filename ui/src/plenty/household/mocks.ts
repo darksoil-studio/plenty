@@ -102,6 +102,46 @@ export class HouseholdZomeMock extends ZomeMock implements AppAgentClient {
     return record;
   }
   
+  /** Requestors for Household */
+  householdToRequestor = new HoloHashMap<ActionHash, Link[]>();
+
+  async get_requestors_for_household(householdHash: ActionHash): Promise<Array<Link>> {
+    return this.householdToRequestor.get(householdHash) || [];
+  }
+  
+  async add_requestor_for_household(input: { household_hash: ActionHash; requestor: AgentPubKey }): Promise<void> {
+    const existing = this.householdToRequestor.get(input.household_hash) || [];
+    this.householdToRequestor.set(input.household_hash, [...existing, { 
+        target: input.requestor, 
+        author: this.myPubKey,
+        timestamp: Date.now() * 1000,
+        zome_index: 0,
+        link_type: 0,
+        tag: new Uint8Array(),
+        create_link_hash: await fakeActionHash()
+      }]);
+  }
+  
+  /** Members for Household */
+  householdToMember = new HoloHashMap<ActionHash, Link[]>();
+
+  async get_members_for_household(householdHash: ActionHash): Promise<Array<Link>> {
+    return this.householdToMember.get(householdHash) || [];
+  }
+  
+  async add_member_for_household(input: { household_hash: ActionHash; member: AgentPubKey }): Promise<void> {
+    const existing = this.householdToMember.get(input.household_hash) || [];
+    this.householdToMember.set(input.household_hash, [...existing, { 
+        target: input.member, 
+        author: this.myPubKey,
+        timestamp: Date.now() * 1000,
+        zome_index: 0,
+        link_type: 0,
+        tag: new Uint8Array(),
+        create_link_hash: await fakeActionHash()
+      }]);
+  }  
+	
 
 }
 

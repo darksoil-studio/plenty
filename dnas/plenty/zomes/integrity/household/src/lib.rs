@@ -1,3 +1,7 @@
+pub mod household_to_members;
+pub use household_to_members::*;
+pub mod household_to_requestors;
+pub use household_to_requestors::*;
 pub mod household;
 pub use household::*;
 use hdi::prelude::*;
@@ -12,6 +16,8 @@ pub enum EntryTypes {
 #[hdk_link_types]
 pub enum LinkTypes {
     HouseholdUpdates,
+    HouseholdToRequestors,
+    HouseholdToMembers,
 }
 #[hdk_extern]
 pub fn genesis_self_check(
@@ -114,6 +120,22 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         tag,
                     )
                 }
+                LinkTypes::HouseholdToRequestors => {
+                    validate_create_link_household_to_requestors(
+                        action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
+                LinkTypes::HouseholdToMembers => {
+                    validate_create_link_household_to_members(
+                        action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
             }
         }
         FlatOp::RegisterDeleteLink {
@@ -127,6 +149,24 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
             match link_type {
                 LinkTypes::HouseholdUpdates => {
                     validate_delete_link_household_updates(
+                        action,
+                        original_action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
+                LinkTypes::HouseholdToRequestors => {
+                    validate_delete_link_household_to_requestors(
+                        action,
+                        original_action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
+                LinkTypes::HouseholdToMembers => {
+                    validate_delete_link_household_to_members(
                         action,
                         original_action,
                         base_address,
@@ -279,6 +319,22 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 tag,
                             )
                         }
+                        LinkTypes::HouseholdToRequestors => {
+                            validate_create_link_household_to_requestors(
+                                action,
+                                base_address,
+                                target_address,
+                                tag,
+                            )
+                        }
+                        LinkTypes::HouseholdToMembers => {
+                            validate_create_link_household_to_members(
+                                action,
+                                base_address,
+                                target_address,
+                                tag,
+                            )
+                        }
                     }
                 }
                 OpRecord::DeleteLink { original_action_hash, base_address, action } => {
@@ -306,6 +362,24 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                     match link_type {
                         LinkTypes::HouseholdUpdates => {
                             validate_delete_link_household_updates(
+                                action,
+                                create_link.clone(),
+                                base_address,
+                                create_link.target_address,
+                                create_link.tag,
+                            )
+                        }
+                        LinkTypes::HouseholdToRequestors => {
+                            validate_delete_link_household_to_requestors(
+                                action,
+                                create_link.clone(),
+                                base_address,
+                                create_link.target_address,
+                                create_link.tag,
+                            )
+                        }
+                        LinkTypes::HouseholdToMembers => {
+                            validate_delete_link_household_to_members(
                                 action,
                                 create_link.clone(),
                                 base_address,
