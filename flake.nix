@@ -2,6 +2,8 @@
   description = "Template for Holochain app development";
 
   inputs = {
+    file-storage.url = "github:holochain-open-dev/file-storage/nixify";
+    profiles.url = "github:holochain-open-dev/profiles/nixify";
     versions.url  = "github:holochain/holochain?dir=versions/weekly";
 
     holochain.url = "github:holochain/holochain";
@@ -13,11 +15,6 @@
     # tauri-plugin-holochain.url = "github:darksoil-studio/tauri-plugin-holochain";
     tauri-plugin-holochain.url = "/home/guillem/projects/darksoil/tauri-plugin-holochain";
     hc-infra.url = "github:holochain-open-dev/infrastructure/0.300.0-dev";
-
-    # Holochain dependencies (zomes, DNAs and hApps)
-    profiles.url = "github:holochain-open-dev/profiles/nixify";
-    file-storage.url = "github:holochain-open-dev/file-storage/nixify";
-    # Add more repositories here...
   };
 
   outputs = inputs:

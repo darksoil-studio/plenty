@@ -1,3 +1,7 @@
+import { householdStoreContext } from './plenty/household/context.js';
+import { HouseholdClient } from './plenty/household/household-client.js';
+import { HouseholdStore } from './plenty/household/household-store.js';
+
 // Replace 'light.css' with 'dark.css' if you want the dark theme
 import '@shoelace-style/shoelace/dist/themes/light.css';
 
@@ -28,7 +32,11 @@ type View = { view: 'main' };
 @localized()
 @customElement('holochain-app')
 export class HolochainApp extends LitElement {
-  @state() _loading = true;
+  @provide({ context: householdStoreContext })
+  @property()
+  _householdStore!: HouseholdStore;
+
+@state() _loading = true;
   @state() _view = { view: 'main' };
   @state() _error: any | undefined;
 
@@ -51,7 +59,8 @@ export class HolochainApp extends LitElement {
 
   // Don't change this
   async initStores(appAgentClient: AppAgentClient) {
-    this._profilesStore = new ProfilesStore(new ProfilesClient(appAgentClient, 'TODO:REPLACE_ME_WITH_THE_DNA_WITH_THE_PROFILES_ZOME'));
+    this._profilesStore = new ProfilesStore(new ProfilesClient(appAgentClient, 'plenty'));
+    this._householdStore = new HouseholdStore(new HouseholdClient(appAgentClient, 'plenty'));
   }
 
   renderMyProfile() {
@@ -133,5 +142,4 @@ export class HolochainApp extends LitElement {
       }
     `,
     sharedStyles,
-  ];
-}
+  ];}

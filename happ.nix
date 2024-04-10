@@ -19,6 +19,7 @@
         dnas = {
           # Override specific dnas here, e.g.:
           # my_dna = inputs'.some_input.packages.my_dna;
+          plenty = self'.packages.plenty;
         };
       };
   	};

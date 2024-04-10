@@ -4148,10 +4148,10 @@
         "versions": "versions_8"
       },
       "locked": {
-        "dirtyRev": "858f7fb73f46f320dfaa2cf2d3ed6408a5953f60-dirty",
-        "dirtyShortRev": "858f7fb-dirty",
-        "lastModified": 1712757453,
-        "narHash": "sha256-IG8Fgg61REu6Pg3FrqL/jdpF3/YJEb1WHqgSZjDkMzA=",
+        "dirtyRev": "6dfa327dc744857ecc99cffe3d6b762cc1cf4843-dirty",
+        "dirtyShortRev": "6dfa327-dirty",
+        "lastModified": 1712757855,
+        "narHash": "sha256-LSadh5nYty2G279qxXd0MsSPQC1JK8GrOV1chQbKnLg=",
         "type": "git",
         "url": "file:///home/guillem/projects/darksoil/tauri-plugin-holochain"
       },

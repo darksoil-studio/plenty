@@ -20,7 +20,9 @@
     "@mdi/js": "^7.2.0",
     "@msgpack/msgpack": "^2.8.0",
     "@shoelace-style/shoelace": "^2.11.0",
-    "lit": "^3.0.0"
+    "lit": "^3.0.0",
+    "@holochain-open-dev/profiles": "github:holochain-open-dev/profiles#69dba6ebf0ee04985e799ccaa39ae2852ab465b7&path:ui",
+    "@holochain-open-dev/file-storage": "github:holochain-open-dev/file-storage#7f7f49373738c815e7e3ec0e9f835f7cfc4cd950&path:ui"
   },
   "devDependencies": {
     "@lit/localize-tools": "^0.6.3",
