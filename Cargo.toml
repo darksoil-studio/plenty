@@ -1,0 +1,16 @@
+[profile.dev]
+opt-level = "z"
+
+[profile.release]
+opt-level = "z"
+
+[workspace]
+members = ["src-tauri", "dnas/*/zomes/coordinator/*", "dnas/*/zomes/integrity/*"]
+resolver = "2"
+
+[workspace.dependencies]
+holochain = { version = "0.3.0-beta-dev.40", default-features = false, features = [
+  "test_utils",
+] }
+hdi = "0.4.0-beta-dev.30"
+hdk = "0.3.0-beta-dev.34"

@@ -1,0 +1,32 @@
+{
+  "productName": "plenty",
+  "version": "0.0.0",
+  "identifier": "plenty",
+  "build": {
+    "beforeDevCommand": "pnpm happ:build-debug && cross-env BOOTSTRAP_PORT=$(port) SIGNAL_PORT=$(port) INTERNAL_IP=$(internal-ip --ipv4) concurrently -k \"pnpm local-services\" \"pnpm -F ui start\"",
+    "beforeBuildCommand": "pnpm -F ui build && pnpm happ:build",
+    "devUrl": "http://localhost:1420",
+    "frontendDist": "../ui/dist"
+  },
+  "app": {
+    "withGlobalTauri": false,
+    "security": {
+      "csp": null
+    },
+    "windows": [
+      {
+        "fullscreen": false,
+        "height": 600,
+        "resizable": true,
+        "title": "Plenty",
+        "width": 800
+      }
+    ]
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+    ]
+  }
+}

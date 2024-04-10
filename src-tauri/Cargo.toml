@@ -1,0 +1,28 @@
+[package]
+name = "plenty"
+version = "0.0.0"
+description = "Plenty"
+authors = ["you"]
+license = ""
+repository = ""
+edition = "2021"
+rust-version = "1.70"
+
+[lib]
+name = "tauri_app_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies]
+tauri-build = { version = "2.0.0-beta.10", default-features = false , features = [] }
+
+[dependencies]
+tauri = { version = "2.0.0-beta.13", features = [] }
+tauri-plugin-holochain = { git = "https://github.com/darksoil-studio/tauri-plugin-holochain", branch = "main" }
+holochain_types = { version = "0.3.0-beta-dev" }
+lair_keystore = { version = "0.4.0" }
+holochain_client = { version = "0.5.0-dev" }
+log = "0.4"
+tauri-plugin-log = "2.0.0-beta"
+

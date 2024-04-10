@@ -1,0 +1,7 @@
+---
+manifest_version: "1"
+name: plenty
+ui:
+  bundled: "../ui/dist.zip"
+happ_manifest:
+  bundled: "./plenty.happ"
