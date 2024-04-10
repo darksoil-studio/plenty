@@ -9,14 +9,14 @@ members = ["src-tauri", "dnas/*/zomes/coordinator/*", "dnas/*/zomes/integrity/*"
 resolver = "2"
 
 [workspace.dependencies]
-hdi = "=0.4.0-beta-dev.30"
-hdk = "=0.3.0-beta-dev.34"
+hdi = "0.4.0-beta-dev"
+hdk = "0.3.0-beta-dev"
 serde = "1.0"
 
 [workspace.dependencies.holochain]
 default-features = false
 features = ["test_utils"]
-version = "0.3.0-beta-dev.40"
+version = "0.3.0-beta-dev"
 
 [workspace.dependencies.household]
 path = "dnas/plenty/zomes/coordinator/household"

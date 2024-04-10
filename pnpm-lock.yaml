@@ -54,8 +54,8 @@ importers:
         specifier: ^0.300.0-dev.0
         version: 0.300.0-dev.0(@types/react@18.2.75)
       '@holochain-open-dev/file-storage':
-        specifier: github:holochain-open-dev/file-storage#7f7f49373738c815e7e3ec0e9f835f7cfc4cd950&path:ui
-        version: github.com/holochain-open-dev/file-storage/7f7f49373738c815e7e3ec0e9f835f7cfc4cd950#path:ui(@types/react@18.2.75)
+        specifier: github:holochain-open-dev/file-storage#7be2c43e1aa8f8ce2a7b18d0e87f6abd6e8f5784&path:ui
+        version: github.com/holochain-open-dev/file-storage/7be2c43e1aa8f8ce2a7b18d0e87f6abd6e8f5784#path:ui(@types/react@18.2.75)
       '@holochain-open-dev/profiles':
         specifier: github:holochain-open-dev/profiles#69dba6ebf0ee04985e799ccaa39ae2852ab465b7&path:ui
         version: github.com/holochain-open-dev/profiles/69dba6ebf0ee04985e799ccaa39ae2852ab465b7#path:ui(@types/react@18.2.75)
@@ -2932,8 +2932,8 @@ packages:
     resolution: {integrity: sha512-9qv4rlDiopXg4E69k+vMHjNN63YFMe9sZMrdlvKnCjlCRWeCBswPPMPUfx+ipsAWq1LXHe70RcbaHdJJpS6hyQ==}
     engines: {node: '>= 10'}
 
-  github.com/holochain-open-dev/file-storage/7f7f49373738c815e7e3ec0e9f835f7cfc4cd950#path:ui:
-    resolution: {path: ui, tarball: https://codeload.github.com/holochain-open-dev/file-storage/tar.gz/7f7f49373738c815e7e3ec0e9f835f7cfc4cd950}
+  github.com/holochain-open-dev/file-storage/7be2c43e1aa8f8ce2a7b18d0e87f6abd6e8f5784#path:ui:
+    resolution: {path: ui, tarball: https://codeload.github.com/holochain-open-dev/file-storage/tar.gz/7be2c43e1aa8f8ce2a7b18d0e87f6abd6e8f5784}
     name: '@holochain-open-dev/file-storage'
     version: 0.300.0-dev.0
 
@@ -6575,8 +6575,8 @@ snapshots:
       readable-stream: 3.6.2
     dev: true
 
-  github.com/holochain-open-dev/file-storage/7f7f49373738c815e7e3ec0e9f835f7cfc4cd950#path:ui(@types/react@18.2.75):
-    id: github.com/holochain-open-dev/file-storage/7f7f49373738c815e7e3ec0e9f835f7cfc4cd950#path:ui
+  github.com/holochain-open-dev/file-storage/7be2c43e1aa8f8ce2a7b18d0e87f6abd6e8f5784#path:ui(@types/react@18.2.75):
+    id: github.com/holochain-open-dev/file-storage/7be2c43e1aa8f8ce2a7b18d0e87f6abd6e8f5784#path:ui
     dependencies:
       '@holochain-open-dev/elements': 0.300.0-dev.0(@types/react@18.2.75)
       '@holochain-open-dev/utils': 0.300.0-dev.1

@@ -1,4 +1,4 @@
-{ inputs, allDnas, ... }:
+{ inputs, ... }:
 
 {
   # Import all `dnas/*/dna.nix` files
@@ -13,7 +13,7 @@
     , self'
     , ...
     }: {
-  	  packages.plenty = inputs.hcInfra.outputs.lib.happ {
+  	  packages.plenty = inputs.hc-infra.outputs.lib.happ {
         holochain = inputs'.holochain;
         happManifest = ./workdir/happ.yaml;
         dnas = {

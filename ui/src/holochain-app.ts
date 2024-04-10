@@ -1,7 +1,3 @@
-import { householdStoreContext } from './plenty/household/context.js';
-import { HouseholdClient } from './plenty/household/household-client.js';
-import { HouseholdStore } from './plenty/household/household-store.js';
-
 // Replace 'light.css' with 'dark.css' if you want the dark theme
 import '@shoelace-style/shoelace/dist/themes/light.css';
 
@@ -18,6 +14,7 @@ import {
   ProfilesStore,
   profilesStoreContext
 } from '@holochain-open-dev/profiles';
+import { fileStorageClientContext, FileStorageClient } from '@holochain-open-dev/file-storage';
 import { EntryRecord } from '@holochain-open-dev/utils';
 
 import '@holochain-open-dev/elements/dist/elements/display-error.js';
@@ -26,6 +23,10 @@ import '@holochain-open-dev/profiles/dist/elements/profile-prompt.js';
 import '@holochain-open-dev/profiles/dist/elements/profile-list-item-skeleton.js';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import '@shoelace-style/shoelace/dist/components/icon-button/icon-button.js';
+
+import { householdStoreContext } from './plenty/household/context.js';
+import { HouseholdClient } from './plenty/household/household-client.js';
+import { HouseholdStore } from './plenty/household/household-store.js';
 
 type View = { view: 'main' };
 
@@ -36,13 +37,17 @@ export class HolochainApp extends LitElement {
   @property()
   _householdStore!: HouseholdStore;
 
-@state() _loading = true;
+  @state() _loading = true;
   @state() _view = { view: 'main' };
   @state() _error: any | undefined;
 
   @provide({ context: profilesStoreContext })
   @property()
   _profilesStore!: ProfilesStore;
+
+  @provide({ context: fileStorageClientContext })
+  @property()
+  _fileStorageClient!: FileStorageClient;
 
   _client!: AppAgentClient;
 
@@ -61,6 +66,7 @@ export class HolochainApp extends LitElement {
   async initStores(appAgentClient: AppAgentClient) {
     this._profilesStore = new ProfilesStore(new ProfilesClient(appAgentClient, 'plenty'));
     this._householdStore = new HouseholdStore(new HouseholdClient(appAgentClient, 'plenty'));
+    this._fileStorageClient = new FileStorageClient(appAgentClient, 'plenty');
   }
 
   renderMyProfile() {
@@ -93,7 +99,7 @@ export class HolochainApp extends LitElement {
     return html`
       <sl-icon-button
         name="arrow-left"
-        @click=${() => { this._view = { view: 'main' } } }
+        @click=${() => { this._view = { view: 'main' } }}
       ></sl-icon-button>
     `;
   }
@@ -142,4 +148,5 @@ export class HolochainApp extends LitElement {
       }
     `,
     sharedStyles,
-  ];}
+  ];
+}
