@@ -1,3 +1,5 @@
+pub mod member_to_households;
+pub use member_to_households::*;
 pub mod household_membership_claim;
 pub use household_membership_claim::*;
 pub mod household_to_members;
@@ -22,6 +24,7 @@ pub enum LinkTypes {
     HouseholdToRequestors,
     HouseholdToMembers,
     ActiveHouseholds,
+    MemberToHouseholds,
 }
 #[hdk_extern]
 pub fn genesis_self_check(_data: GenesisSelfCheckData) -> ExternResult<ValidateCallbackResult> {
@@ -33,7 +36,6 @@ pub fn validate_agent_joining(
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Valid)
 }
-
 pub fn action_hash(op: &Op) -> &ActionHash {
     match op {
         Op::StoreRecord(StoreRecord { record }) => record.action_address(),
@@ -45,7 +47,6 @@ pub fn action_hash(op: &Op) -> &ActionHash {
         Op::RegisterDeleteLink(RegisterDeleteLink { delete_link, .. }) => &delete_link.hashed.hash,
     }
 }
-
 #[hdk_extern]
 pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
     match op.flattened::<EntryTypes, LinkTypes>()? {
@@ -151,6 +152,13 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
             LinkTypes::ActiveHouseholds => {
                 validate_create_link_active_households(action, base_address, target_address, tag)
             }
+            LinkTypes::MemberToHouseholds => validate_create_link_member_to_households(
+                action_hash(&op).clone(),
+                action,
+                base_address,
+                target_address,
+                tag,
+            ),
         },
         FlatOp::RegisterDeleteLink {
             link_type,
@@ -184,6 +192,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 tag,
             ),
             LinkTypes::ActiveHouseholds => validate_delete_link_active_households(
+                action,
+                original_action,
+                base_address,
+                target_address,
+                tag,
+            ),
+            LinkTypes::MemberToHouseholds => validate_delete_link_member_to_households(
+                action_hash(&op).clone(),
                 action,
                 original_action,
                 base_address,
@@ -387,6 +403,13 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                     target_address,
                     tag,
                 ),
+                LinkTypes::MemberToHouseholds => validate_create_link_member_to_households(
+                    action_hash(&op).clone(),
+                    action,
+                    base_address,
+                    target_address,
+                    tag,
+                ),
             },
             OpRecord::DeleteLink {
                 original_action_hash,
@@ -438,6 +461,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         create_link.tag,
                     ),
                     LinkTypes::ActiveHouseholds => validate_delete_link_active_households(
+                        action,
+                        create_link.clone(),
+                        base_address,
+                        create_link.target_address,
+                        create_link.tag,
+                    ),
+                    LinkTypes::MemberToHouseholds => validate_delete_link_member_to_households(
+                        action_hash(&op).clone(),
                         action,
                         create_link.clone(),
                         base_address,

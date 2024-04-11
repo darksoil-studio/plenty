@@ -5,7 +5,6 @@ import {
   wrapPathInSvg,
 } from '@holochain-open-dev/elements';
 import '@holochain-open-dev/elements/dist/elements/display-error.js';
-import '@holochain-open-dev/profiles/dist/elements/agent-avatar.js';
 import { subscribe } from '@holochain-open-dev/stores';
 import { ActionHash, AgentPubKey, EntryHash, Record } from '@holochain/client';
 import { consume } from '@lit/context';
@@ -18,16 +17,17 @@ import { customElement, property, state } from 'lit/decorators.js';
 
 import { householdsStoreContext } from '../context.js';
 import { HouseholdsStore } from '../households-store.js';
+import './household-summary.js';
 
 /**
- * @element requestors-for-household
+ * @element households-for-member
  */
 @localized()
-@customElement('requestors-for-household')
-export class RequestorsForHousehold extends LitElement {
-  // REQUIRED. The HouseholdHash for which the Requestors should be fetched
-  @property(hashProperty('household-hash'))
-  householdHash!: ActionHash;
+@customElement('households-for-member')
+export class HouseholdsForMember extends LitElement {
+  // REQUIRED. The Member for which the Households should be fetched
+  @property(hashProperty('member'))
+  member!: AgentPubKey;
 
   /**
    * @internal
@@ -36,14 +36,14 @@ export class RequestorsForHousehold extends LitElement {
   householdsStore!: HouseholdsStore;
 
   firstUpdated() {
-    if (this.householdHash === undefined) {
+    if (this.member === undefined) {
       throw new Error(
-        `The householdHash property is required for the requestors-for-household element`,
+        `The member property is required for the households-for-member element`,
       );
     }
   }
 
-  renderList(hashes: Array<AgentPubKey>) {
+  renderList(hashes: Array<ActionHash>) {
     if (hashes.length === 0)
       return html` <div class="column center-content" style="gap: 16px;">
         <sl-icon
@@ -51,24 +51,27 @@ export class RequestorsForHousehold extends LitElement {
           .src=${wrapPathInSvg(mdiInformationOutline)}
         ></sl-icon>
         <span class="placeholder"
-          >${msg('No requestors found for this household')}</span
+          >${msg('No households found for this member')}</span
         >
       </div>`;
 
     return html`
       <div class="column" style="gap: 16px;">
         ${hashes.map(
-      hash => html`<agent-avatar .agentPubKey=${hash}></agent-avatar>`,
-    )}
+          hash =>
+            html`<household-summary
+              .householdHash=${hash}
+            ></household-summary>`,
+        )}
       </div>
     `;
   }
 
   render() {
     return html`${subscribe(
-      this.householdsStore.households.get(this.householdHash).requestors.live,
+      this.householdsStore.householdsForMember.get(this.member),
       renderAsyncStatus({
-        complete: links => this.renderList(links.map(l => l.target)),
+        complete: map => this.renderList(Array.from(map.keys())),
         pending: () =>
           html`<div
             style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1;"
@@ -77,7 +80,7 @@ export class RequestorsForHousehold extends LitElement {
           </div>`,
         error: e =>
           html`<display-error
-            .headline=${msg('Error fetching the households')}
+            .headline=${msg('Error fetching the members')}
             .error=${e}
           ></display-error>`,
       }),

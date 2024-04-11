@@ -1,9 +1,11 @@
-import { defineConfig } from "vite";
-import checker from "vite-plugin-checker";
-import path from "path";
-import { viteStaticCopy } from "vite-plugin-static-copy";
-import { internalIpV4Sync } from "internal-ip";
+import path from 'path';
+import { defineConfig } from 'vite';
+import checker from 'vite-plugin-checker';
+import { viteStaticCopy } from 'vite-plugin-static-copy';
 
+// import { internalIpV4Sync } from "internal-ip";
+
+// @ts-ignore
 const mobile = !!/android|ios/.exec(process.env.TAURI_ENV_PLATFORM);
 
 export default defineConfig({
@@ -11,20 +13,20 @@ export default defineConfig({
   clearScreen: false,
   // tauri expects a fixed port, fail if that port is not available
   server: {
-    host: mobile ? "0.0.0.0" : false,
+    host: mobile ? '0.0.0.0' : false,
     port: 1420,
     // strictPort: true,
-    hmr: mobile ? {
-      protocol: 'ws',
-      host: internalIpV4Sync(),
-      port: 1421
-    } : undefined,
+    // hmr: mobile ? {
+    //   protocol: 'ws',
+    //   host: internalIpV4Sync(),
+    //   port: 1421
+    // } : undefined,
   },
   plugins: [
     checker({
       typescript: true,
       eslint: {
-        lintCommand: "eslint --ext .ts,.html . --ignore-path .gitignore",
+        lintCommand: 'eslint --ext .ts,.html . --ignore-path .gitignore',
       },
     }),
     viteStaticCopy({
@@ -32,12 +34,11 @@ export default defineConfig({
         {
           src: path.resolve(
             __dirname,
-            "node_modules/@shoelace-style/shoelace/dist/assets"
+            'node_modules/@shoelace-style/shoelace/dist/assets',
           ),
-          dest: path.resolve(__dirname, "dist/shoelace"),
+          dest: path.resolve(__dirname, 'dist/shoelace'),
         },
       ],
     }),
   ],
 });
-

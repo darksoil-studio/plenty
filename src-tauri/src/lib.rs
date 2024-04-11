@@ -1,12 +1,13 @@
-use holochain_types::web_app::WebAppBundle;
+use holochain_types::prelude::*;
 use lair_keystore::dependencies::sodoken::{BufRead, BufWrite};
 use std::collections::HashMap;
 use std::path::PathBuf;
-use tauri_plugin_holochain::HolochainExt;
+use tauri_plugin_holochain::{HolochainExt, HolochainPluginConfig};
+use url2::Url2;
 
-pub fn happ_bundle() -> WebAppBundle {
-    let bytes = include_bytes!("../../workdir/plenty.webhapp");
-    WebAppBundle::decode(bytes).expect("Failed to decode plenty webhapp")
+pub fn happ_bundle() -> AppBundle {
+    let bytes = include_bytes!("../../workdir/plenty-debug.happ");
+    AppBundle::decode(bytes).expect("Failed to decode plenty happ")
 }
 
 pub fn vec_to_locked(mut pass_tmp: Vec<u8>) -> std::io::Result<BufRead> {
@@ -58,6 +59,10 @@ pub fn run() {
         )
         .plugin(tauri_plugin_holochain::init(
             vec_to_locked(vec![]).expect("Can't build passphrase"),
+            HolochainPluginConfig {
+                signal_url: signal_url(),
+                bootstrap_url: bootstrap_url(),
+            },
         ))
         .setup(|app| {
             let handle = app.handle().clone();
@@ -72,12 +77,7 @@ pub fn run() {
                 if installed_apps.len() == 0 {
                     handle
                         .holochain()?
-                        .install_web_app(
-                            String::from("plenty"),
-                            happ_bundle(),
-                            HashMap::new(),
-                            None,
-                        )
+                        .install_app(String::from("plenty"), happ_bundle(), HashMap::new(), None)
                         .await
                         .map(|_| ())
                 } else {
@@ -85,9 +85,7 @@ pub fn run() {
                 }
             })?;
 
-            app.holochain()?
-                .web_happ_window_builder("plenty")
-                .build()?;
+            // app.holochain()?.web_happ_window_builder("plenty").build()?;
 
             Ok(())
         })
@@ -95,7 +93,5 @@ pub fn run() {
         .expect("error while running tauri application");
 }
 
-// Very simple setup: 
-async fn setup(app: AppHandle) {
-    
-}
+// Very simple setup:
+// async fn setup(app: AppHandle) {}

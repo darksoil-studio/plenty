@@ -6,12 +6,12 @@ pub mod household;
 pub mod household_membership_claim;
 pub mod household_to_members;
 pub mod household_to_requestors;
+pub mod member_to_households;
 
 #[hdk_extern]
 pub fn init(_: ()) -> ExternResult<InitCallbackResult> {
     Ok(InitCallbackResult::Pass)
 }
-
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(tag = "type")]
 pub enum Signal {

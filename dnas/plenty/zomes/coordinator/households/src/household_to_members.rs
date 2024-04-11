@@ -1,8 +1,6 @@
+use crate::household::delete_household;
 use hdk::prelude::*;
 use households_integrity::*;
-
-use crate::household::delete_household;
-
 #[derive(Serialize, Deserialize, Debug)]
 pub struct AddMemberForHouseholdInput {
     pub household_hash: ActionHash,
@@ -14,6 +12,12 @@ pub fn add_member_for_household(input: AddMemberForHouseholdInput) -> ExternResu
         input.household_hash.clone(),
         input.member.clone(),
         LinkTypes::HouseholdToMembers,
+        (),
+    )?;
+    create_link(
+        input.member.clone(),
+        input.household_hash.clone(),
+        LinkTypes::MemberToHouseholds,
         (),
     )?;
     Ok(())
@@ -38,6 +42,7 @@ pub fn get_deleted_members_for_household(
         .filter(|(_link, deletes)| deletes.len() > 0)
         .collect())
 }
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct RemoveMemberForHouseholdInput {
     pub household_hash: ActionHash,
@@ -63,8 +68,24 @@ pub fn remove_member_for_household(input: RemoveMemberForHouseholdInput) -> Exte
         }
     }
     if links.len() == 1 {
-        // Last member left, archive household
-        delete_household(input.household_hash)?;
+        delete_household(input.household_hash.clone())?;
+    }
+
+    let links = get_links(
+        GetLinksInputBuilder::try_new(input.member.clone(), LinkTypes::MemberToHouseholds)?.build(),
+    )?;
+    for link in links.iter() {
+        if link
+            .target
+            .clone()
+            .into_action_hash()
+            .ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
+                "No entry_hash associated with link"
+            ))))?
+            .eq(&input.household_hash)
+        {
+            delete_link(link.create_link_hash.clone())?;
+        }
     }
     Ok(())
 }
@@ -72,29 +93,21 @@ pub fn remove_member_for_household(input: RemoveMemberForHouseholdInput) -> Exte
 #[hdk_extern]
 pub fn leave_household(household_hash: ActionHash) -> ExternResult<()> {
     let my_pub_key = agent_info()?.agent_latest_pubkey;
-
     remove_member_for_household(RemoveMemberForHouseholdInput {
         household_hash: household_hash.clone(),
         member: my_pub_key.clone(),
     })?;
-
-    // Delete membership claim
-
     let membership_claim_entry_type: EntryType =
         UnitEntryTypes::HouseholdMembershipClaim.try_into()?;
     let filter = ChainQueryFilter::new()
         .entry_type(membership_claim_entry_type)
         .include_entries(true);
-
     let records = query(filter)?;
-
     for record in records {
         let claim = HouseholdMembershipClaim::try_from(record.clone())?;
-
         if claim.household_hash.eq(&household_hash) {
             delete_entry(record.action_address().clone())?;
         }
     }
-
     Ok(())
 }

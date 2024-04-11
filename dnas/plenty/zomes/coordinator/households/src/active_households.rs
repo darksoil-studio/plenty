@@ -4,7 +4,10 @@ use households_integrity::*;
 pub fn get_active_households(_: ()) -> ExternResult<Vec<Link>> {
     let path = Path::from("active_households");
     get_links(
-        GetLinksInputBuilder::try_new(path.path_entry_hash()?, LinkTypes::ActiveHouseholds)?
+        GetLinksInputBuilder::try_new(
+                path.path_entry_hash()?,
+                LinkTypes::ActiveHouseholds,
+            )?
             .build(),
     )
 }

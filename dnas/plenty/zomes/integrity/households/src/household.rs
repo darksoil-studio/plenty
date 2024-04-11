@@ -1,15 +1,5 @@
 use hdi::prelude::*;
-
 use crate::{HouseholdMembershipClaim, UnitEntryTypes};
-
-// An agent is a member of a household if
-//   - They created the household
-//   OR
-//   (
-//     - They have a membership claim valid for that household
-//     AND
-//     - They don't have deleted that membership claim
-//   )
 pub fn was_member_of_household(
     agent_pub_key: AgentPubKey,
     chain_top: ActionHash,
@@ -23,28 +13,24 @@ pub fn was_member_of_household(
             include_cached_entries: true,
         },
     )?;
-
     let mut deleted_actions: HashSet<ActionHash> = HashSet::new();
     for activity in agent_activity.iter() {
         if let Action::Delete(delete) = &activity.action.hashed.content {
             deleted_actions.insert(delete.deletes_address.clone());
         }
     }
-
-    let household_membership_claim_entry_type: AppEntryDef =
-        UnitEntryTypes::HouseholdMembershipClaim.try_into()?;
+    let household_membership_claim_entry_type: AppEntryDef = UnitEntryTypes::HouseholdMembershipClaim
+        .try_into()?;
     for activity in agent_activity {
         if activity.action.hashed.hash.eq(&household_hash) {
-            // This agent created the household, they are a valid member
             return Ok(true);
         }
-
         if let Some(EntryType::App(app)) = activity.action.hashed.content.entry_type() {
             if app.eq(&household_membership_claim_entry_type) {
-                let claim_record = must_get_valid_record(activity.action.hashed.hash.clone())?;
-
+                let claim_record = must_get_valid_record(
+                    activity.action.hashed.hash.clone(),
+                )?;
                 let claim = HouseholdMembershipClaim::try_from(claim_record)?;
-
                 if claim.household_hash.eq(&household_hash) {
                     if !deleted_actions.contains(&activity.action.hashed.hash) {
                         return Ok(true);
@@ -53,10 +39,8 @@ pub fn was_member_of_household(
             }
         }
     }
-
     Ok(false)
 }
-
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
 pub struct Household {
@@ -92,31 +76,38 @@ pub fn validate_create_link_household_updates(
 ) -> ExternResult<ValidateCallbackResult> {
     let action_hash = base_address
         .into_action_hash()
-        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
-            "No action hash associated with link"
-        ))))?;
+        .ok_or(
+            wasm_error!(
+                WasmErrorInner::Guest(String::from("No action hash associated with link"))
+            ),
+        )?;
     let record = must_get_valid_record(action_hash)?;
     let _household: crate::Household = record
         .entry()
         .to_app_option()
         .map_err(|e| wasm_error!(e))?
-        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
-            "Linked action must reference an entry"
-        ))))?;
-    let action_hash =
-        target_address
-            .into_action_hash()
-            .ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
-                "No action hash associated with link"
-            ))))?;
+        .ok_or(
+            wasm_error!(
+                WasmErrorInner::Guest(String::from("Linked action must reference an entry"))
+            ),
+        )?;
+    let action_hash = target_address
+        .into_action_hash()
+        .ok_or(
+            wasm_error!(
+                WasmErrorInner::Guest(String::from("No action hash associated with link"))
+            ),
+        )?;
     let record = must_get_valid_record(action_hash)?;
     let _household: crate::Household = record
         .entry()
         .to_app_option()
         .map_err(|e| wasm_error!(e))?
-        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
-            "Linked action must reference an entry"
-        ))))?;
+        .ok_or(
+            wasm_error!(
+                WasmErrorInner::Guest(String::from("Linked action must reference an entry"))
+            ),
+        )?;
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_delete_link_household_updates(
@@ -126,9 +117,11 @@ pub fn validate_delete_link_household_updates(
     _target: AnyLinkableHash,
     _tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
-    Ok(ValidateCallbackResult::Invalid(String::from(
-        "HouseholdUpdates links cannot be deleted",
-    )))
+    Ok(
+        ValidateCallbackResult::Invalid(
+            String::from("HouseholdUpdates links cannot be deleted"),
+        ),
+    )
 }
 pub fn validate_create_link_active_households(
     _action: CreateLink,
@@ -136,22 +129,23 @@ pub fn validate_create_link_active_households(
     target_address: AnyLinkableHash,
     _tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
-    // Check the entry type for the given action hash
-    let action_hash =
-        target_address
-            .into_action_hash()
-            .ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
-                "No action hash associated with link"
-            ))))?;
+    let action_hash = target_address
+        .into_action_hash()
+        .ok_or(
+            wasm_error!(
+                WasmErrorInner::Guest(String::from("No action hash associated with link"))
+            ),
+        )?;
     let record = must_get_valid_record(action_hash)?;
     let _household: crate::Household = record
         .entry()
         .to_app_option()
         .map_err(|e| wasm_error!(e))?
-        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
-            "Linked action must reference an entry"
-        ))))?;
-    // TODO: add the appropriate validation rules
+        .ok_or(
+            wasm_error!(
+                WasmErrorInner::Guest(String::from("Linked action must reference an entry"))
+            ),
+        )?;
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_delete_link_active_households(
@@ -161,6 +155,5 @@ pub fn validate_delete_link_active_households(
     _target: AnyLinkableHash,
     _tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
-    // TODO: add the appropriate validation rules
     Ok(ValidateCallbackResult::Valid)
 }

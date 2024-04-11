@@ -1,23 +1,35 @@
-import { LitElement, html } from 'lit';
-import { repeat } from "lit/directives/repeat.js";
-import { state, property, query, customElement } from 'lit/decorators.js';
-import { ActionHash, Record, DnaHash, AgentPubKey, EntryHash } from '@holochain/client';
+import {
+  hashProperty,
+  hashState,
+  notifyError,
+  onSubmit,
+  sharedStyles,
+  wrapPathInSvg,
+} from '@holochain-open-dev/elements';
+import '@holochain-open-dev/elements/dist/elements/display-error.js';
 import { EntryRecord } from '@holochain-open-dev/utils';
-import { hashProperty, notifyError, hashState, sharedStyles, onSubmit, wrapPathInSvg } from '@holochain-open-dev/elements';
+import {
+  ActionHash,
+  AgentPubKey,
+  DnaHash,
+  EntryHash,
+  Record,
+} from '@holochain/client';
 import { consume } from '@lit/context';
 import { localized, msg } from '@lit/localize';
-import { mdiAlertCircleOutline, mdiDelete } from "@mdi/js";
-
-import '@holochain-open-dev/elements/dist/elements/display-error.js';
+import { mdiAlertCircleOutline, mdiDelete } from '@mdi/js';
 import '@shoelace-style/shoelace/dist/components/alert/alert.js';
-import '@shoelace-style/shoelace/dist/components/card/card.js';
 import SlAlert from '@shoelace-style/shoelace/dist/components/alert/alert.js';
-
-import '@shoelace-style/shoelace/dist/components/icon/icon.js';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
+import '@shoelace-style/shoelace/dist/components/card/card.js';
 import '@shoelace-style/shoelace/dist/components/icon-button/icon-button.js';
-import { HouseholdsStore } from '../households-store.js';
+import '@shoelace-style/shoelace/dist/components/icon/icon.js';
+import { LitElement, html } from 'lit';
+import { customElement, property, query, state } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
+
 import { householdsStoreContext } from '../context.js';
+import { HouseholdsStore } from '../households-store.js';
 import { HouseholdMembershipClaim } from '../types.js';
 
 /**
@@ -34,7 +46,6 @@ export class CreateHouseholdMembershipClaim extends LitElement {
   // REQUIRED. The household hash for this HouseholdMembershipClaim
   @property(hashProperty('household-hash'))
   householdHash!: ActionHash;
-
 
   /**
    * @internal
@@ -54,10 +65,15 @@ export class CreateHouseholdMembershipClaim extends LitElement {
   @query('#create-form')
   form!: HTMLFormElement;
 
-
   async createHouseholdMembershipClaim(fields: any) {
-    if (this.memberCreateLinkHash === undefined) throw new Error('Cannot create a new Household Membership Claim without its member_create_link_hash field');
-    if (this.householdHash === undefined) throw new Error('Cannot create a new Household Membership Claim without its household_hash field');
+    if (this.memberCreateLinkHash === undefined)
+      throw new Error(
+        'Cannot create a new Household Membership Claim without its member_create_link_hash field',
+      );
+    if (this.householdHash === undefined)
+      throw new Error(
+        'Cannot create a new Household Membership Claim without its household_hash field',
+      );
 
     const householdMembershipClaim: HouseholdMembershipClaim = {
       member_create_link_hash: this.memberCreateLinkHash,
@@ -66,43 +82,44 @@ export class CreateHouseholdMembershipClaim extends LitElement {
 
     try {
       this.committing = true;
-      const record: EntryRecord<HouseholdMembershipClaim> = await this.householdsStore.client.createHouseholdMembershipClaim(householdMembershipClaim);
+      const record: EntryRecord<HouseholdMembershipClaim> =
+        await this.householdsStore.client.createHouseholdMembershipClaim(
+          householdMembershipClaim,
+        );
 
-      this.dispatchEvent(new CustomEvent('household-membership-claim-created', {
-        composed: true,
-        bubbles: true,
-        detail: {
-          householdMembershipClaimHash: record.actionHash
-        }
-      }));
+      this.dispatchEvent(
+        new CustomEvent('household-membership-claim-created', {
+          composed: true,
+          bubbles: true,
+          detail: {
+            householdMembershipClaimHash: record.actionHash,
+          },
+        }),
+      );
 
       this.form.reset();
     } catch (e: any) {
       console.error(e);
-      notifyError(msg("Error creating the household membership claim"));
+      notifyError(msg('Error creating the household membership claim'));
     }
     this.committing = false;
   }
 
   render() {
-    return html`
-      <sl-card style="flex: 1;">
-        <span slot="header">${msg("Create Household Membership Claim")}</span>
+    return html` <sl-card style="flex: 1;">
+      <span slot="header">${msg('Create Household Membership Claim')}</span>
 
-        <form 
-          id="create-form"
-          class="column"
-          style="flex: 1; gap: 16px;"
-          ${onSubmit(fields => this.createHouseholdMembershipClaim(fields))}
-        >  
-
-          <sl-button
-            variant="primary"
-            type="submit"
-            .loading=${this.committing}
-          >${msg("Create Household Membership Claim")}</sl-button>
-        </form> 
-      </sl-card>`;
+      <form
+        id="create-form"
+        class="column"
+        style="flex: 1; gap: 16px;"
+        ${onSubmit(fields => this.createHouseholdMembershipClaim(fields))}
+      >
+        <sl-button variant="primary" type="submit" .loading=${this.committing}
+          >${msg('Create Household Membership Claim')}</sl-button
+        >
+      </form>
+    </sl-card>`;
   }
 
   static styles = [sharedStyles];
