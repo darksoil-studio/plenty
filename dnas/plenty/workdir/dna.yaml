@@ -16,9 +16,9 @@ integrity:
       bundled: "<NIX_PACKAGE>"
       dependencies: ~
       dylib: ~
-    - name: household_integrity
+    - name: households_integrity
       hash: ~
-      bundled: "../../../target/wasm32-unknown-unknown/release/household_integrity.wasm"
+      bundled: "../../../target/wasm32-unknown-unknown/release/households_integrity.wasm"
       dependencies: ~
       dylib: ~
 coordinator:
@@ -35,9 +35,9 @@ coordinator:
       dependencies:
         - name: file_storage_integrity
       dylib: ~
-    - name: household
+    - name: households
       hash: ~
-      bundled: "../../../target/wasm32-unknown-unknown/release/household.wasm"
+      bundled: "../../../target/wasm32-unknown-unknown/release/households.wasm"
       dependencies:
-        - name: household_integrity
+        - name: households_integrity
       dylib: ~

@@ -18,18 +18,19 @@
     , lib
     , ...
     }: {
-  	  packages.plenty = inputs.hc-infra.outputs.lib.dna {
+  	  packages.plenty_dna = inputs.hc-infra.outputs.lib.dna {
         dnaManifest = ./workdir/dna.yaml;
         holochain = inputs'.holochain;
         zomes = {
-    file_storage_integrity = inputs'.file-storage.packages.file_storage_integrity;
+          file_storage_integrity = inputs'.file-storage.packages.file_storage_integrity;
           file_storage = inputs'.file-storage.packages.file_storage;
           # Include here the zome packages for this DNA, e.g.:
           # This overrides all the "bundled" properties for the DNA manifest
           profiles_integrity = inputs'.profiles.packages.profiles_integrity;
           profiles = inputs'.profiles.packages.profiles;
-          household_integrity = self'.packages.household_integrity;
-          household = self'.packages.household;
+
+          households_integrity = self'.packages.households_integrity;
+          households = self'.packages.households;
         };
       };
   	};

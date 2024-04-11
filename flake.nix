@@ -24,6 +24,7 @@
         specialArgs = {
           ## Special arguments for the flake parts of this repository
           rootPath = ./.;
+          excludedCrates = ["plenty"];
         };
       }
       {

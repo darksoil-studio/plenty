@@ -16,10 +16,10 @@ serde = "1.0"
 [workspace.dependencies.holochain]
 default-features = false
 features = ["test_utils"]
-version = "0.3.0-beta-dev"
+version = "0.3.0-beta-dev.45"
 
-[workspace.dependencies.household]
-path = "dnas/plenty/zomes/coordinator/household"
+[workspace.dependencies.households]
+path = "dnas/plenty/zomes/coordinator/households"
 
-[workspace.dependencies.household_integrity]
-path = "dnas/plenty/zomes/integrity/household"
+[workspace.dependencies.households_integrity]
+path = "dnas/plenty/zomes/integrity/households"

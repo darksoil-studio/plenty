@@ -3,9 +3,9 @@
   "private": true,
   "scripts": {
     "local-services": "hc run-local-services --bootstrap-port $BOOTSTRAP_PORT --signal-port $SIGNAL_PORT",
-    "test": "pnpm run build:happ && nix flake check -L && pnpm -F tests test",
-    "happ:build-debug": "nix build -L .#plenty.meta.debug -o workdir/plenty.happ",
-    "happ:build": "nix build -L .#plenty -o workdir/plenty.happ",
+    "test": "pnpm run happ:build-debug && nix flake check -L && pnpm -F tests test",
+    "happ:build-debug": "nix build -L .#plenty_happ.meta.debug -o workdir/plenty-debug.happ",
+    "happ:build": "nix build -L .#plenty_happ -o workdir/plenty.happ",
     "tauri": "tauri"
   },
   "devDependencies": {

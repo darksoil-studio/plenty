@@ -13,13 +13,13 @@
     , self'
     , ...
     }: {
-  	  packages.plenty = inputs.hc-infra.outputs.lib.happ {
+  	  packages.plenty_happ = inputs.hc-infra.outputs.lib.happ {
         holochain = inputs'.holochain;
         happManifest = ./workdir/happ.yaml;
         dnas = {
           # Override specific dnas here, e.g.:
           # my_dna = inputs'.some_input.packages.my_dna;
-          plenty = self'.packages.plenty;
+          plenty = self'.packages.plenty_dna;
         };
       };
   	};

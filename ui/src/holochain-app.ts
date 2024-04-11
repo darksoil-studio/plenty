@@ -24,18 +24,18 @@ import '@holochain-open-dev/profiles/dist/elements/profile-list-item-skeleton.js
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import '@shoelace-style/shoelace/dist/components/icon-button/icon-button.js';
 
-import { householdStoreContext } from './plenty/household/context.js';
-import { HouseholdClient } from './plenty/household/household-client.js';
-import { HouseholdStore } from './plenty/household/household-store.js';
+import { householdsStoreContext } from './plenty/households/context.js';
+import { HouseholdsClient } from './plenty/households/households-client.js';
+import { HouseholdsStore } from './plenty/households/households-store.js';
 
 type View = { view: 'main' };
 
 @localized()
 @customElement('holochain-app')
 export class HolochainApp extends LitElement {
-  @provide({ context: householdStoreContext })
+  @provide({ context: householdsStoreContext })
   @property()
-  _householdStore!: HouseholdStore;
+  _householdStore!: HouseholdsStore;
 
   @state() _loading = true;
   @state() _view = { view: 'main' };
@@ -65,7 +65,7 @@ export class HolochainApp extends LitElement {
   // Don't change this
   async initStores(appAgentClient: AppAgentClient) {
     this._profilesStore = new ProfilesStore(new ProfilesClient(appAgentClient, 'plenty'));
-    this._householdStore = new HouseholdStore(new HouseholdClient(appAgentClient, 'plenty'));
+    this._householdStore = new HouseholdsStore(new HouseholdsClient(appAgentClient, 'plenty'));
     this._fileStorageClient = new FileStorageClient(appAgentClient, 'plenty');
   }
 
@@ -90,7 +90,8 @@ export class HolochainApp extends LitElement {
 
   // TODO: add here the content of your application
   renderContent() {
-    return html``;
+    return html`<household-prompt>
+      </household-prompt>`;
   }
 
   renderBackButton() {
