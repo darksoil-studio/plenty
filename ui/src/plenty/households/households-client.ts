@@ -99,8 +99,8 @@ export class HouseholdsClient extends ZomeClient<HouseholdsSignal> {
 
   addMemberForHousehold(householdHash: ActionHash, member: AgentPubKey): Promise<void> {
     return this.callZome('add_member_for_household', {
-      base_household_hash: householdHash,
-      target_member: member,
+      household_hash: householdHash,
+      member: member,
     });
   }
 

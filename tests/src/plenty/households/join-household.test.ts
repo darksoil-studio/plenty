@@ -100,7 +100,7 @@ test('Alice creates a Household, bobs joins it', async () => {
       alice.player.cells[0].cell_id[0]
     );
 
-    members = await toPromise(alice.store.households.get(household.actionHash).members.live)
+    members = await toPromise(carol.store.households.get(household.actionHash).members.live)
     assert.equal(members.length, 3);
     await carol.store.client.createHouseholdMembershipClaim({
       household_hash: household.actionHash,

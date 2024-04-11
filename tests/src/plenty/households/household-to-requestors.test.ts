@@ -10,6 +10,7 @@ import { setup } from './setup.js';
 
 import { Household } from '../../../../ui/src/plenty/households/types.js';
 import { sampleHousehold } from '../../../../ui/src/plenty/households/mocks.js';
+import { cleanNodeDecoding } from "@holochain-open-dev/utils/dist/clean-node-decoding.js";
 
 test('link a Household to a Requestor', async () => {
   await runScenario(async scenario => {
@@ -17,14 +18,13 @@ test('link a Household to a Requestor', async () => {
 
     const baseRecord: EntryRecord<Household> = await alice.store.client.createHousehold(await sampleHousehold(alice.store.client));
     const baseAddress = baseRecord.actionHash;
-    const targetAddress = alice.player.agentPubKey;
 
     // Bob gets the links, should be empty
     let linksOutput = await toPromise(bob.store.households.get(baseAddress).requestors.live);
-    assert.equal(linksOutput.size, 0);
+    assert.equal(linksOutput.length, 0);
 
     // Alice creates a link from Household to Requestor
-    await alice.store.client.requestToJoinHousehold(baseAddress, targetAddress);
+    const joinRequestHash = await bob.store.client.requestToJoinHousehold(baseAddress);
 
     // Wait for the created entry to be propagated to the other node.
     await dhtSync(
@@ -35,10 +35,9 @@ test('link a Household to a Requestor', async () => {
     // Bob gets the links again
     linksOutput = await toPromise(bob.store.households.get(baseAddress).requestors.live);
     assert.equal(linksOutput.length, 1);
-    assert.deepEqual(targetAddress, linksOutput[0]);
+    assert.deepEqual(cleanNodeDecoding(bob.player.agentPubKey), cleanNodeDecoding(linksOutput[0].target));
 
-
-    await alice.store.client.removeRequestorForHousehold(baseAddress, targetAddress);
+    await alice.store.client.rejectJoinRequest(joinRequestHash);
 
     // Wait for the created entry to be propagated to the other node.
     await dhtSync(
@@ -47,13 +46,11 @@ test('link a Household to a Requestor', async () => {
     );
 
     // Bob gets the links again
-    linksOutput = await toPromise(bob.store.households.get(baseAddress).requestors.live);
+    linksOutput = await toPromise(alice.store.households.get(baseAddress).requestors.live);
     assert.equal(linksOutput.length, 0);
 
     // Bob gets the deleted links
     let deletedLinksOutput = await toPromise(bob.store.households.get(baseAddress).requestors.deleted);
     assert.equal(deletedLinksOutput.length, 1);
-
-
   });
 });

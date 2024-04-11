@@ -119,11 +119,10 @@ pub fn update_household(input: UpdateHouseholdInput) -> ExternResult<Record> {
 }
 #[hdk_extern]
 pub fn delete_household(original_household_hash: ActionHash) -> ExternResult<ActionHash> {
-    let details =
-        get_details(original_household_hash.clone(), GetOptions::default())?.ok_or(wasm_error!(
-            WasmErrorInner::Guest(String::from("{pascal_entry_def_name} not found"))
-        ))?;
-    let record = match details {
+    let details = get_details(original_household_hash.clone(), GetOptions::default())?.ok_or(
+        wasm_error!(WasmErrorInner::Guest(String::from("Household not found"))),
+    )?;
+    let _record = match details {
         Details::Record(details) => Ok(details.record),
         _ => Err(wasm_error!(WasmErrorInner::Guest(String::from(
             "Malformed get details response"

@@ -28,4 +28,8 @@ jobs:
 
       - name: Install and test
         run: |
-          nix develop --command bash -c "pnpm i && pnpm t && pnpm package"
+          nix develop --command bash -c "pnpm i && pnpm t"
+
+      - name: Build tauri app
+        run: |
+          nix develop --command bash -c "pnpm tauri build"

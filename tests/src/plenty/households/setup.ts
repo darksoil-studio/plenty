@@ -48,7 +48,6 @@ export async function setup4(scenario: Scenario) {
     { appBundleSource: { path: appPath } },
     { appBundleSource: { path: appPath } },
     { appBundleSource: { path: appPath } },
-    { appBundleSource: { path: appPath } },
   ]);
 
   // Shortcut peer discovery through gossip and register all agents in every
@@ -67,7 +66,7 @@ export async function setup4(scenario: Scenario) {
     new HouseholdsClient(carol.appAgentWs as any, 'plenty', 'households')
   );
   const daveStore = new HouseholdsStore(
-    new HouseholdsClient(carol.appAgentWs as any, 'plenty', 'households')
+    new HouseholdsClient(dave.appAgentWs as any, 'plenty', 'households')
   );
 
   // Shortcut peer discovery through gossip and register all agents in every

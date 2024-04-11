@@ -1,6 +1,8 @@
 use hdk::prelude::*;
 use households_integrity::*;
 
+use crate::household::delete_household;
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct AddMemberForHouseholdInput {
     pub household_hash: ActionHash,
@@ -47,14 +49,22 @@ pub fn remove_member_for_household(input: RemoveMemberForHouseholdInput) -> Exte
         GetLinksInputBuilder::try_new(input.household_hash.clone(), LinkTypes::HouseholdToMembers)?
             .build(),
     )?;
-    for link in links {
-        if AgentPubKey::from(link.target.clone().into_entry_hash().ok_or(wasm_error!(
-            WasmErrorInner::Guest(String::from("No entry_hash associated with link"))
-        ))?)
-        .eq(&input.member)
+    for link in links.iter() {
+        if link
+            .target
+            .clone()
+            .into_agent_pub_key()
+            .ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
+                "No entry_hash associated with link"
+            ))))?
+            .eq(&input.member)
         {
-            delete_link(link.create_link_hash)?;
+            delete_link(link.create_link_hash.clone())?;
         }
+    }
+    if links.len() == 1 {
+        // Last member left, archive household
+        delete_household(input.household_hash)?;
     }
     Ok(())
 }
