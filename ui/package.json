@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@holochain-open-dev/elements": "^0.300.0-dev.0",
-    "@holochain-open-dev/file-storage": "github:holochain-open-dev/file-storage#7be2c43e1aa8f8ce2a7b18d0e87f6abd6e8f5784&path:ui",
+    "@holochain-open-dev/file-storage": "github:holochain-open-dev/file-storage#61e0fef36d6a80a365658e234b8fe67b451e2141&path:ui",
     "@holochain-open-dev/profiles": "github:holochain-open-dev/profiles#69dba6ebf0ee04985e799ccaa39ae2852ab465b7&path:ui",
     "@holochain-open-dev/stores": "^0.300.0-dev.3",
     "@holochain-open-dev/utils": "^0.300.0-dev.1",
@@ -22,7 +22,6 @@
     "@mdi/js": "^7.2.0",
     "@msgpack/msgpack": "^2.8.0",
     "@shoelace-style/shoelace": "^2.11.0",
-    "@tauri-apps/api": "^2.0.0-beta",
     "lit": "^3.0.0"
   },
   "devDependencies": {

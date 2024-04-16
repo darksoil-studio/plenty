@@ -29,7 +29,7 @@ import { HouseholdMembershipClaim } from './types.js';
 import { Household } from './types.js';
 
 export class HouseholdsStore {
-  constructor(public client: HouseholdsClient) {}
+  constructor(public client: HouseholdsClient) { }
 
   /** Household */
 
@@ -118,6 +118,7 @@ export class HouseholdsStore {
       this.client,
       () => this.client.getActiveHouseholds(),
       'ActiveHouseholds',
+      2000
     ),
     activeHouseholds =>
       slice(

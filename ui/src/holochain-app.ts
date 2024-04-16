@@ -1,4 +1,3 @@
-// Replace 'light.css' with 'dark.css' if you want the dark theme
 import { renderAsyncStatus, sharedStyles } from '@holochain-open-dev/elements';
 import '@holochain-open-dev/elements/dist/elements/display-error.js';
 import {
@@ -6,7 +5,6 @@ import {
   fileStorageClientContext,
 } from '@holochain-open-dev/file-storage';
 import {
-  Profile,
   ProfilesClient,
   ProfilesStore,
   profilesStoreContext,
@@ -14,10 +12,8 @@ import {
 import '@holochain-open-dev/profiles/dist/elements/agent-avatar.js';
 import '@holochain-open-dev/profiles/dist/elements/profile-list-item-skeleton.js';
 import '@holochain-open-dev/profiles/dist/elements/profile-prompt.js';
-import { subscribe } from '@holochain-open-dev/stores';
-import { EntryRecord } from '@holochain-open-dev/utils';
+import { pipe, subscribe } from '@holochain-open-dev/stores';
 import {
-  ActionHash,
   AppAgentClient,
   AppAgentWebsocket,
 } from '@holochain/client';
@@ -25,6 +21,9 @@ import { provide } from '@lit/context';
 import { localized, msg } from '@lit/localize';
 import '@shoelace-style/shoelace/dist/components/icon-button/icon-button.js';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
+import '@shoelace-style/shoelace/dist/components/tab/tab.js';
+import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
+import '@shoelace-style/shoelace/dist/components/tab-panel/tab-panel.js';
 import '@shoelace-style/shoelace/dist/themes/light.css';
 import { LitElement, css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -32,7 +31,8 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { householdsStoreContext } from './plenty/households/context.js';
 import { HouseholdsClient } from './plenty/households/households-client.js';
 import { HouseholdsStore } from './plenty/households/households-store.js';
-import { once } from '@tauri-apps/api/event.js';
+
+import './plenty/households/elements/household-prompt.js';
 
 type View = { view: 'main' };
 
@@ -60,12 +60,14 @@ export class HolochainApp extends LitElement {
   _client!: AppAgentClient;
 
   async firstUpdated() {
-    await once('holochain-ready', () => this.connect());
-  }
+    //   await event.once('setup-completed', () => this.connect());
+    // }
 
-  async connect() {
+    // async connect() {
     try {
-      this._client = await AppAgentWebsocket.connect('plenty');
+      this._client = await AppAgentWebsocket.connect('plenty', {
+        url: new URL(`ws://localhost:${(window as any).__HC_LAUNCHER_ENV__.__PORT__}`)
+      });
       await this.initStores(this._client);
     } catch (e: any) {
       this._error = e;
@@ -86,29 +88,39 @@ export class HolochainApp extends LitElement {
   }
 
   renderMyProfile() {
-    return html`${subscribe(
-      this._profilesStore.myProfile,
+    return html`<div class="row" style="gap: 16px" slot="actionItems">${subscribe(
+      pipe(this._householdStore.myHousehold, h => h?.latestVersion),
       renderAsyncStatus({
-        complete: profile =>
-          html`<div class="row" style="align-items: center;" slot="actionItems">
-            <agent-avatar .agentPubKey=${this._client.myPubKey}></agent-avatar>
-            <span style="margin: 0 16px;">${profile?.entry.nickname}</span>
-          </div>`,
+        complete: household => household ?
+          html`<div class="row" style="align-items: center;" >
+            <show-image style="width: 32px; height: 32px;" .imageHash=${household?.entry.avatar}></show-image>
+            <span style="margin: 0 16px;">${household?.entry.name}</span>
+          </div>`: html``,
         error: e =>
           html`<display-error
-            .headline=${msg('Error fetching the profile')}
+            .headline=${msg('Error fetching your household')}
             .error=${e}
             tooltip
           ></display-error>`,
         pending: () =>
           html`<profile-list-item-skeleton></profile-list-item-skeleton>`,
       }),
-    )}`;
+    )}
+    </div>`;
   }
 
-  // TODO: add here the content of your application
   renderContent() {
-    return html`<household-prompt> </household-prompt>`;
+    return html`<household-prompt>
+      <sl-tab-group placement="start">
+        <sl-tab slot="nav" panel="orders">${msg("Orders")}</sl-tab>
+        <sl-tab slot="nav" panel="producers">${msg("Producers")}</sl-tab>
+        <sl-tab slot="nav" panel="members">${msg("Members")}</sl-tab>
+
+        <sl-tab-panel name="orders">This is the general tab panel.</sl-tab-panel>
+        <sl-tab-panel name="producers">This is the general tab panel.</sl-tab-panel>
+        <sl-tab-panel name="members">This is the general tab panel.</sl-tab-panel>
+      </sl-tab-group>
+    </household-prompt>`;
   }
 
   renderBackButton() {
@@ -128,7 +140,7 @@ export class HolochainApp extends LitElement {
     if (this._loading)
       return html`<div
         class="row"
-        style="flex: 1; height: 100%; align-items: center; justify-content: center;"
+        style="flex: 1; height: 100%; align-content: center; justify-content: center;"
       >
         <sl-spinner style="font-size: 2rem"></sl-spinner>
       </div>`;
@@ -136,7 +148,7 @@ export class HolochainApp extends LitElement {
     if (this._error)
       return html`
         <div
-          style="flex: 1; height: 100%; align-items: center; justify-content: center;"
+          style="flex: 1; height: 100%; align-content: center; justify-content: center;"
         >
           <display-error
             .error=${this._error}

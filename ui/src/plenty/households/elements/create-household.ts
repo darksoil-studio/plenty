@@ -90,7 +90,6 @@ export class CreateHousehold extends LitElement {
 
   render() {
     return html` <sl-card style="flex: 1;">
-      <span slot="header">${msg('Create Household')}</span>
 
       <form
         id="create-form"
@@ -98,6 +97,7 @@ export class CreateHousehold extends LitElement {
         style="flex: 1; gap: 16px;"
         ${onSubmit(fields => this.createHousehold(fields))}
       >
+        <span class="title">${msg('Create Household')}</span>
         <div>
           <sl-input name="name" .label=${msg('Name')} required></sl-input>
         </div>

@@ -24,7 +24,7 @@ export class HouseholdsClient extends ZomeClient<HouseholdsSignal> {
   constructor(
     public client: AppAgentClient,
     public roleName: string,
-    public zomeName = 'household',
+    public zomeName = 'households',
   ) {
     super(client, roleName, zomeName);
   }
