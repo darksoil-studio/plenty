@@ -2,11 +2,9 @@
 #![allow(unused_variables)]
 #![allow(unused_imports)]
 
-use std::time::Duration;
 use hdk::prelude::*;
 use holochain::{conductor::config::ConductorConfig, sweettest::*};
-
-use households::member_to_households::AddHouseholdForMemberInput;
+use std::time::Duration;
 
 mod common;
 
@@ -15,9 +13,9 @@ use common::{create_household, sample_household_1};
 #[tokio::test(flavor = "multi_thread")]
 async fn link_a_member_to_a_household() {
     // Use prebuilt dna file
-    let dna_path = std::env::current_dir()
-        .unwrap()
-        .join(std::env::var("DNA_PATH").expect("DNA_PATH not set, must be run using nix flake check"));
+    let dna_path = std::env::current_dir().unwrap().join(
+        std::env::var("DNA_PATH").expect("DNA_PATH not set, must be run using nix flake check"),
+    );
     let dna = SweetDnaFile::from_bundle(&dna_path).await.unwrap();
 
     // Set up conductors
@@ -26,37 +24,48 @@ async fn link_a_member_to_a_household() {
     conductors.exchange_peer_info().await;
 
     let ((alice,), (bobbo,)) = apps.into_tuples();
-    
+
     let alice_zome = alice.zome("households");
     let bob_zome = bobbo.zome("households");
 
     let base_address = alice.agent_pubkey().clone();
-    let target_record = create_household(&conductors[0], &alice_zome, sample_household_1(&conductors[0], &alice_zome).await).await;
+    let target_record = create_household(
+        &conductors[0],
+        &alice_zome,
+        sample_household_1(&conductors[0], &alice_zome).await,
+    )
+    .await;
     let target_address = target_record.signed_action.hashed.hash.clone();
 
     // Bob gets the links, should be empty
     let links_output: Vec<Link> = conductors[1]
-        .call(&bob_zome, "get_households_for_member", base_address.clone()).await;
+        .call(&bob_zome, "get_households_for_member", base_address.clone())
+        .await;
     assert_eq!(links_output.len(), 0);
 
     // Alice creates a link from Member to Household
     let _result: () = conductors[0]
-        .call(&alice_zome, "add_household_for_member", AddHouseholdForMemberInput {
-        base_member: base_address.clone(),
-        target_household_hash: target_address.clone()
-     }).await;
-        
+        .call(
+            &alice_zome,
+            "add_member_for_household",
+            AddMemberForHouseholdInput {
+                member: base_address.clone(),
+                household_hash: target_address.clone(),
+            },
+        )
+        .await;
+
     await_consistency(Duration::from_secs(30), [&alice, &bobbo])
         .await
         .expect("Timed out waiting for consistency");
 
     // Bob gets the links again
     let links_output: Vec<Link> = conductors[1]
-        .call(&bob_zome, "get_households_for_member", base_address.clone()).await;
+        .call(&bob_zome, "get_households_for_member", base_address.clone())
+        .await;
     assert_eq!(links_output.len(), 1);
-    assert_eq!(AnyLinkableHash::from(target_address.clone()), links_output[0].target);
-
-
+    assert_eq!(
+        AnyLinkableHash::from(target_address.clone()),
+        links_output[0].target
+    );
 }
-
-
