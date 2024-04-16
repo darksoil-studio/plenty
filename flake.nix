@@ -4,8 +4,8 @@
   inputs = {
     file-storage.url = "github:holochain-open-dev/file-storage/nixify";
     profiles.url = "github:holochain-open-dev/profiles/nixify";
-    versions.url  = "github:holochain/holochain?dir=versions/weekly";
 
+    versions.url  = "github:holochain/holochain?dir=versions/weekly";
     holochain.url = "github:holochain/holochain";
     holochain.inputs.versions.follows = "versions";
 
@@ -13,8 +13,14 @@
     flake-parts.follows = "holochain/flake-parts";
 
     # tauri-plugin-holochain.url = "github:darksoil-studio/tauri-plugin-holochain";
-    tauri-plugin-holochain.url = "/home/guillem/projects/darksoil/tauri-plugin-holochain";
-    hc-infra.url = "github:holochain-open-dev/infrastructure/0.300.0-dev";
+    tauri-plugin-holochain = {
+      url = "/home/guillem/projects/darksoil/tauri-plugin-holochain";
+      inputs.holochain.follows = "holochain";
+    };
+    hc-infra = {
+      url = "github:holochain-open-dev/infrastructure";
+      inputs.holochain.follows = "holochain";
+    };
   };
 
   outputs = inputs:
@@ -41,7 +47,7 @@
           , ...
           }: {
             devShells.default = pkgs.mkShell {
-              inputsFrom = [ 
+              inputsFrom = [
                 inputs'.hc-infra.devShells.synchronized-pnpm
                 inputs'.tauri-plugin-holochain.devShells.holochainTauriDev 
               ];

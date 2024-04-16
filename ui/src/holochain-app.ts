@@ -32,6 +32,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { householdsStoreContext } from './plenty/households/context.js';
 import { HouseholdsClient } from './plenty/households/households-client.js';
 import { HouseholdsStore } from './plenty/households/households-store.js';
+import { once } from '@tauri-apps/api/event.js';
 
 type View = { view: 'main' };
 
@@ -59,6 +60,10 @@ export class HolochainApp extends LitElement {
   _client!: AppAgentClient;
 
   async firstUpdated() {
+    await once('holochain-ready', () => this.connect());
+  }
+
+  async connect() {
     try {
       this._client = await AppAgentWebsocket.connect('plenty');
       await this.initStores(this._client);
@@ -113,8 +118,8 @@ export class HolochainApp extends LitElement {
       <sl-icon-button
         name="arrow-left"
         @click=${() => {
-          this._view = { view: 'main' };
-        }}
+        this._view = { view: 'main' };
+      }}
       ></sl-icon-button>
     `;
   }

@@ -86,6 +86,9 @@ importers:
       '@shoelace-style/shoelace':
         specifier: ^2.11.0
         version: 2.15.0(@types/react@18.2.75)
+      '@tauri-apps/api':
+        specifier: ^2.0.0-beta
+        version: 2.0.0-beta.8
       lit:
         specifier: ^3.0.0
         version: 3.1.2
@@ -820,6 +823,10 @@ packages:
   /@tauri-apps/api@1.5.3:
     resolution: {integrity: sha512-zxnDjHHKjOsrIzZm6nO5Xapb/BxqUq1tc7cGkFXsFkGTsSWgCPH1D8mm0XS9weJY2OaR73I3k3S+b7eSzJDfqA==}
     engines: {node: '>= 14.6.0', npm: '>= 6.6.0', yarn: '>= 1.19.1'}
+
+  /@tauri-apps/api@2.0.0-beta.8:
+    resolution: {integrity: sha512-fN5u+9HsSfhRaXGOdD2kPGbqDgyX+nkm1XF/4d/LNuM4WiNfvHjjRAqWQYBhQsg1aF9nsTPmSW+tmy+Yn5T5+A==}
+    engines: {node: '>= 18', npm: '>= 6.6.0', yarn: '>= 1.19.1'}
 
   /@tauri-apps/cli-darwin-arm64@2.0.0-beta.12:
     resolution: {integrity: sha512-+Ksrxc4QQE1R62OreCybM8PNnF090qhf+ZeRZTZ9JxOujz4Tq/RiE1vC5nRlDu+Cd3pL63fZ2TsANj2PnpN+qw==}
@@ -4075,6 +4082,9 @@ snapshots:
     dev: false
 
   /@tauri-apps/api@1.5.3:
+    dev: false
+
+  /@tauri-apps/api@2.0.0-beta.8:
     dev: false
 
   /@tauri-apps/cli-darwin-arm64@2.0.0-beta.12:

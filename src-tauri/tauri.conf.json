@@ -1,7 +1,7 @@
 {
   "productName": "plenty",
   "version": "0.0.0",
-  "identifier": "plenty",
+  "identifier": "studio.darksoil.plenty",
   "build": {
     "beforeDevCommand": "BOOTSTRAP_PORT=$(port) SIGNAL_PORT=$(port) INTERNAL_IP=$(internal-ip --ipv4) concurrently -k \"pnpm local-services\" \"pnpm -F ui start\"",
     "beforeBuildCommand": "pnpm -F ui build && pnpm happ:build",
@@ -25,8 +25,6 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
-    "icon": [
-    ]
+    "targets": "all"
   }
 }
