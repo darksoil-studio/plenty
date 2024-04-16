@@ -1,7 +1,7 @@
 use holochain_types::prelude::*;
 use lair_keystore::dependencies::sodoken::{BufRead, BufWrite};
-use std::collections::HashMap;
-use std::path::PathBuf;
+use std::{collections::HashMap, path::PathBuf};
+use tauri::{Manager, WebviewUrl};
 use tauri_plugin_holochain::{HolochainExt, HolochainPluginConfig};
 use url2::Url2;
 
@@ -27,25 +27,58 @@ pub fn vec_to_locked(mut pass_tmp: Vec<u8>) -> std::io::Result<BufRead> {
     }
 }
 
+fn internal_ip() -> String {
+    if cfg!(mobile) {
+        std::option_env!("INTERNAL_IP")
+            .expect("Environment variable INTERNAL_IP was not set")
+            .to_string()
+    } else {
+        String::from("localhost")
+    }
+}
+
 fn bootstrap_url() -> Url2 {
     // Resolved at compile time to be able to point to local services
-    match (
-        std::option_env!("INTERNAL_IP"),
-        std::option_env!("BOOTSTRAP_PORT"),
-    ) {
-        (Some(internal_ip), Some(port)) => url2::url2!("http://{internal_ip}:{port}"),
-        _ => url2::url2!("https://bootstrap.holo.host"),
+    if cfg!(debug_assertions) {
+        let internal_ip = internal_ip();
+        let port = std::option_env!("BOOTSTRAP_PORT")
+            .expect("Environment variable BOOTSTRAP_PORT was not set");
+        url2::url2!("http://{internal_ip}:{port}")
+    } else {
+        url2::url2!("https://bootstrap.holo.host")
     }
 }
 
 fn signal_url() -> Url2 {
     // Resolved at compile time to be able to point to local services
-    match (
-        std::option_env!("INTERNAL_IP"),
-        std::option_env!("SIGNAL_PORT"),
-    ) {
-        (Some(internal_ip), Some(port)) => url2::url2!("http://{internal_ip}:{port}"),
-        _ => url2::url2!("wss://signal.holo.host"),
+    if cfg!(debug_assertions) {
+        let internal_ip = internal_ip();
+        let signal_port =
+            std::option_env!("SIGNAL_PORT").expect("Environment variable INTERNAL_IP was not set");
+        url2::url2!("ws://{internal_ip}:{signal_port}")
+    } else {
+        url2::url2!("wss://signal.holo.host")
+    }
+}
+
+fn holochain_dir() -> PathBuf {
+    if cfg!(debug_assertions) {
+        let tmp_dir = tempdir::TempDir::new("plenty").expect("Could not create temporary directory");
+
+        // Convert `tmp_dir` into a `Path`, destroying the `TempDir`
+        // without deleting the directory.
+        let tmp_path = tmp_dir.into_path();
+        tmp_path
+    } else {
+        app_dirs2::app_root(
+            app_dirs2::AppDataType::UserData,
+            &app_dirs2::AppInfo {
+                name: "studio.darksoil.plenty",
+                author: std::env!("CARGO_PKG_AUTHORS"),
+            },
+        )
+        .expect("Could not get app root")
+        .join("holochain")
     }
 }
 
@@ -62,6 +95,7 @@ pub fn run() {
             HolochainPluginConfig {
                 signal_url: signal_url(),
                 bootstrap_url: bootstrap_url(),
+                holochain_dir: holochain_dir(),
             },
         ))
         .setup(|app| {
@@ -73,6 +107,7 @@ pub fn run() {
                     .list_apps(None)
                     .await
                     .map_err(|err| tauri_plugin_holochain::Error::ConductorApiError(err))?;
+                println!("apps, {installed_apps:?}");
 
                 if installed_apps.len() == 0 {
                     handle
@@ -85,7 +120,12 @@ pub fn run() {
                 }
             })?;
 
-            // app.holochain()?.web_happ_window_builder("plenty").build()?;
+            app.emit("setup-completed", ())?;
+
+            app.holochain()?
+                .web_happ_window_builder("plenty")
+                .webview_url(WebviewUrl::App("index.html".into()))
+                .build()?;
 
             Ok(())
         })

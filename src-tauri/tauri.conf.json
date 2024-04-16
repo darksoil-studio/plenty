@@ -3,7 +3,6 @@
   "version": "0.0.0",
   "identifier": "studio.darksoil.plenty",
   "build": {
-    "beforeDevCommand": "BOOTSTRAP_PORT=$(port) SIGNAL_PORT=$(port) INTERNAL_IP=$(internal-ip --ipv4) concurrently -k \"pnpm local-services\" \"pnpm -F ui start\"",
     "beforeBuildCommand": "pnpm -F ui build && pnpm happ:build",
     "devUrl": "http://localhost:1420",
     "frontendDist": "../ui/dist"
@@ -12,16 +11,7 @@
     "withGlobalTauri": false,
     "security": {
       "csp": null
-    },
-    "windows": [
-      {
-        "fullscreen": false,
-        "height": 600,
-        "resizable": true,
-        "title": "Plenty",
-        "width": 800
-      }
-    ]
+    }
   },
   "bundle": {
     "active": true,
