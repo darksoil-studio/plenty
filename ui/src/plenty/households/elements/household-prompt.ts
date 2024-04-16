@@ -5,7 +5,7 @@ import {
 } from '@holochain-open-dev/elements';
 import '@holochain-open-dev/elements/dist/elements/display-error.js';
 import '@holochain-open-dev/file-storage/dist/elements/show-image.js';
-import { mapAndJoin, pipe, subscribe } from '@holochain-open-dev/stores';
+import { AsyncReadable, mapAndJoin, pipe, subscribe } from '@holochain-open-dev/stores';
 import { EntryRecord } from '@holochain-open-dev/utils';
 import { ActionHash } from '@holochain/client';
 import { consume } from '@lit/context';
@@ -26,6 +26,8 @@ import { HouseholdsStore } from '../households-store.js';
 import { Household } from '../types.js';
 
 import './create-household.js';
+
+type HouseholdRequestStatus = { status: 'HOUSEHOLD_MEMBER' } | { status: 'NOT_REQUESTED' } | { status: 'REQUESTED'; requestedHouseholds: ReadonlyMap<ActionHash, EntryRecord<Household>>; };
 
 @customElement('household-prompt')
 export class HouseholdPrompt extends LitElement {
@@ -131,16 +133,52 @@ export class HouseholdPrompt extends LitElement {
     )}`;
   }
 
+  renderRequestedHouseholds(requestedHouseholds: ReadonlyMap<ActionHash, EntryRecord<Household>>) {
+    return html`
+        <div class="column" style="gap: 16px">
+        ${Array.from(requestedHouseholds.values()).map((household, i) => html`
+          <div class="row">
+            <show-image style="height: 32px; width: 32px; border-radius: 10px" .imageHash=${household.entry.avatar} ></show-image>
+            ${household.entry.name}
+          </div>
+          <sl-button variant="danger" @click=${() => this.householdsStore.client.cancelJoinRequest(household.actionHash)}>${msg("Cancel Join Request")}</sl-button>
+          ${i === requestedHouseholds.size - 1 ? html`` : html`<sl-divider></sl-divider>`}`)}
+        </div>
+      `;
+
+  }
+
   render() {
     if (this.creatingHousehold)
-      return html`<div class="column" style="align-items: center; justify-content: center; flex: 1;"><create-household
-        @household-created=${() => {
+      return html`<div class="column" style="align-items: center; justify-content: center; flex: 1;">
+        <create-household
+          @household-created=${() => {
           this.creatingHousehold = false;
         }}
-      ></create-household></div>`;
+        ></create-household>
+      </div>`;
+
+    const householdStatus: AsyncReadable<HouseholdRequestStatus> = pipe(this.householdsStore.myHousehold,
+      household => {
+        if (household) return {
+          status: 'HOUSEHOLD_MEMBER'
+        } as HouseholdRequestStatus;
+
+        return pipe(this.householdsStore.householdsIHaveRequestedToJoin, requestedHouseholds => {
+          if (requestedHouseholds.size === 0) return {
+            status: 'NOT_REQUESTED'
+          } as HouseholdRequestStatus;
+
+          return pipe(mapAndJoin(requestedHouseholds, h => h.latestVersion), requestedHouseholdsLatestVersion => ({
+            status: 'REQUESTED',
+            requestedHouseholds: requestedHouseholdsLatestVersion
+          } as HouseholdRequestStatus));
+        })
+      }
+    );
 
     return html`${subscribe(
-      this.householdsStore.myHousehold,
+      householdStatus,
       renderAsyncStatus({
         pending: () =>
           html`<div
@@ -149,7 +187,11 @@ export class HouseholdPrompt extends LitElement {
           >
             <sl-spinner style="font-size: 2rem"></sl-spinner>
           </div>`,
-        complete: value => (value ? html`<slot></slot>` : this.renderPrompt()),
+        complete: value => {
+          if (value.status === 'HOUSEHOLD_MEMBER') return html`<slot></slot>`;
+          if (value.status === 'NOT_REQUESTED') return this.renderPrompt();
+          return this.renderRequestedHouseholds(value.requestedHouseholds);
+        },
         error: e => html`
           <div
             style="flex: 1; height: 100%; align-items: center; justify-content: center;"

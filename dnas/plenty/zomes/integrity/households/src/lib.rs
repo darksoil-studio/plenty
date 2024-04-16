@@ -22,9 +22,10 @@ pub enum EntryTypes {
 pub enum LinkTypes {
     HouseholdUpdates,
     HouseholdToRequestors,
+    RequestorToHouseholds,
     HouseholdToMembers,
-    ActiveHouseholds,
     MemberToHouseholds,
+    ActiveHouseholds,
 }
 #[hdk_extern]
 pub fn genesis_self_check(_data: GenesisSelfCheckData) -> ExternResult<ValidateCallbackResult> {
@@ -142,6 +143,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 target_address,
                 tag,
             ),
+            LinkTypes::RequestorToHouseholds => validate_create_link_requestor_to_households(
+                action,
+                base_address,
+                target_address,
+                tag,
+            ),
             LinkTypes::HouseholdToMembers => validate_create_link_household_to_members(
                 action_hash(&op).clone(),
                 action,
@@ -176,6 +183,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 tag,
             ),
             LinkTypes::HouseholdToRequestors => validate_delete_link_household_to_requestors(
+                action_hash(&op).clone(),
+                action,
+                original_action,
+                base_address,
+                target_address,
+                tag,
+            ),
+            LinkTypes::RequestorToHouseholds => validate_delete_link_requestor_to_households(
                 action_hash(&op).clone(),
                 action,
                 original_action,
@@ -390,6 +405,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                     target_address,
                     tag,
                 ),
+                LinkTypes::RequestorToHouseholds => validate_create_link_requestor_to_households(
+                    action,
+                    base_address,
+                    target_address,
+                    tag,
+                ),
                 LinkTypes::HouseholdToMembers => validate_create_link_household_to_members(
                     action_hash(&op).clone(),
                     action,
@@ -444,6 +465,16 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                     ),
                     LinkTypes::HouseholdToRequestors => {
                         validate_delete_link_household_to_requestors(
+                            action_hash(&op).clone(),
+                            action,
+                            create_link.clone(),
+                            base_address,
+                            create_link.target_address,
+                            create_link.tag,
+                        )
+                    }
+                    LinkTypes::RequestorToHouseholds => {
+                        validate_delete_link_requestor_to_households(
                             action_hash(&op).clone(),
                             action,
                             create_link.clone(),

@@ -108,6 +108,12 @@ export class HouseholdsClient extends ZomeClient<HouseholdsSignal> {
     return this.callZome('get_requestors_for_household', householdHash);
   }
 
+  async getJoinHouseholdRequestsForAgent(
+    agent: AgentPubKey
+  ): Promise<Array<Link>> {
+    return this.callZome('get_join_household_requests_for_agent', agent);
+  }
+
   async getDeletedRequestorsForHousehold(
     householdHash: ActionHash,
   ): Promise<
@@ -126,6 +132,10 @@ export class HouseholdsClient extends ZomeClient<HouseholdsSignal> {
 
   acceptJoinRequest(joinRequestHash: ActionHash): Promise<void> {
     return this.callZome('accept_join_request', joinRequestHash);
+  }
+
+  cancelJoinRequest(householdHash: ActionHash): Promise<void> {
+    return this.callZome('cancel_join_request', householdHash);
   }
 
   /** Members for Household */
@@ -199,15 +209,5 @@ export class HouseholdsClient extends ZomeClient<HouseholdsSignal> {
 
   async getHouseholdsForMember(member: AgentPubKey): Promise<Array<Link>> {
     return this.callZome('get_households_for_member', member);
-  }
-
-  addHouseholdForMember(
-    member: AgentPubKey,
-    householdHash: ActionHash,
-  ): Promise<void> {
-    return this.callZome('add_household_for_member', {
-      base_member: member,
-      target_household_hash: householdHash,
-    });
   }
 }

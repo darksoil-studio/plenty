@@ -145,6 +145,21 @@ export class HouseholdsStore {
     ),
   );
 
+  householdsIHaveRequestedToJoin = pipe(
+    liveLinksStore(
+      this.client,
+      this.client.client.myPubKey,
+      () => this.client.getJoinHouseholdRequestsForAgent(this.client.client.myPubKey),
+      'RequestorToHouseholds',
+    ),
+    links =>
+      slice(
+        this.households,
+        links.map(l => l.target),
+      ),
+
+  );
+
   myHousehold = pipe(
     this.householdsForMember.get(this.client.client.myPubKey),
     households => {

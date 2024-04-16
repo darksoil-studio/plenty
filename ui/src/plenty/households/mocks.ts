@@ -140,6 +140,9 @@ export class HouseholdsZomeMock extends ZomeMock implements AppAgentClient {
   /** Requestors for Household */
   householdToRequestor = new HoloHashMap<ActionHash, Link[]>();
 
+  /** Households for Requestor */
+  requestorToHousehold = new HoloHashMap<AgentPubKey, Link[]>();
+
   async get_requestors_for_household(
     householdHash: ActionHash,
   ): Promise<Array<Link>> {
@@ -163,6 +166,25 @@ export class HouseholdsZomeMock extends ZomeMock implements AppAgentClient {
         create_link_hash: await fakeActionHash(),
       },
     ]);
+    const existing2 = this.householdToRequestor.get(input.household_hash) || [];
+    this.requestorToHousehold.set(input.requestor, [
+      ...existing2,
+      {
+        target: input.household_hash,
+        author: this.myPubKey,
+        timestamp: Date.now() * 1000,
+        zome_index: 0,
+        link_type: 0,
+        tag: new Uint8Array(),
+        create_link_hash: await fakeActionHash(),
+      },
+    ]);
+  }
+
+  async get_join_household_requests_for_agent(
+    agent: AgentPubKey
+  ): Promise<Array<Link>> {
+    return this.requestorToHousehold.get(agent) || [];
   }
 
   /** Members for Household */
@@ -254,24 +276,6 @@ export class HouseholdsZomeMock extends ZomeMock implements AppAgentClient {
     return this.memberToHousehold.get(member) || [];
   }
 
-  async add_household_for_member(input: {
-    member: AgentPubKey;
-    household_hash: ActionHash;
-  }): Promise<void> {
-    const existing = this.memberToHousehold.get(input.member) || [];
-    this.memberToHousehold.set(input.member, [
-      ...existing,
-      {
-        target: input.household_hash,
-        author: this.myPubKey,
-        timestamp: Date.now() * 1000,
-        zome_index: 0,
-        link_type: 0,
-        tag: new Uint8Array(),
-        create_link_hash: await fakeActionHash(),
-      },
-    ]);
-  }
 }
 
 export async function sampleHousehold(

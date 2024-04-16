@@ -54,3 +54,46 @@ test('link a Household to a Requestor', async () => {
     assert.equal(deletedLinksOutput.length, 1);
   });
 });
+
+test('Request to join household and cancel it ', async () => {
+  await runScenario(async scenario => {
+    const { alice, bob } = await setup(scenario);
+
+    const baseRecord: EntryRecord<Household> = await alice.store.client.createHousehold(await sampleHousehold(alice.store.client));
+    const baseAddress = baseRecord.actionHash;
+
+    // Bob gets the links, should be empty
+    let linksOutput = await toPromise(bob.store.households.get(baseAddress).requestors.live);
+    assert.equal(linksOutput.length, 0);
+
+    // Alice creates a link from Household to Requestor
+    const joinRequestHash = await bob.store.client.requestToJoinHousehold(baseAddress);
+
+    // Wait for the created entry to be propagated to the other node.
+    await dhtSync(
+      [alice.player, bob.player],
+      alice.player.cells[0].cell_id[0]
+    );
+
+    // Bob gets the links again
+    linksOutput = await toPromise(bob.store.households.get(baseAddress).requestors.live);
+    assert.equal(linksOutput.length, 1);
+    assert.deepEqual(cleanNodeDecoding(bob.player.agentPubKey), cleanNodeDecoding(linksOutput[0].target));
+
+    await bob.store.client.cancelJoinRequest(baseAddress);
+
+    // Wait for the created entry to be propagated to the other node.
+    await dhtSync(
+      [alice.player, bob.player],
+      alice.player.cells[0].cell_id[0]
+    );
+
+    // Bob gets the links again
+    linksOutput = await toPromise(alice.store.households.get(baseAddress).requestors.live);
+    assert.equal(linksOutput.length, 0);
+
+    // Bob gets the deleted links
+    let deletedLinksOutput = await toPromise(bob.store.households.get(baseAddress).requestors.deleted);
+    assert.equal(deletedLinksOutput.length, 1);
+  });
+});
