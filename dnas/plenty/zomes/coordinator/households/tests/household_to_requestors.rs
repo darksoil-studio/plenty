@@ -6,7 +6,7 @@ use hdk::prelude::*;
 use holochain::{conductor::config::ConductorConfig, sweettest::*};
 use std::time::Duration;
 
-use households::household_to_requestors::RemoveRequestorForHouseholdInput;
+use households::household_to_requestors::RejectJoinRequest;
 
 mod common;
 
@@ -75,8 +75,8 @@ async fn link_a_household_to_a_requestor() {
     let _result: () = conductors[0]
         .call(
             &alice_zome,
-            "remove_requestor_for_household",
-            RemoveRequestorForHouseholdInput {
+            "reject_join_request",
+            RejectJoinRequest {
                 household_hash: base_address.clone(),
                 requestor: target_address.clone(),
             },

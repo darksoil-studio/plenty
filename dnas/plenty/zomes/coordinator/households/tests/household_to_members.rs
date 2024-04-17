@@ -37,7 +37,7 @@ async fn link_a_household_to_a_member() {
     )
     .await;
     let base_address = base_record.signed_action.hashed.hash.clone();
-    let target_address = alice.agent_pubkey();
+    let target_address = bobbo.agent_pubkey();
 
     // Bob gets the links, should be empty
     let links_output: Vec<Link> = conductors[1]
@@ -65,7 +65,7 @@ async fn link_a_household_to_a_member() {
     let links_output: Vec<Link> = conductors[1]
         .call(&bob_zome, "get_members_for_household", base_address.clone())
         .await;
-    assert_eq!(links_output.len(), 1);
+    assert_eq!(links_output.len(), 2);
 
     let _result: () = conductors[0]
         .call(
@@ -86,7 +86,7 @@ async fn link_a_household_to_a_member() {
     let links_output: Vec<Link> = conductors[1]
         .call(&bob_zome, "get_members_for_household", base_address.clone())
         .await;
-    assert_eq!(links_output.len(), 0);
+    assert_eq!(links_output.len(), 1);
     // Bob gets the deleted links
     let deleted_links_output: Vec<(SignedActionHashed, Vec<SignedActionHashed>)> = conductors[1]
         .call(

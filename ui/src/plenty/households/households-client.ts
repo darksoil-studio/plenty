@@ -122,16 +122,23 @@ export class HouseholdsClient extends ZomeClient<HouseholdsSignal> {
     return this.callZome('get_deleted_requestors_for_household', householdHash);
   }
 
-  requestToJoinHousehold(householdHash: ActionHash): Promise<ActionHash> {
+  requestToJoinHousehold(householdHash: ActionHash): Promise<void> {
     return this.callZome('request_to_join_household', householdHash);
   }
 
-  rejectJoinRequest(joinRequestHash: ActionHash): Promise<void> {
-    return this.callZome('reject_join_request', joinRequestHash);
+  rejectJoinRequest(householdHash: ActionHash, requestor: AgentPubKey): Promise<void> {
+    return this.callZome('reject_join_request', {
+      requestor,
+      household_hash: householdHash
+    });
   }
 
-  acceptJoinRequest(joinRequestHash: ActionHash): Promise<void> {
-    return this.callZome('accept_join_request', joinRequestHash);
+  acceptJoinRequest(householdHash: ActionHash, requestor: AgentPubKey): Promise<void> {
+    return this.callZome('accept_join_request',
+      {
+        requestor,
+        household_hash: householdHash
+      });
   }
 
   cancelJoinRequest(householdHash: ActionHash): Promise<void> {

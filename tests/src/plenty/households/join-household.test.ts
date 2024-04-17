@@ -30,8 +30,8 @@ test('Alice creates a Household, bobs joins it', async () => {
       alice.player.cells[0].cell_id[0]
     );
 
-    const bobJoinRequestHash = await bob.store.client.requestToJoinHousehold(household.actionHash);
-    const carolJoinRequestHash = await carol.store.client.requestToJoinHousehold(household.actionHash);
+    await bob.store.client.requestToJoinHousehold(household.actionHash);
+    await carol.store.client.requestToJoinHousehold(household.actionHash);
 
     // Wait for the created entry to be propagated to the other node.
     await dhtSync(
@@ -40,8 +40,8 @@ test('Alice creates a Household, bobs joins it', async () => {
     );
 
     // Bob can't reject or accept the join request because he's not a member of the household
-    await expect(() => bob.store.client.rejectJoinRequest(carolJoinRequestHash), "Bob was able to reject the join request without being a member of the household").rejects.toThrowError(undefined);
-    await expect(() => bob.store.client.acceptJoinRequest(carolJoinRequestHash), "Bob was able to accept the join request without being a member of the household").rejects.toThrowError(undefined);
+    await expect(() => bob.store.client.rejectJoinRequest(household.actionHash, carol.player.agentPubKey), "Bob was able to reject the join request without being a member of the household").rejects.toThrowError(undefined);
+    await expect(() => bob.store.client.acceptJoinRequest(household.actionHash, carol.player.agentPubKey), "Bob was able to accept the join request without being a member of the household").rejects.toThrowError(undefined);
 
     // Wait for the created entry to be propagated to the other node.
     await dhtSync(
@@ -54,7 +54,7 @@ test('Alice creates a Household, bobs joins it', async () => {
     let requestors = await toPromise(alice.store.households.get(household.actionHash).requestors.live)
     assert.equal(requestors.length, 2);
 
-    await alice.store.client.rejectJoinRequest(bobJoinRequestHash);
+    await alice.store.client.rejectJoinRequest(household.actionHash, bob.player.agentPubKey);
 
     await dhtSync(
       [alice.player, bob.player, carol.player, dave.player],
@@ -73,7 +73,7 @@ test('Alice creates a Household, bobs joins it', async () => {
     requestors = await toPromise(carol.store.households.get(household.actionHash).requestors.live);
     assert.equal(requestors.length, 2);
 
-    await alice.store.client.acceptJoinRequest(bobJoinRequestHash);
+    await alice.store.client.acceptJoinRequest(household.actionHash, bob.player.agentPubKey);
 
     await dhtSync(
       [alice.player, bob.player, carol.player, dave.player],
@@ -93,7 +93,7 @@ test('Alice creates a Household, bobs joins it', async () => {
     assert.equal(members.length, 2);
 
     // Now Bob can accept Carol
-    await bob.store.client.acceptJoinRequest(carolJoinRequestHash);
+    await bob.store.client.acceptJoinRequest(household.actionHash, carol.player.agentPubKey);
 
     await dhtSync(
       [alice.player, bob.player, carol.player, dave.player],
@@ -117,9 +117,9 @@ test('Alice creates a Household, bobs joins it', async () => {
       alice.player.cells[0].cell_id[0]
     );
 
-    await expect(() => bob.store.client.rejectJoinRequest(daveJoinRequestHash), "Bob was able to reject the join request of Dave even after leaving the household").rejects.toThrow();
-    await expect(() => bob.store.client.acceptJoinRequest(daveJoinRequestHash), "Bob was able to accept the join request of Dave even after leaving the household").rejects.toThrow();
+    await expect(() => bob.store.client.rejectJoinRequest(household.actionHash, dave.player.agentPubKey), "Bob was able to reject the join request of Dave even after leaving the household").rejects.toThrow();
+    await expect(() => bob.store.client.acceptJoinRequest(household.actionHash, dave.player.agentPubKey), "Bob was able to accept the join request of Dave even after leaving the household").rejects.toThrow();
 
-    await carol.store.client.acceptJoinRequest(daveJoinRequestHash);
+    await carol.store.client.acceptJoinRequest(household.actionHash, dave.player.agentPubKey);
   });
 });

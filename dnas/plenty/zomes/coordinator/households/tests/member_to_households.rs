@@ -6,6 +6,8 @@ use hdk::prelude::*;
 use holochain::{conductor::config::ConductorConfig, sweettest::*};
 use std::time::Duration;
 
+use households::household_to_members::AddMemberForHouseholdInput;
+
 mod common;
 
 use common::{create_household, sample_household_1};
@@ -28,7 +30,7 @@ async fn link_a_member_to_a_household() {
     let alice_zome = alice.zome("households");
     let bob_zome = bobbo.zome("households");
 
-    let base_address = alice.agent_pubkey().clone();
+    let base_address = bobbo.agent_pubkey().clone();
     let target_record = create_household(
         &conductors[0],
         &alice_zome,

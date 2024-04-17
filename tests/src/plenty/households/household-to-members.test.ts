@@ -23,6 +23,8 @@ test('link a Household to a Member', async () => {
     // Bob gets the links, should be empty
     let linksOutput = await toPromise(alice.store.households.get(baseAddress).members.live);
     assert.equal(linksOutput.length, 1);
+    let householdsForMemberOutput = await toPromise(bob.store.householdsForMember.get(targetAddress));
+    assert.equal(householdsForMemberOutput.size, 0);
 
     // Alice creates a link from Household to Member
     await alice.store.client.addMemberForHousehold(baseAddress, targetAddress);
@@ -38,6 +40,9 @@ test('link a Household to a Member', async () => {
     assert.equal(linksOutput.length, 2);
     assert.deepEqual(cleanNodeDecoding(targetAddress), cleanNodeDecoding(linksOutput[1].target));
 
+    householdsForMemberOutput = await toPromise(bob.store.householdsForMember.get(targetAddress));
+    assert.equal(householdsForMemberOutput.size, 1);
+
     await alice.store.client.removeMemberForHousehold(baseAddress, targetAddress);
 
     // Wait for the created entry to be propagated to the other node.
@@ -49,6 +54,9 @@ test('link a Household to a Member', async () => {
     // Bob gets the links again
     linksOutput = await toPromise(bob.store.households.get(baseAddress).members.live);
     assert.equal(linksOutput.length, 1);
+
+    householdsForMemberOutput = await toPromise(bob.store.householdsForMember.get(targetAddress));
+    assert.equal(householdsForMemberOutput.size, 0);
 
     // Bob gets the deleted links
     let deletedLinksOutput = await toPromise(bob.store.households.get(baseAddress).members.deleted);

@@ -1,5 +1,7 @@
 use hdi::prelude::*;
+
 use crate::{HouseholdMembershipClaim, UnitEntryTypes};
+
 pub fn was_member_of_household(
     agent_pub_key: AgentPubKey,
     chain_top: ActionHash,
@@ -19,17 +21,15 @@ pub fn was_member_of_household(
             deleted_actions.insert(delete.deletes_address.clone());
         }
     }
-    let household_membership_claim_entry_type: AppEntryDef = UnitEntryTypes::HouseholdMembershipClaim
-        .try_into()?;
+    let household_membership_claim_entry_type: AppEntryDef =
+        UnitEntryTypes::HouseholdMembershipClaim.try_into()?;
     for activity in agent_activity {
         if activity.action.hashed.hash.eq(&household_hash) {
             return Ok(true);
         }
         if let Some(EntryType::App(app)) = activity.action.hashed.content.entry_type() {
             if app.eq(&household_membership_claim_entry_type) {
-                let claim_record = must_get_valid_record(
-                    activity.action.hashed.hash.clone(),
-                )?;
+                let claim_record = must_get_valid_record(activity.action.hashed.hash.clone())?;
                 let claim = HouseholdMembershipClaim::try_from(claim_record)?;
                 if claim.household_hash.eq(&household_hash) {
                     if !deleted_actions.contains(&activity.action.hashed.hash) {
@@ -41,6 +41,7 @@ pub fn was_member_of_household(
     }
     Ok(false)
 }
+
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
 pub struct Household {
@@ -76,38 +77,31 @@ pub fn validate_create_link_household_updates(
 ) -> ExternResult<ValidateCallbackResult> {
     let action_hash = base_address
         .into_action_hash()
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest(String::from("No action hash associated with link"))
-            ),
-        )?;
+        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
+            "No action hash associated with link"
+        ))))?;
     let record = must_get_valid_record(action_hash)?;
     let _household: crate::Household = record
         .entry()
         .to_app_option()
         .map_err(|e| wasm_error!(e))?
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest(String::from("Linked action must reference an entry"))
-            ),
-        )?;
-    let action_hash = target_address
-        .into_action_hash()
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest(String::from("No action hash associated with link"))
-            ),
-        )?;
+        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
+            "Linked action must reference an entry"
+        ))))?;
+    let action_hash =
+        target_address
+            .into_action_hash()
+            .ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
+                "No action hash associated with link"
+            ))))?;
     let record = must_get_valid_record(action_hash)?;
     let _household: crate::Household = record
         .entry()
         .to_app_option()
         .map_err(|e| wasm_error!(e))?
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest(String::from("Linked action must reference an entry"))
-            ),
-        )?;
+        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
+            "Linked action must reference an entry"
+        ))))?;
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_delete_link_household_updates(
@@ -117,11 +111,9 @@ pub fn validate_delete_link_household_updates(
     _target: AnyLinkableHash,
     _tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
-    Ok(
-        ValidateCallbackResult::Invalid(
-            String::from("HouseholdUpdates links cannot be deleted"),
-        ),
-    )
+    Ok(ValidateCallbackResult::Invalid(String::from(
+        "HouseholdUpdates links cannot be deleted",
+    )))
 }
 pub fn validate_create_link_active_households(
     _action: CreateLink,
@@ -129,23 +121,20 @@ pub fn validate_create_link_active_households(
     target_address: AnyLinkableHash,
     _tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
-    let action_hash = target_address
-        .into_action_hash()
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest(String::from("No action hash associated with link"))
-            ),
-        )?;
+    let action_hash =
+        target_address
+            .into_action_hash()
+            .ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
+                "No action hash associated with link"
+            ))))?;
     let record = must_get_valid_record(action_hash)?;
     let _household: crate::Household = record
         .entry()
         .to_app_option()
         .map_err(|e| wasm_error!(e))?
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest(String::from("Linked action must reference an entry"))
-            ),
-        )?;
+        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
+            "Linked action must reference an entry"
+        ))))?;
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_delete_link_active_households(
