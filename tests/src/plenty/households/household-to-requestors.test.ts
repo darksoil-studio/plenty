@@ -23,6 +23,12 @@ test('link a Household to a Requestor', async () => {
     let linksOutput = await toPromise(bob.store.households.get(householdHash).requestors.live);
     assert.equal(linksOutput.length, 0);
 
+    // Wait for the created entry to be propagated to the other node.
+    await dhtSync(
+      [alice.player, bob.player],
+      alice.player.cells[0].cell_id[0]
+    );
+
     // Alice creates a link from Household to Requestor
     await bob.store.client.requestToJoinHousehold(householdHash);
 
@@ -66,8 +72,14 @@ test('Request to join household and cancel it ', async () => {
     let linksOutput = await toPromise(bob.store.households.get(baseAddress).requestors.live);
     assert.equal(linksOutput.length, 0);
 
+    // Wait for the created entry to be propagated to the other node.
+    await dhtSync(
+      [alice.player, bob.player],
+      alice.player.cells[0].cell_id[0]
+    );
+
     // Alice creates a link from Household to Requestor
-    const joinRequestHash = await bob.store.client.requestToJoinHousehold(baseAddress);
+    await bob.store.client.requestToJoinHousehold(baseAddress);
 
     // Wait for the created entry to be propagated to the other node.
     await dhtSync(
