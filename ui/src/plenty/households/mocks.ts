@@ -182,7 +182,7 @@ export class HouseholdsZomeMock extends ZomeMock implements AppAgentClient {
   }
 
   async get_join_household_requests_for_agent(
-    agent: AgentPubKey
+    agent: AgentPubKey,
   ): Promise<Array<Link>> {
     return this.requestorToHousehold.get(agent) || [];
   }
@@ -275,7 +275,6 @@ export class HouseholdsZomeMock extends ZomeMock implements AppAgentClient {
   async get_households_for_member(member: AgentPubKey): Promise<Array<Link>> {
     return this.memberToHousehold.get(member) || [];
   }
-
 }
 
 export async function sampleHousehold(

@@ -90,7 +90,6 @@ export class CreateHousehold extends LitElement {
 
   render() {
     return html` <sl-card style="flex: 1;">
-
       <form
         id="create-form"
         class="column"

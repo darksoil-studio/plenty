@@ -109,7 +109,7 @@ export class HouseholdsClient extends ZomeClient<HouseholdsSignal> {
   }
 
   async getJoinHouseholdRequestsForAgent(
-    agent: AgentPubKey
+    agent: AgentPubKey,
   ): Promise<Array<Link>> {
     return this.callZome('get_join_household_requests_for_agent', agent);
   }

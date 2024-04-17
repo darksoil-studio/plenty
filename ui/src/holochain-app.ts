@@ -13,26 +13,22 @@ import '@holochain-open-dev/profiles/dist/elements/agent-avatar.js';
 import '@holochain-open-dev/profiles/dist/elements/profile-list-item-skeleton.js';
 import '@holochain-open-dev/profiles/dist/elements/profile-prompt.js';
 import { pipe, subscribe } from '@holochain-open-dev/stores';
-import {
-  AppAgentClient,
-  AppAgentWebsocket,
-} from '@holochain/client';
+import { AppAgentClient, AppAgentWebsocket } from '@holochain/client';
 import { provide } from '@lit/context';
 import { localized, msg } from '@lit/localize';
 import '@shoelace-style/shoelace/dist/components/icon-button/icon-button.js';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
-import '@shoelace-style/shoelace/dist/components/tab/tab.js';
 import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
 import '@shoelace-style/shoelace/dist/components/tab-panel/tab-panel.js';
+import '@shoelace-style/shoelace/dist/components/tab/tab.js';
 import '@shoelace-style/shoelace/dist/themes/light.css';
 import { LitElement, css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import { householdsStoreContext } from './plenty/households/context.js';
+import './plenty/households/elements/household-prompt.js';
 import { HouseholdsClient } from './plenty/households/households-client.js';
 import { HouseholdsStore } from './plenty/households/households-store.js';
-
-import './plenty/households/elements/household-prompt.js';
 
 type View = { view: 'main' };
 
@@ -66,7 +62,9 @@ export class HolochainApp extends LitElement {
     // async connect() {
     try {
       this._client = await AppAgentWebsocket.connect('plenty', {
-        url: new URL(`ws://localhost:${(window as any).__HC_LAUNCHER_ENV__.__PORT__}`)
+        url: new URL(
+          `ws://localhost:${(window as any).__HC_LAUNCHER_ENV__.__PORT__}`,
+        ),
       });
       await this.initStores(this._client);
     } catch (e: any) {
@@ -88,37 +86,49 @@ export class HolochainApp extends LitElement {
   }
 
   renderMyProfile() {
-    return html`<div class="row" style="gap: 16px" slot="actionItems">${subscribe(
-      pipe(this._householdStore.myHousehold, h => h?.latestVersion),
-      renderAsyncStatus({
-        complete: household => household ?
-          html`<div class="row" style="align-items: center;" >
-            <show-image style="width: 32px; height: 32px;" .imageHash=${household?.entry.avatar}></show-image>
-            <span style="margin: 0 16px;">${household?.entry.name}</span>
-          </div>`: html``,
-        error: e =>
-          html`<display-error
-            .headline=${msg('Error fetching your household')}
-            .error=${e}
-            tooltip
-          ></display-error>`,
-        pending: () =>
-          html`<profile-list-item-skeleton></profile-list-item-skeleton>`,
-      }),
-    )}
+    return html`<div class="row" style="gap: 16px" slot="actionItems">
+      ${subscribe(
+        pipe(this._householdStore.myHousehold, h => h?.latestVersion),
+        renderAsyncStatus({
+          complete: household =>
+            household
+              ? html`<div class="row" style="align-items: center;">
+                  <show-image
+                    style="width: 32px; height: 32px;"
+                    .imageHash=${household?.entry.avatar}
+                  ></show-image>
+                  <span style="margin: 0 16px;">${household?.entry.name}</span>
+                </div>`
+              : html``,
+          error: e =>
+            html`<display-error
+              .headline=${msg('Error fetching your household')}
+              .error=${e}
+              tooltip
+            ></display-error>`,
+          pending: () =>
+            html`<profile-list-item-skeleton></profile-list-item-skeleton>`,
+        }),
+      )}
     </div>`;
   }
 
   renderContent() {
     return html`<household-prompt>
       <sl-tab-group placement="start">
-        <sl-tab slot="nav" panel="orders">${msg("Orders")}</sl-tab>
-        <sl-tab slot="nav" panel="producers">${msg("Producers")}</sl-tab>
-        <sl-tab slot="nav" panel="members">${msg("Members")}</sl-tab>
+        <sl-tab slot="nav" panel="orders">${msg('Orders')}</sl-tab>
+        <sl-tab slot="nav" panel="producers">${msg('Producers')}</sl-tab>
+        <sl-tab slot="nav" panel="members">${msg('Members')}</sl-tab>
 
-        <sl-tab-panel name="orders">This is the general tab panel.</sl-tab-panel>
-        <sl-tab-panel name="producers">This is the general tab panel.</sl-tab-panel>
-        <sl-tab-panel name="members">This is the general tab panel.</sl-tab-panel>
+        <sl-tab-panel name="orders"
+          >This is the general tab panel.</sl-tab-panel
+        >
+        <sl-tab-panel name="producers"
+          >This is the general tab panel.</sl-tab-panel
+        >
+        <sl-tab-panel name="members"
+          >This is the general tab panel.</sl-tab-panel
+        >
       </sl-tab-group>
     </household-prompt>`;
   }
@@ -130,8 +140,8 @@ export class HolochainApp extends LitElement {
       <sl-icon-button
         name="arrow-left"
         @click=${() => {
-        this._view = { view: 'main' };
-      }}
+          this._view = { view: 'main' };
+        }}
       ></sl-icon-button>
     `;
   }

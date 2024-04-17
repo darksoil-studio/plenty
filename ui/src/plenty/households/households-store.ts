@@ -29,7 +29,7 @@ import { HouseholdMembershipClaim } from './types.js';
 import { Household } from './types.js';
 
 export class HouseholdsStore {
-  constructor(public client: HouseholdsClient) { }
+  constructor(public client: HouseholdsClient) {}
 
   /** Household */
 
@@ -118,7 +118,7 @@ export class HouseholdsStore {
       this.client,
       () => this.client.getActiveHouseholds(),
       'ActiveHouseholds',
-      2000
+      2000,
     ),
     activeHouseholds =>
       slice(
@@ -149,7 +149,10 @@ export class HouseholdsStore {
     liveLinksStore(
       this.client,
       this.client.client.myPubKey,
-      () => this.client.getJoinHouseholdRequestsForAgent(this.client.client.myPubKey),
+      () =>
+        this.client.getJoinHouseholdRequestsForAgent(
+          this.client.client.myPubKey,
+        ),
       'RequestorToHouseholds',
     ),
     links =>
@@ -157,7 +160,6 @@ export class HouseholdsStore {
         this.households,
         links.map(l => l.target),
       ),
-
   );
 
   myHousehold = pipe(

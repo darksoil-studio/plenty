@@ -58,8 +58,8 @@ export class MembersForHousehold extends LitElement {
     return html`
       <div class="column" style="gap: 16px;">
         ${hashes.map(
-      hash => html`<agent-avatar .agentPubKey=${hash}></agent-avatar>`,
-    )}
+          hash => html`<agent-avatar .agentPubKey=${hash}></agent-avatar>`,
+        )}
       </div>
     `;
   }
