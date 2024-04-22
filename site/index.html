@@ -1,0 +1,62 @@
+<html>
+  <head>
+    <link href='https://fonts.googleapis.com/css?family=Rubik' rel='stylesheet'>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+
+    <div class="parallax">
+      <div class="parallax__layer parallax__layer--back darksoil-background"></div>
+      <div class="parallax__layer parallax__layer--base">
+        <rocket-content-area>
+          <h2 class="area-headline">plenty<br /></h2>
+
+          <rocket-columns style="align-items: center">
+            <rocket-card>
+              <p>
+                plenty is a peer-to-peer app to manage food buyers clubs, so that eating amazing food from locally sourced producers becomes joyful, easy and cheap.
+              </p>
+              <p>
+                With it, you can add producers and their products' details, create orders from all the households that are members of the buyers club, and manage delivery and sorting tasks. 
+              </p>
+            </rocket-card>
+          </rocket-columns>
+        </rocket-content-area>
+
+        <rocket-content-area>
+          <rocket-columns>
+            <div>
+              <h2 id="darksoil" link-text="darksoil.studio">
+                a darksoil studio project
+              </h2>
+              <p>
+                plenty is a darksoil studio project.
+                <br />
+                <br />
+                Learn more about darksoil at
+                <a href="https://darksoil.studio">darksoil.studio</a>.
+              </p>
+            </div>
+          </rocket-columns>
+        </rocket-content-area>
+      </div>
+    </div>
+    <script type="module">
+      export async function registerCustomElements() {
+        // server-only components
+        // prettier-ignore
+        customElements.define('rocket-content-area', await import('@rocket/components/content-area.js').then(m => m.RocketContentArea));
+        // prettier-ignore
+        customElements.define('rocket-header-scroll-menu', await import('@rocket/components/header-scroll-menu.js').then(m => m.RocketHeaderScrollMenu));
+        // prettier-ignore
+        customElements.define('rocket-card', await import('@rocket/components/card.js').then(m => m.RocketCard));
+        // prettier-ignore
+        customElements.define('rocket-columns', await import('@rocket/components/columns.js').then(m => m.RocketColumns));
+      }
+
+      registerCustomElements();
+
+    </script>
+
+  </body>
+</html>

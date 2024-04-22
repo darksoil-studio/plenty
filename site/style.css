@@ -1,5 +1,7 @@
 body {
   color: white !important;
+  font-family: 'Rubik', sans-serif;
+  margin: 0;
 }
 
 :root {
@@ -97,7 +99,7 @@ body {
 }
 .darksoil-background {
   filter: brightness(40%);
-  background-image: url(/darksoil.jpg) !important;
+  background-image: url(https://raw.githubusercontent.com/darksoil-studio/media/e4c4813fb38b265c75011f02389668e01fda3618/images/darksoil.jpg) !important;
   background-size: cover;
   background-position: center;
 }
