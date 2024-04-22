@@ -1,0 +1,105 @@
+<script type="module" server>
+/* START - Rocket auto generated - do not touch */
+export const sourceRelativeFilePath = 'index.rocket.html';
+import { components } from './recursive.data.js';
+export { components };
+  export async function registerCustomElements() {
+    // server-only components
+    // prettier-ignore
+  // prettier-ignore
+    customElements.define('rocket-content-area', await import('@rocket/components/content-area.js').then(m => m.RocketContentArea));
+    // prettier-ignore
+  // prettier-ignore
+    customElements.define('rocket-header-scroll-menu', await import('@rocket/components/header-scroll-menu.js').then(m => m.RocketHeaderScrollMenu));
+    // prettier-ignore
+  // prettier-ignore
+    customElements.define('rocket-card', await import('@rocket/components/card.js').then(m => m.RocketCard));
+    // prettier-ignore
+  // prettier-ignore
+    customElements.define('rocket-columns', await import('@rocket/components/columns.js').then(m => m.RocketColumns));
+  }
+/* END - Rocket auto generated - do not touch */
+
+  import '#src/elements/custom-social-link.js';
+  import { LayoutHome } from '@rocket/spark';
+  import { layoutData } from '#src/layouts/layoutData.js';
+
+  export const layout = new LayoutHome({
+    ...layoutData,
+  });
+
+  export const title = 'gather';
+  export const description =
+    'Co-create emergent events in your local community';
+</script>
+<div class="parallax">
+  <div class="parallax__layer parallax__layer--back darksoil-background"></div>
+  <div class="parallax__layer parallax__layer--base">
+    <rocket-content-area>
+      <h2 class="area-headline">gather<br /></h2>
+
+      <rocket-columns style="align-items: center">
+        <rocket-card>
+          <p class="poem">
+            I can see that you are free<br />
+            and you can see the same of me<br />
+            so we agree we’d like to be<br />
+            out in the park at 2:03
+          </p>
+          <p>
+            Software for co-creating, accessing, and managing emergent events.
+            It could be a meeting for a project, practice session for a martial
+            art, gaming session, hobby hangout, or a big celebration. Gather
+            lets you see and actualize previously invisible possibilities for
+            coming together with the people in your life around the things you
+            care about.
+          </p>
+        </rocket-card>
+        <div class="column">
+          <p>
+            Although gather is just in its infancy, there is already a prototype
+            that you can install and use!
+          </p>
+          <br />
+          <div class="row" style="gap: 16px">
+            <a
+              class="cta"
+              href="https://github.com/darksoil-studio/gather/releases/download/v0.0.5/gather_0.0.5_x64_en-US.msi"
+              style="flex: 1; text-align: center"
+              >Windows</a
+            >
+            <a
+              class="cta"
+              href="https://github.com/darksoil-studio/gather/releases/download/v0.0.5/gather_0.0.5_x64.dmg"
+              style="flex: 1; text-align: center"
+              >MacOs</a
+            >
+            <a
+              class="cta"
+              href="https://github.com/darksoil-studio/gather/releases/download/v0.0.5/gather_0.0.5_amd64.AppImage"
+              style="flex: 1; text-align: center"
+              >Linux</a
+            >
+          </div>
+        </div>
+      </rocket-columns>
+    </rocket-content-area>
+
+    <rocket-content-area>
+      <rocket-columns>
+        <div>
+          <h2 id="darksoil" link-text="darksoil.studio">
+            a darksoil studio project
+          </h2>
+          <p>
+            gather is a darksoil studio project.
+            <br />
+            <br />
+            Learn more about darksoil at
+            <a href="https://darksoil.studio">darksoil.studio</a>.
+          </p>
+        </div>
+      </rocket-columns>
+    </rocket-content-area>
+  </div>
+</div>
