@@ -5,16 +5,16 @@
     file-storage.url = "github:holochain-open-dev/file-storage/nixify";
     profiles.url = "github:holochain-open-dev/profiles/nixify";
 
-    versions.url  = "github:holochain/holochain?dir=versions/weekly";
+    versions.url  = "github:holochain/holochain/0.3.0-beta-dev.45?dir=versions/weekly";
     holochain.url = "github:holochain/holochain";
     holochain.inputs.versions.follows = "versions";
 
     nixpkgs.follows = "holochain/nixpkgs";
     flake-parts.follows = "holochain/flake-parts";
 
-    # tauri-plugin-holochain.url = "github:darksoil-studio/tauri-plugin-holochain";
     tauri-plugin-holochain = {
-      url = "/home/guillem/projects/darksoil/tauri-plugin-holochain";
+      url = "github:darksoil-studio/tauri-plugin-holochain";
+      # url = "/home/guillem/projects/darksoil/tauri-plugin-holochain";
       inputs.holochain.follows = "holochain";
     };
     hc-infra = {

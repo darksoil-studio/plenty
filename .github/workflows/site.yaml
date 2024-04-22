@@ -17,7 +17,7 @@ jobs:
 
       - name: Install and Build 🔧 
         run: |
-          nix develop --command bash -c "pnpm install && pnpm -F site build"
+          nix develop github:holochain-open-dev/infrastructure#synchronized-pnpm --command bash -c "pnpm install && pnpm -F site build"
 
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4.3.3
