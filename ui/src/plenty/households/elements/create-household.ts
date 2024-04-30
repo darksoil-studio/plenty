@@ -5,42 +5,43 @@ import {
   onSubmit,
   sharedStyles,
   wrapPathInSvg,
-} from '@holochain-open-dev/elements';
-import '@holochain-open-dev/elements/dist/elements/display-error.js';
-import '@holochain-open-dev/file-storage/dist/elements/upload-files.js';
-import { EntryRecord } from '@holochain-open-dev/utils';
+} from "@holochain-open-dev/elements";
+import "@holochain-open-dev/elements/dist/elements/display-error.js";
+import "@holochain-open-dev/file-storage/dist/elements/upload-files.js";
+import { EntryRecord } from "@holochain-open-dev/utils";
 import {
   ActionHash,
   AgentPubKey,
   DnaHash,
   EntryHash,
   Record,
-} from '@holochain/client';
-import { consume } from '@lit/context';
-import { localized, msg } from '@lit/localize';
-import { mdiAlertCircleOutline, mdiDelete } from '@mdi/js';
-import SlAlert from '@shoelace-style/shoelace/dist/components/alert/alert.js';
-import '@shoelace-style/shoelace/dist/components/alert/alert.js';
-import '@shoelace-style/shoelace/dist/components/button/button.js';
-import '@shoelace-style/shoelace/dist/components/card/card.js';
-import '@shoelace-style/shoelace/dist/components/icon-button/icon-button.js';
-import '@shoelace-style/shoelace/dist/components/icon/icon.js';
-import '@shoelace-style/shoelace/dist/components/input/input.js';
-import { LitElement, html } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
-import { repeat } from 'lit/directives/repeat.js';
+} from "@holochain/client";
+import { consume } from "@lit/context";
+import { localized, msg } from "@lit/localize";
+import { mdiAlertCircleOutline, mdiDelete } from "@mdi/js";
+import SlAlert from "@shoelace-style/shoelace/dist/components/alert/alert.js";
+import "@shoelace-style/shoelace/dist/components/alert/alert.js";
+import "@shoelace-style/shoelace/dist/components/button/button.js";
+import "@shoelace-style/shoelace/dist/components/card/card.js";
+import "@shoelace-style/shoelace/dist/components/icon-button/icon-button.js";
+import "@shoelace-style/shoelace/dist/components/icon/icon.js";
+import "@shoelace-style/shoelace/dist/components/input/input.js";
+import { LitElement, html } from "lit";
+import { customElement, property, query, state } from "lit/decorators.js";
+import { repeat } from "lit/directives/repeat.js";
 
-import { householdsStoreContext } from '../context.js';
-import { HouseholdsStore } from '../households-store.js';
-import { Household } from '../types.js';
+import { householdsStoreContext } from "../context.js";
+import { HouseholdsStore } from "../households-store.js";
+import { Household } from "../types.js";
+import { SignalWatcher } from "@holochain-open-dev/signals";
 
 /**
  * @element create-household
  * @fires household-created: detail will contain { householdHash }
  */
 @localized()
-@customElement('create-household')
-export class CreateHousehold extends LitElement {
+@customElement("create-household")
+export class CreateHousehold extends SignalWatcher(LitElement) {
   /**
    * @internal
    */
@@ -56,7 +57,7 @@ export class CreateHousehold extends LitElement {
   /**
    * @internal
    */
-  @query('#create-form')
+  @query("#create-form")
   form!: HTMLFormElement;
 
   async createHousehold(fields: any) {
@@ -71,7 +72,7 @@ export class CreateHousehold extends LitElement {
         await this.householdsStore.client.createHousehold(household);
 
       this.dispatchEvent(
-        new CustomEvent('household-created', {
+        new CustomEvent("household-created", {
           composed: true,
           bubbles: true,
           detail: {
@@ -83,7 +84,7 @@ export class CreateHousehold extends LitElement {
       this.form.reset();
     } catch (e: any) {
       console.error(e);
-      notifyError(msg('Error creating the household'));
+      notifyError(msg("Error creating the household"));
     }
     this.committing = false;
   }
@@ -94,11 +95,11 @@ export class CreateHousehold extends LitElement {
         id="create-form"
         class="column"
         style="flex: 1; gap: 16px;"
-        ${onSubmit(fields => this.createHousehold(fields))}
+        ${onSubmit((fields) => this.createHousehold(fields))}
       >
-        <span class="title">${msg('Create Household')}</span>
+        <span class="title">${msg("Create Household")}</span>
         <div>
-          <sl-input name="name" .label=${msg('Name')} required></sl-input>
+          <sl-input name="name" .label=${msg("Name")} required></sl-input>
         </div>
 
         <div>
@@ -111,7 +112,7 @@ export class CreateHousehold extends LitElement {
         </div>
 
         <sl-button variant="primary" type="submit" .loading=${this.committing}
-          >${msg('Create Household')}</sl-button
+          >${msg("Create Household")}</sl-button
         >
       </form>
     </sl-card>`;

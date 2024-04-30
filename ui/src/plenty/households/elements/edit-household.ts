@@ -5,36 +5,37 @@ import {
   onSubmit,
   sharedStyles,
   wrapPathInSvg,
-} from '@holochain-open-dev/elements';
-import '@holochain-open-dev/file-storage/dist/elements/upload-files.js';
-import { EntryRecord } from '@holochain-open-dev/utils';
-import { ActionHash, AgentPubKey, EntryHash, Record } from '@holochain/client';
-import { consume } from '@lit/context';
-import { localized, msg } from '@lit/localize';
-import { mdiAlertCircleOutline, mdiDelete } from '@mdi/js';
-import SlAlert from '@shoelace-style/shoelace/dist/components/alert/alert.js';
-import '@shoelace-style/shoelace/dist/components/alert/alert.js';
-import '@shoelace-style/shoelace/dist/components/button/button.js';
-import '@shoelace-style/shoelace/dist/components/card/card.js';
-import '@shoelace-style/shoelace/dist/components/icon/icon.js';
-import '@shoelace-style/shoelace/dist/components/input/input.js';
-import { LitElement, html } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
-import { repeat } from 'lit/directives/repeat.js';
+} from "@holochain-open-dev/elements";
+import "@holochain-open-dev/file-storage/dist/elements/upload-files.js";
+import { EntryRecord } from "@holochain-open-dev/utils";
+import { ActionHash, AgentPubKey, EntryHash, Record } from "@holochain/client";
+import { consume } from "@lit/context";
+import { localized, msg } from "@lit/localize";
+import { mdiAlertCircleOutline, mdiDelete } from "@mdi/js";
+import SlAlert from "@shoelace-style/shoelace/dist/components/alert/alert.js";
+import "@shoelace-style/shoelace/dist/components/alert/alert.js";
+import "@shoelace-style/shoelace/dist/components/button/button.js";
+import "@shoelace-style/shoelace/dist/components/card/card.js";
+import "@shoelace-style/shoelace/dist/components/icon/icon.js";
+import "@shoelace-style/shoelace/dist/components/input/input.js";
+import { LitElement, html } from "lit";
+import { customElement, property, state } from "lit/decorators.js";
+import { repeat } from "lit/directives/repeat.js";
 
-import { householdsStoreContext } from '../context.js';
-import { HouseholdsStore } from '../households-store.js';
-import { Household } from '../types.js';
+import { householdsStoreContext } from "../context.js";
+import { HouseholdsStore } from "../households-store.js";
+import { Household } from "../types.js";
+import { SignalWatcher } from "@holochain-open-dev/signals";
 
 /**
  * @element edit-household
  * @fires household-updated: detail will contain { originalHouseholdHash, previousHouseholdHash, updatedHouseholdHash }
  */
 @localized()
-@customElement('edit-household')
-export class EditHousehold extends LitElement {
+@customElement("edit-household")
+export class EditHousehold extends SignalWatcher(LitElement) {
   // REQUIRED. The hash of the original `Create` action for this Household
-  @property(hashProperty('original-household-hash'))
+  @property(hashProperty("original-household-hash"))
   originalHouseholdHash!: ActionHash;
 
   // REQUIRED. The current Household record that should be updated
@@ -54,7 +55,7 @@ export class EditHousehold extends LitElement {
   committing = false;
 
   firstUpdated() {
-    this.shadowRoot?.querySelector('form')!.reset();
+    this.shadowRoot?.querySelector("form")!.reset();
   }
 
   async updateHousehold(fields: any) {
@@ -72,7 +73,7 @@ export class EditHousehold extends LitElement {
       );
 
       this.dispatchEvent(
-        new CustomEvent('household-updated', {
+        new CustomEvent("household-updated", {
           composed: true,
           bubbles: true,
           detail: {
@@ -84,7 +85,7 @@ export class EditHousehold extends LitElement {
       );
     } catch (e: any) {
       console.error(e);
-      notifyError(msg('Error updating the household'));
+      notifyError(msg("Error updating the household"));
     }
 
     this.committing = false;
@@ -92,17 +93,17 @@ export class EditHousehold extends LitElement {
 
   render() {
     return html` <sl-card>
-      <span slot="header">${msg('Edit Household')}</span>
+      <span slot="header">${msg("Edit Household")}</span>
 
       <form
         class="column"
         style="flex: 1; gap: 16px;"
-        ${onSubmit(fields => this.updateHousehold(fields))}
+        ${onSubmit((fields) => this.updateHousehold(fields))}
       >
         <div>
           <sl-input
             name="name"
-            .label=${msg('Name')}
+            .label=${msg("Name")}
             required
             .defaultValue=${this.currentRecord.entry.name}
           ></sl-input>
@@ -122,20 +123,20 @@ export class EditHousehold extends LitElement {
           <sl-button
             @click=${() =>
               this.dispatchEvent(
-                new CustomEvent('edit-canceled', {
+                new CustomEvent("edit-canceled", {
                   bubbles: true,
                   composed: true,
                 }),
               )}
             style="flex: 1;"
-            >${msg('Cancel')}</sl-button
+            >${msg("Cancel")}</sl-button
           >
           <sl-button
             type="submit"
             variant="primary"
             style="flex: 1;"
             .loading=${this.committing}
-            >${msg('Save')}</sl-button
+            >${msg("Save")}</sl-button
           >
         </div>
       </form>

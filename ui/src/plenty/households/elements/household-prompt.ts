@@ -1,48 +1,43 @@
+import { sharedStyles, wrapPathInSvg } from "@holochain-open-dev/elements";
+import "@holochain-open-dev/elements/dist/elements/display-error.js";
+import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
+import { EntryRecord, mapValues } from "@holochain-open-dev/utils";
+import { ActionHash } from "@holochain/client";
+import { consume } from "@lit/context";
+import { msg } from "@lit/localize";
+import { mdiInformationOutline, mdiPlus } from "@mdi/js";
+import { SlDialog } from "@shoelace-style/shoelace";
+import "@shoelace-style/shoelace/dist/components/button/button.js";
+import "@shoelace-style/shoelace/dist/components/dialog/dialog.js";
+import "@shoelace-style/shoelace/dist/components/radio-button/radio-button.js";
+import "@shoelace-style/shoelace/dist/components/radio-group/radio-group.js";
+import "@shoelace-style/shoelace/dist/components/spinner/spinner.js";
+import "@shoelace-style/shoelace/dist/components/tree-item/tree-item.js";
+import "@shoelace-style/shoelace/dist/components/tree/tree.js";
+import { LitElement, css, html } from "lit";
+import { customElement, state } from "lit/decorators.js";
+import { styleMap } from "lit/directives/style-map.js";
 import {
-  renderAsyncStatus,
-  sharedStyles,
-  wrapPathInSvg,
-} from '@holochain-open-dev/elements';
-import '@holochain-open-dev/elements/dist/elements/display-error.js';
-import '@holochain-open-dev/file-storage/dist/elements/show-image.js';
-import {
-  AsyncReadable,
-  mapAndJoin,
-  pipe,
-  subscribe,
-} from '@holochain-open-dev/stores';
-import { EntryRecord } from '@holochain-open-dev/utils';
-import { ActionHash } from '@holochain/client';
-import { consume } from '@lit/context';
-import { msg } from '@lit/localize';
-import { mdiInformationOutline, mdiPlus } from '@mdi/js';
-import { SlDialog } from '@shoelace-style/shoelace';
-import '@shoelace-style/shoelace/dist/components/button/button.js';
-import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
-import '@shoelace-style/shoelace/dist/components/radio-button/radio-button.js';
-import '@shoelace-style/shoelace/dist/components/radio-group/radio-group.js';
-import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
-import '@shoelace-style/shoelace/dist/components/tree-item/tree-item.js';
-import '@shoelace-style/shoelace/dist/components/tree/tree.js';
-import { LitElement, css, html } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
-import { styleMap } from 'lit/directives/style-map.js';
+  AsyncResult,
+  SignalWatcher,
+  joinAsyncMap,
+} from "@holochain-open-dev/signals";
 
-import { householdsStoreContext } from '../context.js';
-import { HouseholdsStore } from '../households-store.js';
-import { Household } from '../types.js';
-import './create-household.js';
+import { householdsStoreContext } from "../context.js";
+import { HouseholdsStore } from "../households-store.js";
+import { Household } from "../types.js";
+import "./create-household.js";
 
 type HouseholdRequestStatus =
-  | { status: 'HOUSEHOLD_MEMBER' }
-  | { status: 'NOT_REQUESTED' }
+  | { status: "HOUSEHOLD_MEMBER" }
+  | { status: "NOT_REQUESTED" }
   | {
-      status: 'REQUESTED';
+      status: "REQUESTED";
       requestedHouseholds: ReadonlyMap<ActionHash, EntryRecord<Household>>;
     };
 
-@customElement('household-prompt')
-export class HouseholdPrompt extends LitElement {
+@customElement("household-prompt")
+export class HouseholdPrompt extends SignalWatcher(LitElement) {
   @consume({ context: householdsStoreContext, subscribe: true })
   householdsStore!: HouseholdsStore;
 
@@ -62,7 +57,7 @@ export class HouseholdPrompt extends LitElement {
           style="color: grey; height: 64px; width: 64px;"
         ></sl-icon>
         <span class="placeholder"
-          >${msg('No active households were found')}</span
+          >${msg("No active households were found")}</span
         >
       </div>`;
 
@@ -78,14 +73,14 @@ export class HouseholdPrompt extends LitElement {
               this.selectedHousehold = h.actionHash;
             }}
             style="${styleMap({
-              cursor: 'pointer',
-              gap: '8px',
-              padding: '8px',
-              'align-items': 'center',
-              'background-color':
+              cursor: "pointer",
+              gap: "8px",
+              padding: "8px",
+              "align-items": "center",
+              "background-color":
                 this.selectedHousehold?.toString() === h.actionHash.toString()
-                  ? 'var(--sl-color-primary-500)'
-                  : 'auto',
+                  ? "var(--sl-color-primary-500)"
+                  : "auto",
             })}"
           >
             <show-image
@@ -102,30 +97,46 @@ export class HouseholdPrompt extends LitElement {
     </div>`;
   }
 
-  renderPrompt() {
-    const activeHouseholds = pipe(
-      this.householdsStore.activeHouseholds,
-      householdMap => mapAndJoin(householdMap, h => h.latestVersion),
-    );
+  getActiveHouseholds() {
+    const activeHouseholds = this.householdsStore.activeHouseholds$.get();
+    if (activeHouseholds.status !== "completed") return activeHouseholds;
 
-    return html`${subscribe(
-      activeHouseholds,
-      renderAsyncStatus({
-        complete: map => html`
+    return joinAsyncMap(
+      mapValues(activeHouseholds.value, (h) => h.latestVersion$.get()),
+    );
+  }
+
+  renderPrompt() {
+    const activeHouseholds = this.getActiveHouseholds();
+
+    switch (activeHouseholds.status) {
+      case "pending":
+        return html`<div
+          style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1;"
+        >
+          <sl-spinner style="font-size: 2rem;"></sl-spinner>
+        </div>`;
+      case "error":
+        return html`<display-error
+          .headline=${msg("Error fetching the households")}
+          .error=${activeHouseholds.error}
+        ></display-error>`;
+      case "completed":
+        return html`
           <div
             class="column"
             style="flex: 1; align-items: center; justify-content: center;"
           >
             <sl-card>
               <div class="column" style="gap: 16px">
-                <span class="title">${msg('Households')}</span>
+                <span class="title">${msg("Households")}</span>
 
                 <span class="placeholder"
-                  >${msg('Select your household and wait to be invited.')}</span
+                  >${msg("Select your household and wait to be invited.")}</span
                 >
                 <span class="placeholder"
                   >${msg(
-                    'If your household does not appear in the list, create it.',
+                    "If your household does not appear in the list, create it.",
                   )}</span
                 >
 
@@ -139,11 +150,11 @@ export class HouseholdPrompt extends LitElement {
                       slot="prefix"
                       .src=${wrapPathInSvg(mdiPlus)}
                     ></sl-icon>
-                    ${msg('Create Household')}
+                    ${msg("Create Household")}
                   </sl-button>
                 </div>
 
-                ${this.renderActiveHouseholds(map)}
+                ${this.renderActiveHouseholds(activeHouseholds.value)}
                 <sl-button
                   .disabled=${this.selectedHousehold === undefined}
                   variant="primary"
@@ -151,25 +162,13 @@ export class HouseholdPrompt extends LitElement {
                     this.householdsStore.client.requestToJoinHousehold(
                       this.selectedHousehold!,
                     )}
-                  >${msg('Request To Join Household')}</sl-button
+                  >${msg("Request To Join Household")}</sl-button
                 >
               </div>
             </sl-card>
           </div>
-        `,
-        pending: () =>
-          html`<div
-            style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1;"
-          >
-            <sl-spinner style="font-size: 2rem;"></sl-spinner>
-          </div>`,
-        error: e =>
-          html`<display-error
-            .headline=${msg('Error fetching the households')}
-            .error=${e}
-          ></display-error>`,
-      }),
-    )}`;
+        `;
+    }
   }
 
   renderRequestedHouseholds(
@@ -184,11 +183,11 @@ export class HouseholdPrompt extends LitElement {
           (household, i) => html`
             <sl-dialog
               id="cancel-join-request-${household.actionHash.toString()}"
-              .label=${msg('Cancel join request')}
+              .label=${msg("Cancel join request")}
             >
               <span
                 >${msg(
-                  'Are you sure you want to cancel the join request to the household ',
+                  "Are you sure you want to cancel the join request to the household ",
                 )}${household.entry.name}?</span
               >
               <sl-button
@@ -198,7 +197,7 @@ export class HouseholdPrompt extends LitElement {
                   this.householdsStore.client.cancelJoinRequest(
                     household.actionHash,
                   )}
-                >${msg('Cancel Join Request')}</sl-button
+                >${msg("Cancel Join Request")}</sl-button
               >
             </sl-dialog>
             <sl-card>
@@ -218,7 +217,7 @@ export class HouseholdPrompt extends LitElement {
                         `cancel-join-request-${household.actionHash.toString()}`,
                       ) as SlDialog
                     ).show()}
-                  >${msg('Cancel Join Request')}</sl-button
+                  >${msg("Cancel Join Request")}</sl-button
                 >
               </div>
             </sl-card>
@@ -226,6 +225,44 @@ export class HouseholdPrompt extends LitElement {
         )}
       </div>
     `;
+  }
+
+  getHouseholdStatus(): AsyncResult<HouseholdRequestStatus> {
+    const myHousehold = this.householdsStore.myHousehold$.get();
+    if (myHousehold.status !== "completed") return myHousehold;
+    if (myHousehold.value !== undefined)
+      return {
+        status: "completed",
+        value: {
+          status: "HOUSEHOLD_MEMBER",
+        },
+      };
+
+    const requestedHouseholds =
+      this.householdsStore.householdsIHaveRequestedToJoin$.get();
+    if (requestedHouseholds.status !== "completed") return requestedHouseholds;
+
+    if (requestedHouseholds.value.size === 0)
+      return {
+        status: "completed",
+        value: {
+          status: "NOT_REQUESTED",
+        },
+      };
+
+    const requestedHouseholdsLatestVersion = joinAsyncMap(
+      mapValues(requestedHouseholds.value, (h) => h.latestVersion$.get()),
+    );
+    if (requestedHouseholdsLatestVersion.status !== "completed")
+      return requestedHouseholdsLatestVersion;
+
+    return {
+      status: "completed",
+      value: {
+        status: "REQUESTED",
+        requestedHouseholds: requestedHouseholdsLatestVersion.value,
+      },
+    };
   }
 
   render() {
@@ -241,63 +278,37 @@ export class HouseholdPrompt extends LitElement {
         ></create-household>
       </div>`;
 
-    const householdStatus: AsyncReadable<HouseholdRequestStatus> = pipe(
-      this.householdsStore.myHousehold,
-      household => {
-        if (household)
-          return {
-            status: 'HOUSEHOLD_MEMBER',
-          } as HouseholdRequestStatus;
+    const householdsStatus = this.getHouseholdStatus();
 
-        return pipe(
-          this.householdsStore.householdsIHaveRequestedToJoin,
-          requestedHouseholds => {
-            if (requestedHouseholds.size === 0)
-              return {
-                status: 'NOT_REQUESTED',
-              } as HouseholdRequestStatus;
-
-            return pipe(
-              mapAndJoin(requestedHouseholds, h => h.latestVersion),
-              requestedHouseholdsLatestVersion =>
-                ({
-                  status: 'REQUESTED',
-                  requestedHouseholds: requestedHouseholdsLatestVersion,
-                }) as HouseholdRequestStatus,
-            );
-          },
-        );
-      },
-    );
-
-    return html`${subscribe(
-      householdStatus,
-      renderAsyncStatus({
-        pending: () =>
-          html`<div
-            class="row"
-            style="flex: 1; height: 100%; align-items: center; justify-content: center;"
-          >
-            <sl-spinner style="font-size: 2rem"></sl-spinner>
-          </div>`,
-        complete: value => {
-          if (value.status === 'HOUSEHOLD_MEMBER') return html`<slot></slot>`;
-          if (value.status === 'NOT_REQUESTED') return this.renderPrompt();
-          return this.renderRequestedHouseholds(value.requestedHouseholds);
-        },
-        error: e => html`
+    switch (householdsStatus.status) {
+      case "pending":
+        return html`<div
+          class="row"
+          style="flex: 1; height: 100%; align-items: center; justify-content: center;"
+        >
+          <sl-spinner style="font-size: 2rem"></sl-spinner>
+        </div>`;
+      case "error":
+        return html`
           <div
             style="flex: 1; height: 100%; align-items: center; justify-content: center;"
           >
             <display-error
-              .error=${e}
-              .headline=${msg('Error getting your household.')}
+              .error=${householdsStatus.error}
+              .headline=${msg("Error getting your household.")}
             >
             </display-error>
           </div>
-        `,
-      }),
-    )}`;
+        `;
+      case "completed":
+        if (householdsStatus.value.status === "HOUSEHOLD_MEMBER")
+          return html`<slot></slot>`;
+        if (householdsStatus.value.status === "NOT_REQUESTED")
+          return this.renderPrompt();
+        return this.renderRequestedHouseholds(
+          householdsStatus.value.requestedHouseholds,
+        );
+    }
   }
 
   static styles = [

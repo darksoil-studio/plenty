@@ -1,39 +1,39 @@
-import { renderAsyncStatus, sharedStyles } from '@holochain-open-dev/elements';
-import '@holochain-open-dev/elements/dist/elements/display-error.js';
+import { renderAsyncStatus, sharedStyles } from "@holochain-open-dev/elements";
+import "@holochain-open-dev/elements/dist/elements/display-error.js";
 import {
   FileStorageClient,
   fileStorageClientContext,
-} from '@holochain-open-dev/file-storage';
+} from "@holochain-open-dev/file-storage";
 import {
   ProfilesClient,
   ProfilesStore,
   profilesStoreContext,
-} from '@holochain-open-dev/profiles';
-import '@holochain-open-dev/profiles/dist/elements/agent-avatar.js';
-import '@holochain-open-dev/profiles/dist/elements/profile-list-item-skeleton.js';
-import '@holochain-open-dev/profiles/dist/elements/profile-prompt.js';
-import { pipe, subscribe } from '@holochain-open-dev/stores';
-import { AppAgentClient, AppAgentWebsocket } from '@holochain/client';
-import { provide } from '@lit/context';
-import { localized, msg } from '@lit/localize';
-import '@shoelace-style/shoelace/dist/components/icon-button/icon-button.js';
-import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
-import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
-import '@shoelace-style/shoelace/dist/components/tab-panel/tab-panel.js';
-import '@shoelace-style/shoelace/dist/components/tab/tab.js';
-import '@shoelace-style/shoelace/dist/themes/light.css';
-import { LitElement, css, html } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+} from "@holochain-open-dev/profiles";
+import "@holochain-open-dev/profiles/dist/elements/agent-avatar.js";
+import "@holochain-open-dev/profiles/dist/elements/profile-list-item-skeleton.js";
+import "@holochain-open-dev/profiles/dist/elements/profile-prompt.js";
+import { pipe, subscribe } from "@holochain-open-dev/stores";
+import { AppAgentClient, AppAgentWebsocket } from "@holochain/client";
+import { provide } from "@lit/context";
+import { localized, msg } from "@lit/localize";
+import "@shoelace-style/shoelace/dist/components/icon-button/icon-button.js";
+import "@shoelace-style/shoelace/dist/components/spinner/spinner.js";
+import "@shoelace-style/shoelace/dist/components/tab-group/tab-group.js";
+import "@shoelace-style/shoelace/dist/components/tab-panel/tab-panel.js";
+import "@shoelace-style/shoelace/dist/components/tab/tab.js";
+import "@shoelace-style/shoelace/dist/themes/light.css";
+import { LitElement, css, html } from "lit";
+import { customElement, property, state } from "lit/decorators.js";
 
-import { householdsStoreContext } from './plenty/households/context.js';
-import './plenty/households/elements/household-prompt.js';
-import { HouseholdsClient } from './plenty/households/households-client.js';
-import { HouseholdsStore } from './plenty/households/households-store.js';
+import { householdsStoreContext } from "./plenty/households/context.js";
+import "./plenty/households/elements/household-prompt.js";
+import { HouseholdsClient } from "./plenty/households/households-client.js";
+import { HouseholdsStore } from "./plenty/households/households-store.js";
 
-type View = { view: 'main' };
+type View = { view: "main" };
 
 @localized()
-@customElement('holochain-app')
+@customElement("holochain-app")
 export class HolochainApp extends LitElement {
   @provide({ context: householdsStoreContext })
   @property()
@@ -41,7 +41,7 @@ export class HolochainApp extends LitElement {
 
   @state() _loading = true;
 
-  @state() _view = { view: 'main' };
+  @state() _view = { view: "main" };
 
   @state() _error: any | undefined;
 
@@ -61,7 +61,7 @@ export class HolochainApp extends LitElement {
 
     // async connect() {
     try {
-      this._client = await AppAgentWebsocket.connect('plenty', {
+      this._client = await AppAgentWebsocket.connect("plenty", {
         url: new URL(
           `ws://localhost:${(window as any).__HC_LAUNCHER_ENV__.__PORT__}`,
         ),
@@ -77,20 +77,20 @@ export class HolochainApp extends LitElement {
   // Don't change this
   async initStores(appAgentClient: AppAgentClient) {
     this._profilesStore = new ProfilesStore(
-      new ProfilesClient(appAgentClient, 'plenty'),
+      new ProfilesClient(appAgentClient, "plenty"),
     );
     this._householdStore = new HouseholdsStore(
-      new HouseholdsClient(appAgentClient, 'plenty'),
+      new HouseholdsClient(appAgentClient, "plenty"),
     );
-    this._fileStorageClient = new FileStorageClient(appAgentClient, 'plenty');
+    this._fileStorageClient = new FileStorageClient(appAgentClient, "plenty");
   }
 
   renderMyProfile() {
     return html`<div class="row" style="gap: 16px" slot="actionItems">
       ${subscribe(
-        pipe(this._householdStore.myHousehold, h => h?.latestVersion),
+        pipe(this._householdStore.myHousehold$, (h) => h?.latestVersion),
         renderAsyncStatus({
-          complete: household =>
+          complete: (household) =>
             household
               ? html`<div class="row" style="align-items: center;">
                   <show-image
@@ -100,9 +100,9 @@ export class HolochainApp extends LitElement {
                   <span style="margin: 0 16px;">${household?.entry.name}</span>
                 </div>`
               : html``,
-          error: e =>
+          error: (e) =>
             html`<display-error
-              .headline=${msg('Error fetching your household')}
+              .headline=${msg("Error fetching your household")}
               .error=${e}
               tooltip
             ></display-error>`,
@@ -116,9 +116,9 @@ export class HolochainApp extends LitElement {
   renderContent() {
     return html`<household-prompt>
       <sl-tab-group placement="start">
-        <sl-tab slot="nav" panel="orders">${msg('Orders')}</sl-tab>
-        <sl-tab slot="nav" panel="producers">${msg('Producers')}</sl-tab>
-        <sl-tab slot="nav" panel="members">${msg('Members')}</sl-tab>
+        <sl-tab slot="nav" panel="orders">${msg("Orders")}</sl-tab>
+        <sl-tab slot="nav" panel="producers">${msg("Producers")}</sl-tab>
+        <sl-tab slot="nav" panel="members">${msg("Members")}</sl-tab>
 
         <sl-tab-panel name="orders"
           >This is the general tab panel.</sl-tab-panel
@@ -134,13 +134,13 @@ export class HolochainApp extends LitElement {
   }
 
   renderBackButton() {
-    if (this._view.view === 'main') return html``;
+    if (this._view.view === "main") return html``;
 
     return html`
       <sl-icon-button
         name="arrow-left"
         @click=${() => {
-          this._view = { view: 'main' };
+          this._view = { view: "main" };
         }}
       ></sl-icon-button>
     `;
@@ -162,7 +162,7 @@ export class HolochainApp extends LitElement {
         >
           <display-error
             .error=${this._error}
-            .headline=${msg('Error connecting to holochain.')}
+            .headline=${msg("Error connecting to holochain.")}
           >
           </display-error>
         </div>
@@ -175,7 +175,7 @@ export class HolochainApp extends LitElement {
           style="align-items: center; color:white; background-color: var(--sl-color-primary-900); padding: 16px"
         >
           ${this.renderBackButton()}
-          <span class="title" style="flex: 1">${msg('Plenty')}</span>
+          <span class="title" style="flex: 1">${msg("Plenty")}</span>
 
           ${this.renderMyProfile()}
         </div>
