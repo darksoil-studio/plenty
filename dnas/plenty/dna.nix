@@ -22,6 +22,8 @@
         dnaManifest = ./workdir/dna.yaml;
         holochain = inputs'.holochain;
         zomes = {
+          notifications_integrity = inputs'.notifications.packages.notifications_integrity;
+          notifications = inputs'.notifications.packages.notifications;
           file_storage_integrity = inputs'.file-storage.packages.file_storage_integrity;
           file_storage = inputs'.file-storage.packages.file_storage;
           # Include here the zome packages for this DNA, e.g.:
