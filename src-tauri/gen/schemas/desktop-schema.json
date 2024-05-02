@@ -311,6 +311,96 @@
           ]
         },
         {
+          "type": "string",
+          "enum": [
+            "holochain:default"
+          ]
+        },
+        {
+          "description": "holochain:allow-get-locales -> Enables the get_locales command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "holochain:allow-get-locales"
+          ]
+        },
+        {
+          "description": "holochain:allow-get-runtime-info -> Enables the get_runtime_info command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "holochain:allow-get-runtime-info"
+          ]
+        },
+        {
+          "description": "holochain:allow-is-holochain-ready -> Enables the is_holochain_ready command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "holochain:allow-is-holochain-ready"
+          ]
+        },
+        {
+          "description": "holochain:allow-list-apps -> Enables the list_apps command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "holochain:allow-list-apps"
+          ]
+        },
+        {
+          "description": "holochain:allow-open-app -> Enables the open_app command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "holochain:allow-open-app"
+          ]
+        },
+        {
+          "description": "holochain:allow-sign-zome-call -> Enables the sign_zome_call command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "holochain:allow-sign-zome-call"
+          ]
+        },
+        {
+          "description": "holochain:deny-get-locales -> Denies the get_locales command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "holochain:deny-get-locales"
+          ]
+        },
+        {
+          "description": "holochain:deny-get-runtime-info -> Denies the get_runtime_info command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "holochain:deny-get-runtime-info"
+          ]
+        },
+        {
+          "description": "holochain:deny-is-holochain-ready -> Denies the is_holochain_ready command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "holochain:deny-is-holochain-ready"
+          ]
+        },
+        {
+          "description": "holochain:deny-list-apps -> Denies the list_apps command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "holochain:deny-list-apps"
+          ]
+        },
+        {
+          "description": "holochain:deny-open-app -> Denies the open_app command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "holochain:deny-open-app"
+          ]
+        },
+        {
+          "description": "holochain:deny-sign-zome-call -> Denies the sign_zome_call command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "holochain:deny-sign-zome-call"
+          ]
+        },
+        {
           "description": "image:default -> Default permissions for the plugin.",
           "type": "string",
           "enum": [
@@ -1242,6 +1332,13 @@
           ]
         },
         {
+          "description": "window:allow-cursor-position -> Enables the cursor_position command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "window:allow-cursor-position"
+          ]
+        },
+        {
           "description": "window:allow-destroy -> Enables the destroy command without any pre-configured scope.",
           "type": "string",
           "enum": [
@@ -1592,6 +1689,13 @@
           ]
         },
         {
+          "description": "window:allow-start-resize-dragging -> Enables the start_resize_dragging command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "window:allow-start-resize-dragging"
+          ]
+        },
+        {
           "description": "window:allow-theme -> Enables the theme command without any pre-configured scope.",
           "type": "string",
           "enum": [
@@ -1659,6 +1763,13 @@
           "type": "string",
           "enum": [
             "window:deny-current-monitor"
+          ]
+        },
+        {
+          "description": "window:deny-cursor-position -> Denies the cursor_position command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "window:deny-cursor-position"
           ]
         },
         {
@@ -2009,6 +2120,13 @@
           "type": "string",
           "enum": [
             "window:deny-start-dragging"
+          ]
+        },
+        {
+          "description": "window:deny-start-resize-dragging -> Denies the start_resize_dragging command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "window:deny-start-resize-dragging"
           ]
         },
         {

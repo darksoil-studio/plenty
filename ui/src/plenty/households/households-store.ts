@@ -1,4 +1,6 @@
 import {
+  AsyncComputed,
+  AsyncState,
   allRevisionsOfEntrySignal,
   collectionSignal,
   deletedLinksSignal,
@@ -9,7 +11,6 @@ import {
   mapCompleted,
 } from "@holochain-open-dev/signals";
 import {
-  EntryRecord,
   HashType,
   LazyHoloHashMap,
   retype,
@@ -18,17 +19,32 @@ import {
 import {
   ActionHash,
   AgentPubKey,
-  EntryHash,
-  NewEntryAction,
-  Record,
+  decodeHashFromBase64,
+  encodeHashToBase64,
 } from "@holochain/client";
 
 import { HouseholdsClient } from "./households-client.js";
-import { HouseholdMembershipClaim } from "./types.js";
-import { Household } from "./types.js";
+import { NotificationsTypes } from "@darksoil-studio/notifications";
+import { ProfilesStore } from "@holochain-open-dev/profiles";
+import { wrapPathInSvg } from "@holochain-open-dev/elements";
+import {
+  mdiAccountCancel,
+  mdiAccountCancelOutline,
+  mdiAccountCheck,
+  mdiAccountPlus,
+} from "@mdi/js";
+import { msg, str } from "@lit/localize";
+import { decode } from "@msgpack/msgpack";
+import {
+  NOTIFICATIONS_TYPES,
+  decodeRequestNotificationGroup,
+} from "./notifications.js";
 
 export class HouseholdsStore {
-  constructor(public client: HouseholdsClient) {}
+  constructor(
+    public client: HouseholdsClient,
+    private profilesStore: ProfilesStore,
+  ) {}
 
   /** Household */
 
@@ -53,11 +69,7 @@ export class HouseholdsStore {
           () => this.client.getRequestorsForHousehold(householdHash),
           "HouseholdToRequestors",
         ),
-        (links) =>
-          links.map((l) => ({
-            ...l,
-            target: retype(l.target, HashType.AGENT),
-          })),
+        (links) => links.map((l) => retype(l.target, HashType.AGENT)),
       ),
       deleted$: mapCompleted(
         deletedLinksSignal(
@@ -80,11 +92,7 @@ export class HouseholdsStore {
           () => this.client.getMembersForHousehold(householdHash),
           "HouseholdToMembers",
         ),
-        (links) =>
-          links.map((l) => ({
-            ...l,
-            target: retype(l.target, HashType.AGENT),
-          })),
+        (links) => links.map((l) => retype(l.target, HashType.AGENT)),
       ),
       deleted$: mapCompleted(
         deletedLinksSignal(
@@ -171,4 +179,144 @@ export class HouseholdsStore {
       return Array.from(households.values())[0];
     },
   );
+
+  /** Notifications types */
+  private requestNotificationTitle(notificationGroup: string) {
+    const { requestor, householdHash } =
+      decodeRequestNotificationGroup(notificationGroup);
+    if (requestor.toString() === this.client.client.myPubKey.toString())
+      return new AsyncComputed(() => {
+        const household = this.households
+          .get(householdHash)
+          .latestVersion$.get();
+        if (household.status !== "completed") return household;
+        return {
+          status: "completed",
+          value: msg(
+            str`You requested to join the household "${household.value?.entry.name}".`,
+          ),
+        };
+      });
+    return new AsyncComputed(() => {
+      const profile = this.profilesStore.profiles.get(requestor).get();
+      if (profile.status !== "completed") return profile;
+      return {
+        status: "completed",
+        value: msg(
+          str`${profile.value?.entry.nickname} requested to join your household.`,
+        ),
+      };
+    });
+  }
+
+  notificationsTypes(
+    onClickRequestNotificationGroup: (
+      householdHash: ActionHash,
+      requestor: AgentPubKey,
+    ) => void,
+  ): NotificationsTypes {
+    const onClickForRequestNotificationTypes = (notificationGroup: string) => {
+      const { requestor, householdHash } =
+        decodeRequestNotificationGroup(notificationGroup);
+      return onClickRequestNotificationGroup(householdHash, requestor);
+    };
+    return {
+      [NOTIFICATIONS_TYPES.REQUEST_TO_JOIN_HOUSEHOLD]: {
+        contents: (notification) => {
+          const { requestor } = decodeRequestNotificationGroup(
+            notification.entry.notification_group,
+          );
+          const iconSrc = wrapPathInSvg(mdiAccountPlus);
+          return new AsyncState({
+            status: "completed",
+            value: {
+              iconSrc,
+              body: "",
+            },
+          });
+        },
+        onClick: onClickForRequestNotificationTypes,
+        title: (notificationGroup) =>
+          this.requestNotificationTitle(notificationGroup),
+      },
+      [NOTIFICATIONS_TYPES.REQUEST_ACCEPTED]: {
+        contents: (notification) => {
+          const acceptor = notification.action.author;
+          const iconSrc = wrapPathInSvg(mdiAccountCheck);
+
+          return new AsyncComputed(() => {
+            const acceptorProfile = this.profilesStore.profiles
+              .get(acceptor)
+              .get();
+            if (acceptorProfile.status !== "completed") return acceptorProfile;
+
+            return {
+              status: "completed",
+              value: {
+                iconSrc,
+                body: msg(
+                  str`${acceptorProfile.value?.entry.nickname} accepted the request.`,
+                ),
+              },
+            };
+          });
+        },
+        onClick: onClickForRequestNotificationTypes,
+        title: (notificationGroup) =>
+          this.requestNotificationTitle(notificationGroup),
+      },
+      [NOTIFICATIONS_TYPES.REQUEST_REJECTED]: {
+        contents: (notification) => {
+          const rejector = notification.action.author;
+          const iconSrc = wrapPathInSvg(mdiAccountCancel);
+
+          return new AsyncComputed(() => {
+            const rejectorProfile = this.profilesStore.profiles
+              .get(rejector)
+              .get();
+            if (rejectorProfile.status !== "completed") return rejectorProfile;
+
+            return {
+              status: "completed",
+              value: {
+                iconSrc,
+                body: msg(
+                  str`${rejectorProfile.value?.entry.nickname}rejected the request.`,
+                ),
+              },
+            };
+          });
+        },
+        onClick: onClickForRequestNotificationTypes,
+        title: (notificationGroup) =>
+          this.requestNotificationTitle(notificationGroup),
+      },
+      [NOTIFICATIONS_TYPES.REQUEST_CANCELLED]: {
+        contents: (notification) => {
+          const rejector = notification.action.author;
+          const iconSrc = wrapPathInSvg(mdiAccountCancel);
+
+          return new AsyncComputed(() => {
+            const rejectorProfile = this.profilesStore.profiles
+              .get(rejector)
+              .get();
+            if (rejectorProfile.status !== "completed") return rejectorProfile;
+
+            return {
+              status: "completed",
+              value: {
+                iconSrc,
+                body: msg(
+                  str`${rejectorProfile.value?.entry.nickname} cancelled the request.`,
+                ),
+              },
+            };
+          });
+        },
+        onClick: onClickForRequestNotificationTypes,
+        title: (notificationGroup) =>
+          this.requestNotificationTitle(notificationGroup),
+      },
+    };
+  }
 }

@@ -6,7 +6,7 @@
     file-storage.url = "github:holochain-open-dev/file-storage/nixify";
     profiles.url = "github:holochain-open-dev/profiles/nixify";
 
-    versions.url = "github:holochain/holochain?dir=versions/weekly";
+    versions.url = "github:holochain/holochain?dir=versions/0_3_rc";
     holochain.url = "github:holochain/holochain";
     holochain.inputs.versions.follows = "versions";
 
@@ -22,6 +22,17 @@
       url = "github:holochain-open-dev/infrastructure";
       inputs.holochain.follows = "holochain";
     };
+  };
+
+  nixConfig = {
+    extra-substituters = [
+      "https://holochain-open-dev.cachix.org"
+      "https://darksoil-studio.cachix.org"
+    ];
+    extra-trusted-public-keys = [
+      "holochain-open-dev.cachix.org-1:3Tr+9in6uo44Ga7qiuRIfOTFXog+2+YbyhwI/Z6Cp4U="
+      "darksoil-studio.cachix.org-1:UEi+aujy44s41XL/pscLw37KEVpTEIn8N/kn7jO8rkc="
+    ];
   };
 
   outputs = inputs:

@@ -126,8 +126,7 @@ export class HouseholdDetail extends SignalWatcher(LitElement) {
       case "completed":
         if (this._editing) {
           return html`<edit-household
-            .originalHouseholdHash=${this.householdHash}
-            .currentRecord=${household.value}
+            .householdHash=${this.householdHash}
             @household-updated=${async () => {
               this._editing = false;
             }}

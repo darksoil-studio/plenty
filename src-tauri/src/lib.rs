@@ -63,7 +63,8 @@ fn signal_url() -> Url2 {
 
 fn holochain_dir() -> PathBuf {
     if cfg!(debug_assertions) {
-        let tmp_dir = tempdir::TempDir::new("plenty").expect("Could not create temporary directory");
+        let tmp_dir =
+            tempdir::TempDir::new("plenty").expect("Could not create temporary directory");
 
         // Convert `tmp_dir` into a `Path`, destroying the `TempDir`
         // without deleting the directory.
@@ -87,7 +88,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(
             tauri_plugin_log::Builder::default()
-                .level(log::LevelFilter::Info)
+                .level(log::LevelFilter::Warn)
                 .build(),
         )
         .plugin(tauri_plugin_holochain::init(
@@ -107,7 +108,6 @@ pub fn run() {
                     .list_apps(None)
                     .await
                     .map_err(|err| tauri_plugin_holochain::Error::ConductorApiError(err))?;
-                println!("apps, {installed_apps:?}");
 
                 if installed_apps.len() == 0 {
                     handle

@@ -129,14 +129,14 @@ export class HouseholdPrompt extends SignalWatcher(LitElement) {
           >
             <sl-card>
               <div class="column" style="gap: 16px">
-                <span class="title">${msg("Households")}</span>
+                <span class="title">${msg("Join Your Household")}</span>
 
                 <span class="placeholder"
                   >${msg("Select your household and wait to be invited.")}</span
                 >
                 <span class="placeholder"
                   >${msg(
-                    "If your household does not appear in the list, create it.",
+                    "If your household does not exist yet, create it.",
                   )}</span
                 >
 
@@ -197,18 +197,30 @@ export class HouseholdPrompt extends SignalWatcher(LitElement) {
                   this.householdsStore.client.cancelJoinRequest(
                     household.actionHash,
                   )}
-                >${msg("Cancel Join Request")}</sl-button
+                >${msg("Cancel join request")}</sl-button
               >
             </sl-dialog>
-            <sl-card>
+            <sl-card style="width: 400px;">
               <div class="column" style="flex: 1; gap: 16px">
-                <div class="row" style="gap: 8px; align-items: center">
+                <span class="title">${msg("Waiting to get accepted...")}</span>
+                <span
+                  >${msg("You have requested to join this household:")}</span
+                >
+                <div
+                  class="row"
+                  style="gap: 8px; align-items: center; justify-content: center; padding: 16px"
+                >
                   <show-image
                     style="height: 32px; width: 32px; border-radius: 10px"
                     .imageHash=${household.entry.avatar}
                   ></show-image>
                   <span>${household.entry.name}</span>
                 </div>
+                <span style="flex: 1"
+                  >${msg(
+                    "Waiting for a member of the household to accept you.",
+                  )}</span
+                >
                 <sl-button
                   variant="danger"
                   @click=${() =>

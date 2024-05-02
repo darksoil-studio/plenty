@@ -20,7 +20,7 @@ import "@shoelace-style/shoelace/dist/components/icon/icon.js";
 import "@shoelace-style/shoelace/dist/components/input/input.js";
 import { LitElement, html } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-import { repeat } from "lit/directives/repeat.js";
+import { ref } from "lit/directives/ref.js";
 
 import { householdsStoreContext } from "../context.js";
 import { HouseholdsStore } from "../households-store.js";
@@ -36,11 +36,7 @@ import { SignalWatcher } from "@holochain-open-dev/signals";
 export class EditHousehold extends SignalWatcher(LitElement) {
   // REQUIRED. The hash of the original `Create` action for this Household
   @property(hashProperty("original-household-hash"))
-  originalHouseholdHash!: ActionHash;
-
-  // REQUIRED. The current Household record that should be updated
-  @property()
-  currentRecord!: EntryRecord<Household>;
+  householdHash!: ActionHash;
 
   /**
    * @internal
@@ -54,11 +50,7 @@ export class EditHousehold extends SignalWatcher(LitElement) {
   @state()
   committing = false;
 
-  firstUpdated() {
-    this.shadowRoot?.querySelector("form")!.reset();
-  }
-
-  async updateHousehold(fields: any) {
+  async updateHousehold(currentRecord: EntryRecord<Household>, fields: any) {
     const household: Household = {
       name: fields.name,
       avatar: fields.avatar,
@@ -67,8 +59,8 @@ export class EditHousehold extends SignalWatcher(LitElement) {
     try {
       this.committing = true;
       const updateRecord = await this.householdsStore.client.updateHousehold(
-        this.originalHouseholdHash,
-        this.currentRecord.actionHash,
+        this.householdHash,
+        currentRecord.actionHash,
         household,
       );
 
@@ -77,8 +69,8 @@ export class EditHousehold extends SignalWatcher(LitElement) {
           composed: true,
           bubbles: true,
           detail: {
-            originalHouseholdHash: this.originalHouseholdHash,
-            previousHouseholdHash: this.currentRecord.actionHash,
+            originalHouseholdHash: this.householdHash,
+            previousHouseholdHash: currentRecord.actionHash,
             updatedHouseholdHash: updateRecord.actionHash,
           },
         }),
@@ -91,21 +83,22 @@ export class EditHousehold extends SignalWatcher(LitElement) {
     this.committing = false;
   }
 
-  render() {
+  renderEditForm(currentRecord: EntryRecord<Household>) {
     return html` <sl-card>
       <span slot="header">${msg("Edit Household")}</span>
 
       <form
         class="column"
         style="flex: 1; gap: 16px;"
-        ${onSubmit((fields) => this.updateHousehold(fields))}
+        ${ref((form) => (form as HTMLFormElement)?.reset())}
+        ${onSubmit((fields) => this.updateHousehold(currentRecord, fields))}
       >
         <div>
           <sl-input
             name="name"
             .label=${msg("Name")}
             required
-            .defaultValue=${this.currentRecord.entry.name}
+            .defaultValue=${currentRecord.entry.name}
           ></sl-input>
         </div>
 
@@ -115,7 +108,7 @@ export class EditHousehold extends SignalWatcher(LitElement) {
             one-file
             accepted-files="image/jpeg,image/png,image/gif"
             required
-            .defaultValue=${this.currentRecord.entry.avatar}
+            .defaultValue=${currentRecord.entry.avatar}
           ></upload-files>
         </div>
 
@@ -141,6 +134,28 @@ export class EditHousehold extends SignalWatcher(LitElement) {
         </div>
       </form>
     </sl-card>`;
+  }
+
+  render() {
+    const household = this.householdsStore.households
+      .get(this.householdHash)
+      .latestVersion$.get();
+
+    switch (household.status) {
+      case "pending":
+        return html`<div
+          style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1;"
+        >
+          <sl-spinner style="font-size: 2rem;"></sl-spinner>
+        </div>`;
+      case "error":
+        return html`<display-error
+          .headline=${msg("Error fetching the household")}
+          .error=${household.error}
+        ></display-error>`;
+      case "completed":
+        return this.renderEditForm(household.value);
+    }
   }
 
   static styles = [sharedStyles];

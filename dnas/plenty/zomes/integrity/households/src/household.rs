@@ -55,11 +55,12 @@ pub fn validate_create_household(
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_update_household(
-    _action: Update,
-    _household: Household,
-    _original_action: EntryCreationAction,
-    _original_household: Household,
+    action: Update,
+    household: Household,
 ) -> ExternResult<ValidateCallbackResult> {
+    // TODO: Add adequate validation
+    // was_member_of_household(action.author, action_hash, household_hash)
+
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_delete_household(
@@ -135,6 +136,7 @@ pub fn validate_create_link_active_households(
         .ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
             "Linked action must reference an entry"
         ))))?;
+    // TODO: Add adequate validation
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_delete_link_active_households(
@@ -144,5 +146,6 @@ pub fn validate_delete_link_active_households(
     _target: AnyLinkableHash,
     _tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
+    // TODO: Add adequate validation
     Ok(ValidateCallbackResult::Valid)
 }

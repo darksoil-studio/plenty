@@ -13,11 +13,11 @@ import {
   fakeUpdateEntry,
   hash,
   pickBy,
-} from '@holochain-open-dev/utils';
+} from "@holochain-open-dev/utils";
 import {
   ActionHash,
   AgentPubKey,
-  AppAgentClient,
+  AppClient,
   Delete,
   EntryHash,
   Link,
@@ -29,15 +29,15 @@ import {
   fakeAgentPubKey,
   fakeDnaHash,
   fakeEntryHash,
-} from '@holochain/client';
+} from "@holochain/client";
 
-import { HouseholdsClient } from './households-client.js';
-import { HouseholdMembershipClaim } from './types.js';
-import { Household } from './types.js';
+import { HouseholdsClient } from "./households-client.js";
+import { HouseholdMembershipClaim } from "./types.js";
+import { Household } from "./types.js";
 
-export class HouseholdsZomeMock extends ZomeMock implements AppAgentClient {
+export class HouseholdsZomeMock extends ZomeMock implements AppClient {
   constructor(myPubKey?: AgentPubKey) {
-    super('household_test', 'households', myPubKey);
+    super("household_test", "households", myPubKey);
   }
 
   /** Household */
@@ -254,10 +254,10 @@ export class HouseholdsZomeMock extends ZomeMock implements AppAgentClient {
 
   async get_active_households(_: any): Promise<Array<Link>> {
     const records: Record[] = Array.from(this.households.values()).map(
-      r => r.revisions[r.revisions.length - 1],
+      (r) => r.revisions[r.revisions.length - 1],
     );
     return Promise.all(
-      records.map(async record => ({
+      records.map(async (record) => ({
         target: record.signed_action.hashed.hash,
         author: record.signed_action.hashed.content.author,
         timestamp: record.signed_action.hashed.content.timestamp,
@@ -283,7 +283,7 @@ export async function sampleHousehold(
 ): Promise<Household> {
   return {
     ...{
-      name: 'Lorem ipsum 2',
+      name: "Lorem ipsum 2",
       avatar: await fakeEntryHash(),
     },
     ...partialHousehold,

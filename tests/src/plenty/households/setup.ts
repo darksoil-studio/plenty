@@ -1,7 +1,7 @@
-import { Scenario } from '@holochain/tryorama';
-import { appPath } from '../../app-path.js';
-import { HouseholdsClient } from '../../../../ui/src/plenty/households/households-client.js';
-import { HouseholdsStore } from '../../../../ui/src/plenty/households/households-store.js';
+import { Scenario } from "@holochain/tryorama";
+import { appPath } from "../../app-path.js";
+import { HouseholdsClient } from "../../../../ui/src/plenty/households/households-client.js";
+import { HouseholdsStore } from "../../../../ui/src/plenty/households/households-store.js";
 
 export async function setup(scenario: Scenario) {
   // Add 2 players with the test hApp to the Scenario. The returned players
@@ -16,11 +16,11 @@ export async function setup(scenario: Scenario) {
   await scenario.shareAllAgents();
 
   const aliceStore = new HouseholdsStore(
-    new HouseholdsClient(alice.appAgentWs as any, 'plenty', 'households')
+    new HouseholdsClient(alice.appWs as any, "plenty", "households"),
   );
 
   const bobStore = new HouseholdsStore(
-    new HouseholdsClient(bob.appAgentWs as any, 'plenty', 'households')
+    new HouseholdsClient(bob.appWs as any, "plenty", "households"),
   );
 
   // Shortcut peer discovery through gossip and register all agents in every
@@ -39,7 +39,6 @@ export async function setup(scenario: Scenario) {
   };
 }
 
-
 export async function setup4(scenario: Scenario) {
   // Add 2 players with the test hApp to the Scenario. The returned players
   // can be destructured.
@@ -55,18 +54,18 @@ export async function setup4(scenario: Scenario) {
   await scenario.shareAllAgents();
 
   const aliceStore = new HouseholdsStore(
-    new HouseholdsClient(alice.appAgentWs as any, 'plenty', 'households')
+    new HouseholdsClient(alice.appWs as any, "plenty", "households"),
   );
 
   const bobStore = new HouseholdsStore(
-    new HouseholdsClient(bob.appAgentWs as any, 'plenty', 'households')
+    new HouseholdsClient(bob.appWs as any, "plenty", "households"),
   );
 
   const carolStore = new HouseholdsStore(
-    new HouseholdsClient(carol.appAgentWs as any, 'plenty', 'households')
+    new HouseholdsClient(carol.appWs as any, "plenty", "households"),
   );
   const daveStore = new HouseholdsStore(
-    new HouseholdsClient(dave.appAgentWs as any, 'plenty', 'households')
+    new HouseholdsClient(dave.appWs as any, "plenty", "households"),
   );
 
   // Shortcut peer discovery through gossip and register all agents in every
@@ -92,4 +91,3 @@ export async function setup4(scenario: Scenario) {
     },
   };
 }
-

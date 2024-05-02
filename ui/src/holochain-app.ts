@@ -1,4 +1,4 @@
-import { renderAsyncStatus, sharedStyles } from "@holochain-open-dev/elements";
+import { sharedStyles, wrapPathInSvg } from "@holochain-open-dev/elements";
 import "@holochain-open-dev/elements/dist/elements/display-error.js";
 import {
   FileStorageClient,
@@ -12,8 +12,7 @@ import {
 import "@holochain-open-dev/profiles/dist/elements/agent-avatar.js";
 import "@holochain-open-dev/profiles/dist/elements/profile-list-item-skeleton.js";
 import "@holochain-open-dev/profiles/dist/elements/profile-prompt.js";
-import { pipe, subscribe } from "@holochain-open-dev/stores";
-import { AppAgentClient, AppAgentWebsocket } from "@holochain/client";
+import { AppClient, AppWebsocket } from "@holochain/client";
 import { provide } from "@lit/context";
 import { localized, msg } from "@lit/localize";
 import "@shoelace-style/shoelace/dist/components/icon-button/icon-button.js";
@@ -24,24 +23,33 @@ import "@shoelace-style/shoelace/dist/components/tab/tab.js";
 import "@shoelace-style/shoelace/dist/themes/light.css";
 import { LitElement, css, html } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
+import { AsyncResult, SignalWatcher } from "@holochain-open-dev/signals";
+import { EntryRecord } from "@holochain-open-dev/utils";
+import {
+  NotificationsClient,
+  NotificationsStore,
+  notificationsStoreContext,
+} from "@darksoil-studio/notifications";
+import "@darksoil-studio/notifications/dist/elements/my-notifications-icon-button.js";
+import { Router } from "@lit-labs/router";
+import { mdiArrowLeft } from "@mdi/js";
 
 import { householdsStoreContext } from "./plenty/households/context.js";
 import "./plenty/households/elements/household-prompt.js";
+import "./plenty/households/elements/my-household.js";
 import { HouseholdsClient } from "./plenty/households/households-client.js";
 import { HouseholdsStore } from "./plenty/households/households-store.js";
 
-type View = { view: "main" };
+import { Household } from "./plenty/households/types.js";
 
 @localized()
 @customElement("holochain-app")
-export class HolochainApp extends LitElement {
+export class HolochainApp extends SignalWatcher(LitElement) {
   @provide({ context: householdsStoreContext })
   @property()
   _householdStore!: HouseholdsStore;
 
   @state() _loading = true;
-
-  @state() _view = { view: "main" };
 
   @state() _error: any | undefined;
 
@@ -49,23 +57,30 @@ export class HolochainApp extends LitElement {
   @property()
   _profilesStore!: ProfilesStore;
 
+  @provide({ context: notificationsStoreContext })
+  @property()
+  _notificationsStore!: NotificationsStore;
+
   @provide({ context: fileStorageClientContext })
   @property()
   _fileStorageClient!: FileStorageClient;
 
-  _client!: AppAgentClient;
+  _client!: AppClient;
+
+  router = new Router(this, [
+    {
+      path: "/",
+      render: () => this.renderMain(),
+    },
+    {
+      path: "/my-household",
+      render: () => this.renderMyHousehold(),
+    },
+  ]);
 
   async firstUpdated() {
-    //   await event.once('setup-completed', () => this.connect());
-    // }
-
-    // async connect() {
     try {
-      this._client = await AppAgentWebsocket.connect("plenty", {
-        url: new URL(
-          `ws://localhost:${(window as any).__HC_LAUNCHER_ENV__.__PORT__}`,
-        ),
-      });
+      this._client = await AppWebsocket.connect();
       await this.initStores(this._client);
     } catch (e: any) {
       this._error = e;
@@ -75,74 +90,113 @@ export class HolochainApp extends LitElement {
   }
 
   // Don't change this
-  async initStores(appAgentClient: AppAgentClient) {
+  async initStores(appClient: AppClient) {
     this._profilesStore = new ProfilesStore(
-      new ProfilesClient(appAgentClient, "plenty"),
+      new ProfilesClient(appClient, "plenty"),
+    );
+    this._notificationsStore = new NotificationsStore(
+      new NotificationsClient(appClient, "plenty"),
+      {},
     );
     this._householdStore = new HouseholdsStore(
-      new HouseholdsClient(appAgentClient, "plenty"),
+      new HouseholdsClient(this._notificationsStore, appClient, "plenty"),
+      this._profilesStore,
     );
-    this._fileStorageClient = new FileStorageClient(appAgentClient, "plenty");
+    this._notificationsStore.notificationsTypes =
+      this._householdStore.notificationsTypes(() =>
+        this.router.goto("/my-household"),
+      );
+    this._fileStorageClient = new FileStorageClient(appClient, "plenty");
+  }
+
+  myHouseholdLatestVersion(): AsyncResult<EntryRecord<Household> | undefined> {
+    const myHousehold = this._householdStore.myHousehold$.get();
+    if (myHousehold.status !== "completed") return myHousehold;
+    if (!myHousehold.value)
+      return {
+        status: "completed",
+        value: undefined,
+      };
+    return myHousehold.value?.latestVersion$.get();
   }
 
   renderMyProfile() {
-    return html`<div class="row" style="gap: 16px" slot="actionItems">
-      ${subscribe(
-        pipe(this._householdStore.myHousehold$, (h) => h?.latestVersion),
-        renderAsyncStatus({
-          complete: (household) =>
-            household
-              ? html`<div class="row" style="align-items: center;">
-                  <show-image
-                    style="width: 32px; height: 32px;"
-                    .imageHash=${household?.entry.avatar}
-                  ></show-image>
-                  <span style="margin: 0 16px;">${household?.entry.name}</span>
-                </div>`
-              : html``,
-          error: (e) =>
-            html`<display-error
-              .headline=${msg("Error fetching your household")}
-              .error=${e}
-              tooltip
-            ></display-error>`,
-          pending: () =>
-            html`<profile-list-item-skeleton></profile-list-item-skeleton>`,
-        }),
-      )}
+    const household = this.myHouseholdLatestVersion();
+
+    switch (household.status) {
+      case "pending":
+        return html`<profile-list-item-skeleton></profile-list-item-skeleton>`;
+      case "error":
+        return html`<display-error
+          .headline=${msg("Error fetching your household")}
+          .error=${household.error}
+          tooltip
+        ></display-error>`;
+      case "completed":
+        return html`<div
+          class="row"
+          style="align-items: center; cursor: pointer"
+          @click=${() => this.router.goto("/my-household")}
+        >
+          <show-image
+            style="width: 32px; height: 32px;"
+            .imageHash=${household.value?.entry.avatar}
+          ></show-image>
+          <span style="margin: 0 16px;">${household.value?.entry.name}</span>
+        </div>`;
+    }
+  }
+
+  renderMyHousehold() {
+    return html`<div class="column fill">
+      <div
+        class="row"
+        style="align-items: center; color: white; background-color: var(--sl-color-primary-900); padding: 16px; gap: 16px;"
+      >
+        <sl-icon-button
+          .src=${wrapPathInSvg(mdiArrowLeft)}
+          @click=${() => this.router.goto("/")}
+        ></sl-icon-button>
+        <span class="title" style="flex: 1">${msg("My Household")}</span>
+      </div>
+
+      <div class="column" style="align-items: center; flex: 1; padding: 24px">
+        <my-household></my-household>
+      </div>
     </div>`;
   }
 
-  renderContent() {
-    return html`<household-prompt>
-      <sl-tab-group placement="start">
-        <sl-tab slot="nav" panel="orders">${msg("Orders")}</sl-tab>
-        <sl-tab slot="nav" panel="producers">${msg("Producers")}</sl-tab>
-        <sl-tab slot="nav" panel="members">${msg("Members")}</sl-tab>
-
-        <sl-tab-panel name="orders"
-          >This is the general tab panel.</sl-tab-panel
-        >
-        <sl-tab-panel name="producers"
-          >This is the general tab panel.</sl-tab-panel
-        >
-        <sl-tab-panel name="members"
-          >This is the general tab panel.</sl-tab-panel
-        >
-      </sl-tab-group>
-    </household-prompt>`;
-  }
-
-  renderBackButton() {
-    if (this._view.view === "main") return html``;
-
+  renderMain() {
     return html`
-      <sl-icon-button
-        name="arrow-left"
-        @click=${() => {
-          this._view = { view: "main" };
-        }}
-      ></sl-icon-button>
+      <div class="column fill">
+        <div
+          class="row"
+          style="align-items: center; color:white; background-color: var(--sl-color-primary-900); padding: 16px"
+        >
+          <span class="title" style="flex: 1">${msg("Plenty")}</span>
+
+          <div class="row" style="gap: 16px" slot="actionItems">
+            <my-notifications-icon-button></my-notifications-icon-button>
+            ${this.renderMyProfile()}
+          </div>
+        </div>
+
+        <sl-tab-group placement="start">
+          <sl-tab slot="nav" panel="orders">${msg("Orders")}</sl-tab>
+          <sl-tab slot="nav" panel="producers">${msg("Producers")}</sl-tab>
+          <sl-tab slot="nav" panel="members">${msg("Members")}</sl-tab>
+
+          <sl-tab-panel name="orders"
+            >This is the general tab panel.</sl-tab-panel
+          >
+          <sl-tab-panel name="producers"
+            >This is the general tab panel.</sl-tab-panel
+          >
+          <sl-tab-panel name="members"
+            >This is the general tab panel.</sl-tab-panel
+          >
+        </sl-tab-group>
+      </div>
     `;
   }
 
@@ -169,21 +223,9 @@ export class HolochainApp extends LitElement {
       `;
 
     return html`
-      <div class="column fill">
-        <div
-          class="row"
-          style="align-items: center; color:white; background-color: var(--sl-color-primary-900); padding: 16px"
-        >
-          ${this.renderBackButton()}
-          <span class="title" style="flex: 1">${msg("Plenty")}</span>
-
-          ${this.renderMyProfile()}
-        </div>
-
-        <profile-prompt style="flex: 1;">
-          ${this.renderContent()}
-        </profile-prompt>
-      </div>
+      <profile-prompt style="flex: 1;">
+        <household-prompt> ${this.router.outlet()} </household-prompt>
+      </profile-prompt>
     `;
   }
 
