@@ -90,7 +90,7 @@ export class EditHousehold extends SignalWatcher(LitElement) {
       <form
         class="column"
         style="flex: 1; gap: 16px;"
-        ${ref((form) => (form as HTMLFormElement)?.reset())}
+        ${ref((form) => setTimeout(() => (form as HTMLFormElement)?.reset()))}
         ${onSubmit((fields) => this.updateHousehold(currentRecord, fields))}
       >
         <div>

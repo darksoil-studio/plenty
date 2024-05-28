@@ -14,14 +14,13 @@
     flake-parts.follows = "holochain/flake-parts";
 
     tauri-plugin-holochain = {
-      # url = "github:darksoil-studio/tauri-plugin-holochain";
-      url = "/home/guillem/projects/darksoil/tauri-plugin-holochain";
-      inputs.holochain.follows = "holochain";
+      url = "github:darksoil-studio/tauri-plugin-holochain";
     };
     hc-infra = {
       url = "github:holochain-open-dev/infrastructure";
-      inputs.holochain.follows = "holochain";
+      # inputs.holochain.follows = "holochain";
     };
+    scaffolding.url = "github:holochain-open-dev/templates";
   };
 
   nixConfig = {
@@ -41,7 +40,6 @@
       specialArgs = {
         ## Special arguments for the flake parts of this repository
         rootPath = ./.;
-        excludedCrates = [ "plenty" ];
       };
     } {
       imports = [ ./happ.nix ];
@@ -54,7 +52,7 @@
             inputs'.tauri-plugin-holochain.devShells.holochainTauriDev
           ];
 
-          packages = [ inputs'.tauri-plugin-holochain.packages.hc-scaffold ];
+          packages = [ inputs'.scaffolding.packages.hc-scaffold-app-template ];
         };
 
         devShells.androidDev = pkgs.mkShell {
@@ -63,7 +61,7 @@
             inputs'.tauri-plugin-holochain.devShells.holochainTauriAndroidDev
           ];
 
-          packages = [ inputs'.tauri-plugin-holochain.packages.hc-scaffold ];
+          packages = [ inputs'.scaffolding.packages.hc-scaffold-app-template ];
         };
       };
     };

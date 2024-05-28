@@ -169,10 +169,7 @@ export class HolochainApp extends SignalWatcher(LitElement) {
   renderMain() {
     return html`
       <div class="column fill">
-        <div
-          class="row"
-          style="align-items: center; color:white; background-color: var(--sl-color-primary-900); padding: 16px"
-        >
+        <div class="row top-bar">
           <span class="title" style="flex: 1">${msg("Plenty")}</span>
 
           <div class="row" style="gap: 16px" slot="actionItems">
@@ -234,6 +231,12 @@ export class HolochainApp extends SignalWatcher(LitElement) {
       :host {
         display: flex;
         flex: 1;
+      }
+
+      .top-bar {
+        align-items: center;
+        color: white;
+        padding: 16px;
       }
     `,
     sharedStyles,

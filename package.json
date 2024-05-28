@@ -8,11 +8,11 @@
     "launch": "concurrently-repeat \"pnpm tauri dev\" $AGENTS",
     "local-services": "hc run-local-services --bootstrap-port $BOOTSTRAP_PORT --signal-port $SIGNAL_PORT",
     "test": "pnpm run happ:build-debug && nix flake check -L && pnpm -F tests test",
-    "happ:build-debug": "nix build -L .#plenty_happ.meta.debug -o workdir/plenty-debug.happ",
-    "happ:build": "nix build -L .#plenty_happ -o workdir/plenty.happ"
+    "happ:build-debug": "nix build -L .#plenty_happ -o workdir/plenty.happ",
+    "happ:build": "nix build -L .#plenty_happ.meta.release -o workdir/plenty.happ"
   },
   "devDependencies": {
-    "@holochain-playground/cli": "^0.1.0",
+    "@holochain-playground/cli": "^0.300.0-rc",
     "@tauri-apps/cli": "^2.0.0-alpha.17",
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "@eslint/js": "^8.0.0",

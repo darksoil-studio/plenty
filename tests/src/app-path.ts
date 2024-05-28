@@ -1,5 +1,5 @@
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { dirname } from "path";
+import { fileURLToPath } from "url";
 
 export const appPath =
-    dirname(fileURLToPath(import.meta.url)) + '/../../workdir/plenty-debug.happ';
+  dirname(fileURLToPath(import.meta.url)) + "/../../workdir/plenty.happ";

@@ -1,12 +1,14 @@
 use holochain_types::prelude::*;
 use lair_keystore::dependencies::sodoken::{BufRead, BufWrite};
 use std::{collections::HashMap, path::PathBuf};
-use tauri::{Manager, WebviewUrl};
+use tauri::Manager;
 use tauri_plugin_holochain::{HolochainExt, HolochainPluginConfig};
 use url2::Url2;
 
+const APP_ID: &'static str = "plenty";
+
 pub fn happ_bundle() -> AppBundle {
-    let bytes = include_bytes!("../../workdir/plenty-debug.happ");
+    let bytes = include_bytes!("../../workdir/plenty.happ");
     AppBundle::decode(bytes).expect("Failed to decode plenty happ")
 }
 
@@ -112,7 +114,7 @@ pub fn run() {
                 if installed_apps.len() == 0 {
                     handle
                         .holochain()?
-                        .install_app(String::from("plenty"), happ_bundle(), HashMap::new(), None)
+                        .install_app(String::from(APP_ID), happ_bundle(), HashMap::new(), None)
                         .await
                         .map(|_| ())
                 } else {
@@ -122,16 +124,10 @@ pub fn run() {
 
             app.emit("setup-completed", ())?;
 
-            app.holochain()?
-                .web_happ_window_builder("plenty")
-                .webview_url(WebviewUrl::App("index.html".into()))
-                .build()?;
+            app.holochain()?.main_window_builder(APP_ID).build()?;
 
             Ok(())
         })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
-
-// Very simple setup:
-// async fn setup(app: AppHandle) {}
