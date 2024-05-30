@@ -16,25 +16,14 @@ import {
   retype,
   slice,
 } from "@holochain-open-dev/utils";
-import {
-  ActionHash,
-  AgentPubKey,
-  decodeHashFromBase64,
-  encodeHashToBase64,
-} from "@holochain/client";
+import { ActionHash, AgentPubKey } from "@holochain/client";
 
 import { HouseholdsClient } from "./households-client.js";
-import { NotificationsTypes } from "@darksoil-studio/notifications";
 import { ProfilesStore } from "@holochain-open-dev/profiles";
 import { wrapPathInSvg } from "@holochain-open-dev/elements";
-import {
-  mdiAccountCancel,
-  mdiAccountCancelOutline,
-  mdiAccountCheck,
-  mdiAccountPlus,
-} from "@mdi/js";
+import { mdiAccountCancel, mdiAccountCheck, mdiAccountPlus } from "@mdi/js";
 import { msg, str } from "@lit/localize";
-import { decode } from "@msgpack/msgpack";
+import { NotificationType } from "@darksoil-studio/notifications";
 import {
   NOTIFICATIONS_TYPES,
   decodeRequestNotificationGroup,
@@ -214,7 +203,7 @@ export class HouseholdsStore {
       householdHash: ActionHash,
       requestor: AgentPubKey,
     ) => void,
-  ): NotificationsTypes {
+  ): Record<string, NotificationType> {
     const onClickForRequestNotificationTypes = (notificationGroup: string) => {
       const { requestor, householdHash } =
         decodeRequestNotificationGroup(notificationGroup);
@@ -222,6 +211,10 @@ export class HouseholdsStore {
     };
     return {
       [NOTIFICATIONS_TYPES.REQUEST_TO_JOIN_HOUSEHOLD]: {
+        name: msg("New request to join your household"),
+        description: msg(
+          "A new member of the buyers club is requesting to join your household.",
+        ),
         contents: (notification) => {
           const { requestor } = decodeRequestNotificationGroup(
             notification.entry.notification_group,
@@ -240,6 +233,10 @@ export class HouseholdsStore {
           this.requestNotificationTitle(notificationGroup),
       },
       [NOTIFICATIONS_TYPES.REQUEST_ACCEPTED]: {
+        name: msg("Accepted join household request"),
+        description: msg(
+          "A member of your household accepted a request to join it.",
+        ),
         contents: (notification) => {
           const acceptor = notification.action.author;
           const iconSrc = wrapPathInSvg(mdiAccountCheck);
@@ -266,6 +263,10 @@ export class HouseholdsStore {
           this.requestNotificationTitle(notificationGroup),
       },
       [NOTIFICATIONS_TYPES.REQUEST_REJECTED]: {
+        name: msg("Rejected join household request"),
+        description: msg(
+          "A member of your household rejected a request to join it.",
+        ),
         contents: (notification) => {
           const rejector = notification.action.author;
           const iconSrc = wrapPathInSvg(mdiAccountCancel);
@@ -292,6 +293,8 @@ export class HouseholdsStore {
           this.requestNotificationTitle(notificationGroup),
       },
       [NOTIFICATIONS_TYPES.REQUEST_CANCELLED]: {
+        name: msg("Cancelled join household request"),
+        description: msg("The request to join your household was cancelled."),
         contents: (notification) => {
           const rejector = notification.action.author;
           const iconSrc = wrapPathInSvg(mdiAccountCancel);

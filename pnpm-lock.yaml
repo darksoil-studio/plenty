@@ -15,7 +15,7 @@ importers:
         specifier: ^0.300.0-rc
         version: 0.300.0-rc.0
       '@tauri-apps/cli':
-        specifier: ^2.0.0-alpha.17
+        specifier: ^2.0.0-alpha.20
         version: 2.0.0-beta.13
       '@trivago/prettier-plugin-sort-imports':
         specifier: ^4.3.0
@@ -90,8 +90,8 @@ importers:
   ui:
     dependencies:
       '@darksoil-studio/notifications':
-        specifier: github:darksoil-studio/notifications#243066416860685b86b1c6c9ee39e3566ba10e7d&path:ui
-        version: github.com/darksoil-studio/notifications/243066416860685b86b1c6c9ee39e3566ba10e7d#path:ui(@types/react@18.2.79)
+        specifier: github:darksoil-studio/notifications#e8603119dc4a4b844017fe313a2e4180d496343e&path:ui
+        version: github.com/darksoil-studio/notifications/e8603119dc4a4b844017fe313a2e4180d496343e#path:ui(@types/react@18.2.79)
       '@holochain-open-dev/elements':
         specifier: ^0.300.0-rc
         version: 0.300.0-rc.0(@types/react@18.2.79)
@@ -2685,8 +2685,8 @@ packages:
     resolution: {integrity: sha512-9qv4rlDiopXg4E69k+vMHjNN63YFMe9sZMrdlvKnCjlCRWeCBswPPMPUfx+ipsAWq1LXHe70RcbaHdJJpS6hyQ==}
     engines: {node: '>= 10'}
 
-  github.com/darksoil-studio/notifications/243066416860685b86b1c6c9ee39e3566ba10e7d#path:ui:
-    resolution: {path: ui, tarball: https://codeload.github.com/darksoil-studio/notifications/tar.gz/243066416860685b86b1c6c9ee39e3566ba10e7d}
+  github.com/darksoil-studio/notifications/e8603119dc4a4b844017fe313a2e4180d496343e#path:ui:
+    resolution: {path: ui, tarball: https://codeload.github.com/darksoil-studio/notifications/tar.gz/e8603119dc4a4b844017fe313a2e4180d496343e}
     name: '@darksoil-studio/notifications'
     version: 0.1.0
 
@@ -5732,8 +5732,8 @@ snapshots:
       readable-stream: 3.6.2
     dev: true
 
-  github.com/darksoil-studio/notifications/243066416860685b86b1c6c9ee39e3566ba10e7d#path:ui(@types/react@18.2.79):
-    id: github.com/darksoil-studio/notifications/243066416860685b86b1c6c9ee39e3566ba10e7d#path:ui
+  github.com/darksoil-studio/notifications/e8603119dc4a4b844017fe313a2e4180d496343e#path:ui(@types/react@18.2.79):
+    id: github.com/darksoil-studio/notifications/e8603119dc4a4b844017fe313a2e4180d496343e#path:ui
     dependencies:
       '@holochain-open-dev/elements': 0.300.0-rc.0(@types/react@18.2.79)
       '@holochain-open-dev/profiles': github.com/holochain-open-dev/profiles/f95cd9b627a308dcac016b47df960dbb24b741b8#path:ui(@types/react@18.2.79)

@@ -69,6 +69,10 @@ export class HolochainApp extends SignalWatcher(LitElement) {
 
   router = new Router(this, [
     {
+      path: "/index.html/",
+      render: () => this.renderMain(),
+    },
+    {
       path: "/",
       render: () => this.renderMain(),
     },
@@ -96,16 +100,20 @@ export class HolochainApp extends SignalWatcher(LitElement) {
     );
     this._notificationsStore = new NotificationsStore(
       new NotificationsClient(appClient, "plenty"),
-      {},
+      {
+        types: {},
+      },
     );
     this._householdStore = new HouseholdsStore(
       new HouseholdsClient(this._notificationsStore, appClient, "plenty"),
       this._profilesStore,
     );
-    this._notificationsStore.notificationsTypes =
-      this._householdStore.notificationsTypes(() =>
+    this._notificationsStore.notificationsConfig.types = {
+      ...this._notificationsStore.notificationsConfig.types,
+      ...this._householdStore.notificationsTypes(() =>
         this.router.goto("/my-household"),
-      );
+      ),
+    };
     this._fileStorageClient = new FileStorageClient(appClient, "plenty");
   }
 
@@ -150,8 +158,8 @@ export class HolochainApp extends SignalWatcher(LitElement) {
   renderMyHousehold() {
     return html`<div class="column fill">
       <div
-        class="row"
-        style="align-items: center; color: white; background-color: var(--sl-color-primary-900); padding: 16px; gap: 16px;"
+        class="row top-bar"
+        style="align-items: center; padding: 16px; gap: 16px;"
       >
         <sl-icon-button
           .src=${wrapPathInSvg(mdiArrowLeft)}
@@ -236,6 +244,7 @@ export class HolochainApp extends SignalWatcher(LitElement) {
       .top-bar {
         align-items: center;
         color: white;
+        background-color: var(--sl-color-primary-900);
         padding: 16px;
       }
     `,

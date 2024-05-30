@@ -104,7 +104,7 @@ pub fn run() {
         .setup(|app| {
             let handle = app.handle().clone();
             tauri::async_runtime::block_on(async move {
-                let mut admin_ws = handle.holochain()?.admin_websocket().await?;
+                let admin_ws = handle.holochain()?.admin_websocket().await?;
 
                 let installed_apps = admin_ws
                     .list_apps(None)
@@ -124,7 +124,14 @@ pub fn run() {
 
             app.emit("setup-completed", ())?;
 
-            app.holochain()?.main_window_builder(APP_ID).build()?;
+            app.holochain()?
+                .main_window_builder(
+                    String::from("plenty"),
+                    false,
+                    Some(String::from(APP_ID)),
+                    None,
+                )?
+                .build()?;
 
             Ok(())
         })

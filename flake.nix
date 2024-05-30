@@ -13,9 +13,7 @@
     nixpkgs.follows = "holochain/nixpkgs";
     flake-parts.follows = "holochain/flake-parts";
 
-    tauri-plugin-holochain = {
-      url = "github:darksoil-studio/tauri-plugin-holochain";
-    };
+    p2p-shipyard = { url = "github:darksoil-studio/p2p-shipyard"; };
     hc-infra = {
       url = "github:holochain-open-dev/infrastructure";
       # inputs.holochain.follows = "holochain";
@@ -49,7 +47,7 @@
         devShells.default = pkgs.mkShell {
           inputsFrom = [
             inputs'.hc-infra.devShells.synchronized-pnpm
-            inputs'.tauri-plugin-holochain.devShells.holochainTauriDev
+            inputs'.p2p-shipyard.devShells.holochainTauriDev
           ];
 
           packages = [ inputs'.scaffolding.packages.hc-scaffold-app-template ];
@@ -58,7 +56,7 @@
         devShells.androidDev = pkgs.mkShell {
           inputsFrom = [
             inputs'.hc-infra.devShells.synchronized-pnpm
-            inputs'.tauri-plugin-holochain.devShells.holochainTauriAndroidDev
+            inputs'.p2p-shipyard.devShells.holochainTauriAndroidDev
           ];
 
           packages = [ inputs'.scaffolding.packages.hc-scaffold-app-template ];
