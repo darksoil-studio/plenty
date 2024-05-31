@@ -5,6 +5,7 @@
   "scripts": {
     "start": "AGENTS=2 pnpm network",
     "network": "pnpm happ:build-debug && BOOTSTRAP_PORT=$(port) SIGNAL_PORT=$(port) INTERNAL_IP=$(internal-ip --ipv4) concurrently -k \"pnpm local-services\" \"pnpm -F ui start\" \"pnpm launch\"",
+    "network:mobile": "pnpm happ:build-debug && BOOTSTRAP_PORT=$(port) SIGNAL_PORT=$(port) INTERNAL_IP=$(internal-ip --ipv4) concurrently -k \"pnpm local-services\" \"pnpm -F ui start\" \"pnpm tauri ios dev\" \"pnpm tauri dev\"",
     "launch": "concurrently-repeat \"pnpm tauri dev\" $AGENTS",
     "local-services": "hc run-local-services --bootstrap-port $BOOTSTRAP_PORT --signal-port $SIGNAL_PORT",
     "test": "pnpm run happ:build-debug && nix flake check -L && pnpm -F tests test",

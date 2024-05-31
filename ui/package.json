@@ -1,6 +1,7 @@
 {
   "name": "ui",
   "version": "0.0.0",
+  "type": "module",
   "scripts": {
     "start": "vite",
     "build": "vite build",
@@ -13,8 +14,8 @@
   "dependencies": {
     "@darksoil-studio/notifications": "github:darksoil-studio/notifications#25b4ad9691737a61ccd750b2ce7d0b177e4811c8&path:ui",
     "@holochain-open-dev/elements": "^0.300.0-rc",
-    "@holochain-open-dev/file-storage": "github:holochain-open-dev/file-storage#43f9988fe5ea246624d458201170ddf2b1ce4896&path:ui",
-    "@holochain-open-dev/profiles": "github:holochain-open-dev/profiles#dc458318ce01343ce8383c8bad2bb1c20e95a8ac&path:ui",
+    "@holochain-open-dev/file-storage": "github:holochain-open-dev/file-storage#7761b9e0057d14048a93a859bd6dc6170db24607&path:ui",
+    "@holochain-open-dev/profiles": "github:holochain-open-dev/profiles#decbb755bfa4432d672a58783eb7d4985fcadcba&path:ui",
     "@holochain-open-dev/signals": "^0.300.0-rc",
     "@holochain-open-dev/utils": "^0.300.0-rc",
     "@holochain/client": "^0.17.0-rc",
