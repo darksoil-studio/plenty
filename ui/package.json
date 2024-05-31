@@ -11,10 +11,10 @@
     "localize:build": "lit-localize build"
   },
   "dependencies": {
-    "@darksoil-studio/notifications": "github:darksoil-studio/notifications#e8603119dc4a4b844017fe313a2e4180d496343e&path:ui",
+    "@darksoil-studio/notifications": "github:darksoil-studio/notifications#25b4ad9691737a61ccd750b2ce7d0b177e4811c8&path:ui",
     "@holochain-open-dev/elements": "^0.300.0-rc",
-    "@holochain-open-dev/file-storage": "github:holochain-open-dev/file-storage#d643e0a9f6c5353506bd29b9152be2c7e8a4cdf5&path:ui",
-    "@holochain-open-dev/profiles": "github:holochain-open-dev/profiles#f95cd9b627a308dcac016b47df960dbb24b741b8&path:ui",
+    "@holochain-open-dev/file-storage": "github:holochain-open-dev/file-storage#43f9988fe5ea246624d458201170ddf2b1ce4896&path:ui",
+    "@holochain-open-dev/profiles": "github:holochain-open-dev/profiles#dc458318ce01343ce8383c8bad2bb1c20e95a8ac&path:ui",
     "@holochain-open-dev/signals": "^0.300.0-rc",
     "@holochain-open-dev/utils": "^0.300.0-rc",
     "@holochain/client": "^0.17.0-rc",

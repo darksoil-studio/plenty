@@ -1,12 +1,11 @@
-{ inputs, rootPath, ... }:
+{ inputs, ... }:
 
 {
   perSystem = { inputs', ... }: {
     packages.households_integrity = inputs.hc-infra.outputs.lib.rustZome {
-      workspacePath = rootPath;
+      workspacePath = inputs.self.outPath;
       holochain = inputs'.holochain;
       crateCargoToml = ./Cargo.toml;
     };
   };
 }
-

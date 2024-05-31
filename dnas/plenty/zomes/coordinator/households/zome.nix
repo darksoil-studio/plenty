@@ -1,16 +1,16 @@
-{ inputs, rootPath, ... }:
+{ inputs, self, ... }:
 
 {
-  perSystem = { inputs', self', ... }: {
+  perSystem = { inputs', self', pkgs, lib, ... }: {
     packages.households = inputs.hc-infra.outputs.lib.rustZome {
-      workspacePath = rootPath;
+      workspacePath = self.outPath;
       holochain = inputs'.holochain;
       crateCargoToml = ./Cargo.toml;
     };
 
     # Test only this zome and its integrity in isolation
     checks.households = inputs.hc-infra.outputs.lib.sweettest {
-      workspacePath = rootPath;
+      workspacePath = self.outPath;
       holochain = inputs'.holochain;
       dna = (inputs.hc-infra.outputs.lib.dna {
         dnaManifest = builtins.toFile "dna.yaml" ''
@@ -35,6 +35,13 @@
         holochain = inputs'.holochain;
       });
       crateCargoToml = ./Cargo.toml;
+      buildInputs = inputs.p2p-shipyard.outputs.lib.tauriAppDeps.buildInputs {
+        inherit pkgs lib;
+      };
+      nativeBuildInputs =
+        inputs.p2p-shipyard.outputs.lib.tauriAppDeps.nativeBuildInputs {
+          inherit pkgs lib;
+        };
     };
 
   };
