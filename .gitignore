@@ -33,7 +33,7 @@ storybook-static
 
 # cargo
 /target/
-/.cargo/
+.cargo/
 
 .direnv/
 result*

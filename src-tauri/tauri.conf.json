@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "identifier": "studio.darksoil.plenty",
   "build": {
-    "beforeBuildCommand": "pnpm -F ui build && pnpm happ:build",
+    "beforeBuildCommand": "pnpm -F ui build && pnpm happ:build-debug",
     "devUrl": "http://localhost:1420",
     "frontendDist": "../ui/dist"
   },
@@ -15,6 +15,13 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all"
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
   }
 }
