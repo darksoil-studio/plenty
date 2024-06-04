@@ -4,8 +4,7 @@
   inputs = {
     notifications.url = "github:darksoil-studio/notifications";
     file-storage.url = "github:holochain-open-dev/file-storage/nixify";
-    profiles.url =
-      "github:holochain-open-dev/profiles/decbb755bfa4432d672a58783eb7d4985fcadcba";
+    profiles.url = "github:holochain-open-dev/profiles/nixify";
 
     versions.url = "github:holochain/holochain?dir=versions/0_3_rc";
     holochain.url = "github:holochain/holochain";
@@ -14,11 +13,8 @@
     nixpkgs.follows = "holochain/nixpkgs";
     flake-parts.follows = "holochain/flake-parts";
 
-    p2p-shipyard = { url = "github:darksoil-studio/p2p-shipyard/develop"; };
-    hc-infra = {
-      url = "github:holochain-open-dev/infrastructure";
-      # inputs.holochain.follows = "holochain";
-    };
+    p2p-shipyard.url = "github:darksoil-studio/p2p-shipyard/develop";
+    hc-infra.url = "github:holochain-open-dev/infrastructure";
     scaffolding.url = "github:holochain-open-dev/templates";
   };
 

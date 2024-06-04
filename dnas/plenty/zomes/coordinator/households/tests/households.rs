@@ -20,6 +20,7 @@ async fn create_household_test() {
     let dna_path = std::env::current_dir().unwrap().join(
         std::env::var("DNA_PATH").expect("DNA_PATH not set, must be run using nix flake check"),
     );
+
     let dna = SweetDnaFile::from_bundle(&dna_path).await.unwrap();
 
     // Set up conductors

@@ -14,7 +14,6 @@ serde = { workspace = true }
 
 households_integrity = { workspace = true } 
 
-
 [dev-dependencies]
 fixt = "0.3.1-rc"
 futures = { version = "0.3.1", default-features = false }

@@ -280,6 +280,12 @@ export class MyHousehold extends SignalWatcher(LitElement) {
             </div>
           </sl-card>
         </div>
+        <sl-button
+          variant="danger"
+          @click=${() =>
+            this.householdsStore.client.leaveHousehold(entryRecord.actionHash)}
+          >${msg("Leave Household")}</sl-button
+        >
       </div>
     `;
   }

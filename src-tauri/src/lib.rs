@@ -1,6 +1,5 @@
 use holochain_types::prelude::*;
 use lair_keystore::dependencies::sodoken::{BufRead, BufWrite};
-use tauri_plugin_log::{Target, TargetKind};
 use std::{collections::HashMap, path::PathBuf};
 use tauri::Manager;
 use tauri_plugin_holochain::{HolochainExt, HolochainPluginConfig};
@@ -29,7 +28,6 @@ pub fn vec_to_locked(mut pass_tmp: Vec<u8>) -> std::io::Result<BufRead> {
         }
     }
 }
-
 
 fn internal_ip() -> String {
     std::option_env!("INTERNAL_IP")

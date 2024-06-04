@@ -1,11 +1,13 @@
-{ inputs, self, ... }:
+{ inputs, ... }:
 
 {
-  perSystem = { inputs', self', pkgs, lib, ... }: {
+  perSystem = { inputs', self', system, pkgs, lib, ... }: {
     packages.households = inputs.hc-infra.outputs.lib.rustZome {
       workspacePath = inputs.self.outPath;
       holochain = inputs'.holochain;
       crateCargoToml = ./Cargo.toml;
+      cargoArtifacts =
+        inputs.hc-infra.outputs.lib.zomeCargoArtifacts { inherit system; };
     };
 
     # Test only this zome and its integrity in isolation
@@ -31,17 +33,23 @@
                   - name: households_integrity
                 dylib: ~
         '';
-        zomes = inputs.hc-infra.outputs.lib.filterZomes self'.packages;
+        zomes = {
+          households = self'.packages.households;
+          households_integrity = self'.packages.households_integrity;
+        };
         holochain = inputs'.holochain;
       });
       crateCargoToml = ./Cargo.toml;
-      buildInputs = inputs.p2p-shipyard.outputs.lib.tauriAppDeps.buildInputs {
+      buildInputs = inputs.p2p-shipyard.outputs.lib.tauriHappDeps.buildInputs {
         inherit pkgs lib;
       };
       nativeBuildInputs =
-        inputs.p2p-shipyard.outputs.lib.tauriAppDeps.nativeBuildInputs {
+        inputs.p2p-shipyard.outputs.lib.tauriHappDeps.nativeBuildInputs {
           inherit pkgs lib;
         };
+      cargoArtifacts = inputs.p2p-shipyard.outputs.lib.tauriHappCargoArtifacts {
+        inherit pkgs lib;
+      };
     };
 
   };

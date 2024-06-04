@@ -1,7 +1,36 @@
 import { Scenario } from "@holochain/tryorama";
+import { ProfilesStore, ProfilesClient } from "@holochain-open-dev/profiles";
+import {
+  NotificationsStore,
+  NotificationsClient,
+} from "@darksoil-studio/notifications";
 import { appPath } from "../../app-path.js";
 import { HouseholdsClient } from "../../../../ui/src/plenty/households/households-client.js";
 import { HouseholdsStore } from "../../../../ui/src/plenty/households/households-store.js";
+import { AppClient } from "@holochain/client";
+
+function setupStore(appClient: AppClient): HouseholdsStore {
+  const profilesStore = new ProfilesStore(
+    new ProfilesClient(appClient, "plenty"),
+  );
+  const notificationsStore = new NotificationsStore(
+    new NotificationsClient(appClient, "plenty"),
+    {
+      types: {},
+    },
+  );
+  const householdStore = new HouseholdsStore(
+    new HouseholdsClient(notificationsStore, appClient, "plenty"),
+    profilesStore,
+  );
+  notificationsStore.notificationsConfig.types = {
+    ...notificationsStore.notificationsConfig.types,
+    ...householdStore.notificationsTypes(() => {
+      console.log("notification clicked");
+    }),
+  };
+  return householdStore;
+}
 
 export async function setup(scenario: Scenario) {
   // Add 2 players with the test hApp to the Scenario. The returned players
@@ -15,13 +44,8 @@ export async function setup(scenario: Scenario) {
   // conductor of the scenario.
   await scenario.shareAllAgents();
 
-  const aliceStore = new HouseholdsStore(
-    new HouseholdsClient(alice.appWs as any, "plenty", "households"),
-  );
-
-  const bobStore = new HouseholdsStore(
-    new HouseholdsClient(bob.appWs as any, "plenty", "households"),
-  );
+  const aliceStore = setupStore(alice.appWs as any);
+  const bobStore = setupStore(bob.appWs as any);
 
   // Shortcut peer discovery through gossip and register all agents in every
   // conductor of the scenario.
@@ -53,20 +77,10 @@ export async function setup4(scenario: Scenario) {
   // conductor of the scenario.
   await scenario.shareAllAgents();
 
-  const aliceStore = new HouseholdsStore(
-    new HouseholdsClient(alice.appWs as any, "plenty", "households"),
-  );
-
-  const bobStore = new HouseholdsStore(
-    new HouseholdsClient(bob.appWs as any, "plenty", "households"),
-  );
-
-  const carolStore = new HouseholdsStore(
-    new HouseholdsClient(carol.appWs as any, "plenty", "households"),
-  );
-  const daveStore = new HouseholdsStore(
-    new HouseholdsClient(dave.appWs as any, "plenty", "households"),
-  );
+  const aliceStore = setupStore(alice.appWs as any);
+  const bobStore = setupStore(bob.appWs as any);
+  const carolStore = setupStore(carol.appWs as any);
+  const daveStore = setupStore(dave.appWs as any);
 
   // Shortcut peer discovery through gossip and register all agents in every
   // conductor of the scenario.
