@@ -34,10 +34,10 @@ jobs:
         env:
           CACHIX_AUTH_TOKEN: "${{ secrets.DARKSOIL_CACHIX_AUTH_TOKEN }}"
         run: |
-          cachix watch-exec darksoil-studio -- nix develop --command bash -c "pnpm i && pnpm t"
+          cachix watch-exec darksoil-studio -- nix develop --accept-flake-config --command bash -c "pnpm i && pnpm t"
 
       - name: Build tauri app
         env:
           CACHIX_AUTH_TOKEN: "${{ secrets.DARKSOIL_CACHIX_AUTH_TOKEN }}"
         run: |
-          cachix watch-exec darksoil-studio -- nix develop --command bash -c "pnpm tauri build --no-bundle"
+          cachix watch-exec darksoil-studio -- nix develop --accept-flake-config --command bash -c "pnpm tauri build --no-bundle"

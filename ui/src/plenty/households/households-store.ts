@@ -8,7 +8,7 @@ import {
   immutableEntrySignal,
   latestVersionOfEntrySignal,
   liveLinksSignal,
-  mapCompleted,
+  pipe,
 } from "@holochain-open-dev/signals";
 import {
   HashType,
@@ -51,7 +51,7 @@ export class HouseholdsStore {
       this.client.getAllDeletesForHousehold(householdHash),
     ),
     requestors: {
-      live$: mapCompleted(
+      live$: pipe(
         liveLinksSignal(
           this.client,
           householdHash,
@@ -60,7 +60,7 @@ export class HouseholdsStore {
         ),
         (links) => links.map((l) => retype(l.target, HashType.AGENT)),
       ),
-      deleted$: mapCompleted(
+      deleted$: pipe(
         deletedLinksSignal(
           this.client,
           householdHash,
@@ -74,7 +74,7 @@ export class HouseholdsStore {
       ),
     },
     members: {
-      live$: mapCompleted(
+      live$: pipe(
         liveLinksSignal(
           this.client,
           householdHash,
@@ -87,7 +87,7 @@ export class HouseholdsStore {
             target: retype(l.target, HashType.AGENT),
           })),
       ),
-      deleted$: mapCompleted(
+      deleted$: pipe(
         deletedLinksSignal(
           this.client,
           householdHash,
@@ -113,7 +113,7 @@ export class HouseholdsStore {
 
   /** Active Households */
 
-  activeHouseholds$ = mapCompleted(
+  activeHouseholds$ = pipe(
     collectionSignal(
       this.client,
       () => this.client.getActiveHouseholds(),
@@ -130,7 +130,7 @@ export class HouseholdsStore {
   /** Households for Member */
 
   householdsForMember = new LazyHoloHashMap((member: AgentPubKey) =>
-    mapCompleted(
+    pipe(
       liveLinksSignal(
         this.client,
         member,
@@ -145,7 +145,7 @@ export class HouseholdsStore {
     ),
   );
 
-  householdsIHaveRequestedToJoin$ = mapCompleted(
+  householdsIHaveRequestedToJoin$ = pipe(
     liveLinksSignal(
       this.client,
       this.client.client.myPubKey,
@@ -162,7 +162,7 @@ export class HouseholdsStore {
       ),
   );
 
-  myHousehold$ = mapCompleted(
+  myHousehold$ = pipe(
     this.householdsForMember.get(this.client.client.myPubKey),
     (households) => {
       if (households.size === 0) return undefined;

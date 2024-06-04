@@ -66,14 +66,14 @@ importers:
   tests:
     dependencies:
       '@darksoil-studio/notifications':
-        specifier: github:darksoil-studio/notifications#6a54e9c03cf2a56e72d1205349280b4fc8f1a64a&path:ui
-        version: github.com/darksoil-studio/notifications/6a54e9c03cf2a56e72d1205349280b4fc8f1a64a#path:ui(@types/react@18.3.3)
+        specifier: github:darksoil-studio/notifications#e72a9b73ddcc638d44889289502b06ce7761d676&path:ui
+        version: github.com/darksoil-studio/notifications/e72a9b73ddcc638d44889289502b06ce7761d676#path:ui(@types/react@18.3.3)
       '@holochain-open-dev/profiles':
-        specifier: github:holochain-open-dev/profiles#63aafdb8e4f9eb97741b98634859cb48f3d1f046&path:ui
-        version: github.com/holochain-open-dev/profiles/63aafdb8e4f9eb97741b98634859cb48f3d1f046#path:ui(@types/react@18.3.3)
+        specifier: github:holochain-open-dev/profiles#eb83db8c32c4a439dbfdcb9276075eac42e56274&path:ui
+        version: github.com/holochain-open-dev/profiles/eb83db8c32c4a439dbfdcb9276075eac42e56274#path:ui(@types/react@18.3.3)
       '@holochain-open-dev/signals':
         specifier: ^0.300.0-rc
-        version: 0.300.0-rc.1(@types/react@18.3.3)
+        version: 0.300.0-rc.2(@types/react@18.3.3)
       '@holochain-open-dev/utils':
         specifier: ^0.300.0-rc
         version: 0.300.0-rc.0
@@ -96,8 +96,8 @@ importers:
   ui:
     dependencies:
       '@darksoil-studio/notifications':
-        specifier: github:darksoil-studio/notifications#6a54e9c03cf2a56e72d1205349280b4fc8f1a64a&path:ui
-        version: github.com/darksoil-studio/notifications/6a54e9c03cf2a56e72d1205349280b4fc8f1a64a#path:ui(@types/react@18.3.3)
+        specifier: github:darksoil-studio/notifications#e72a9b73ddcc638d44889289502b06ce7761d676&path:ui
+        version: github.com/darksoil-studio/notifications/e72a9b73ddcc638d44889289502b06ce7761d676#path:ui(@types/react@18.3.3)
       '@holochain-open-dev/elements':
         specifier: ^0.300.0-rc
         version: 0.300.0-rc.0(@types/react@18.3.3)
@@ -105,11 +105,11 @@ importers:
         specifier: github:holochain-open-dev/file-storage#7761b9e0057d14048a93a859bd6dc6170db24607&path:ui
         version: github.com/holochain-open-dev/file-storage/7761b9e0057d14048a93a859bd6dc6170db24607#path:ui(@types/react@18.3.3)
       '@holochain-open-dev/profiles':
-        specifier: github:holochain-open-dev/profiles#63aafdb8e4f9eb97741b98634859cb48f3d1f046&path:ui
-        version: github.com/holochain-open-dev/profiles/63aafdb8e4f9eb97741b98634859cb48f3d1f046#path:ui(@types/react@18.3.3)
+        specifier: github:holochain-open-dev/profiles#eb83db8c32c4a439dbfdcb9276075eac42e56274&path:ui
+        version: github.com/holochain-open-dev/profiles/eb83db8c32c4a439dbfdcb9276075eac42e56274#path:ui(@types/react@18.3.3)
       '@holochain-open-dev/signals':
-        specifier: ^0.300.0-rc
-        version: 0.300.0-rc.1(@types/react@18.3.3)
+        specifier: ^0.300.0-rc.2
+        version: 0.300.0-rc.2(@types/react@18.3.3)
       '@holochain-open-dev/utils':
         specifier: ^0.300.0-rc
         version: 0.300.0-rc.0
@@ -553,8 +553,8 @@ packages:
   /@holochain-open-dev/elements@0.300.0-rc.0:
     resolution: {integrity: sha512-b26ZChbZ6qmAZjwzHSOyRmCOdBQ7vy/9+MedvQEuiIpAjz5KGdtKfbkMAz4M2GgQwLPVBYS66Gdct6mGVvwkyw==}
 
-  /@holochain-open-dev/signals@0.300.0-rc.1:
-    resolution: {integrity: sha512-2f8nYnzIW9eioF1S8R+6jpr0O4Z2I4d5+dKLQoIOklOdtmaaMqk7HltPbD3Np1S9Uj+2nPaNYHNWdSS4G4fSGg==}
+  /@holochain-open-dev/signals@0.300.0-rc.2:
+    resolution: {integrity: sha512-hzhHGw/pvyznzgoiFNPTKXpJb96puHCKUHiywJ7vh9RbpMZEzSFwiicUQyXnb3dEu5+EJ7EkVvtWOoW/rNj/Sw==}
 
   /@holochain-open-dev/utils@0.300.0-rc.0:
     resolution: {integrity: sha512-D1mqrpnWnJPnEceGzxzCjo3xe4ADgpTd+CX+F4+HZpyWkxUIIFiQIpjm6i0HO+WmEJblvLWXSN5xG1neC1UU0g==}
@@ -1015,8 +1015,8 @@ packages:
   /assertion-error@1.1.0:
     resolution: {integrity: sha512-jgsaNduz+ndvGyFt3uSuWqvy4lCnIJiovtouQN5JZHOKCS2QuhEdbcQHFhVksz2N2U9hXJo8odG7ETyWlEeuDw==}
 
-  /async-signals@0.1.9:
-    resolution: {integrity: sha512-vjnpA/wVOzMxYDHAyfB2hIB4G9Cu8YfrSK7IJJHFZctACUPjS6+kAEKKnBHB09ClHh/IO1FZ0WSc2a3g5gfseg==}
+  /async-signals@0.1.10:
+    resolution: {integrity: sha512-sEiZ6wI7LuCcv70yaJnm8FPrHyy6QdtBmojaYpkB3m9k9+HbEftPfeJQNl9GCcvbqibbV5n1XFMogT0LNIEIMQ==}
 
   /async@2.6.4:
     resolution: {integrity: sha512-mzo5dfJYwAn29PeiJ0zvwTo04zj8HDJj0Mn8TD7sno7q12prdbnasKJHhkm2c1LgrhlJ0teaea8860oxi51mGA==}
@@ -1778,8 +1778,8 @@ packages:
   /lit-html@3.1.3:
     resolution: {integrity: sha512-FwIbqDD8O/8lM4vUZ4KvQZjPPNx7V1VhT7vmRB8RBAO0AU6wuTVdoXiu2CivVjEGdugvcbPNBLtPE1y0ifplHA==}
 
-  /lit-signal-watcher@0.1.0:
-    resolution: {integrity: sha512-lZ0SgmHv2wRiTduW0KdTbO27gmzgv+87meC2xDR4UAnF/o/yEk77r7wNkZolX0WU88YdXBGDVx9q/URLA4cTCg==}
+  /lit-signal-watcher@0.1.1:
+    resolution: {integrity: sha512-OUAEqcKI7NY6/1md4Hy3RqoQOpiv+GiYO6ISDt8JTeXKW3YditiAACYsfEZ8mwGxfCLcRSfWLdKgNFntiYqm+Q==}
 
   /lit@2.8.0:
     resolution: {integrity: sha512-4Sc3OFX9QHOJaHbmTMk28SYgVxLN3ePDjg7hofEft2zWlehFL3LiAuapWc4U/kYwMYJSh2hTCPZ6/LIC7ii0MA==}
@@ -2229,9 +2229,6 @@ packages:
   /signal-exit@4.1.0:
     resolution: {integrity: sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw==}
     engines: {node: '>=14'}
-
-  /signal-polyfill@0.1.0:
-    resolution: {integrity: sha512-RMyLaEor0noasIsXmvLfRNf/QeF3eND6A1WErMqJ5ZLc3dpI7aifcZMwwpLafJkGnyLSWraK8gcXaAqxCtxxeg==}
 
   /signal-polyfill@0.1.1:
     resolution: {integrity: sha512-ZihPkMjiWOCZaYOb/vi1YLj+f0GTKVF7tQVNovtK32yjqcvRvjGPTwwX3Ad45mQ8v08kLUBagsOkuyJ6gpwhWA==}
@@ -2690,8 +2687,8 @@ packages:
     resolution: {integrity: sha512-9qv4rlDiopXg4E69k+vMHjNN63YFMe9sZMrdlvKnCjlCRWeCBswPPMPUfx+ipsAWq1LXHe70RcbaHdJJpS6hyQ==}
     engines: {node: '>= 10'}
 
-  github.com/darksoil-studio/notifications/6a54e9c03cf2a56e72d1205349280b4fc8f1a64a#path:ui:
-    resolution: {path: ui, tarball: https://codeload.github.com/darksoil-studio/notifications/tar.gz/6a54e9c03cf2a56e72d1205349280b4fc8f1a64a}
+  github.com/darksoil-studio/notifications/e72a9b73ddcc638d44889289502b06ce7761d676#path:ui:
+    resolution: {path: ui, tarball: https://codeload.github.com/darksoil-studio/notifications/tar.gz/e72a9b73ddcc638d44889289502b06ce7761d676}
     name: '@darksoil-studio/notifications'
     version: 0.1.0
 
@@ -2700,8 +2697,8 @@ packages:
     name: '@holochain-open-dev/file-storage'
     version: 0.300.0-rc
 
-  github.com/holochain-open-dev/profiles/63aafdb8e4f9eb97741b98634859cb48f3d1f046#path:ui:
-    resolution: {path: ui, tarball: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/63aafdb8e4f9eb97741b98634859cb48f3d1f046}
+  github.com/holochain-open-dev/profiles/eb83db8c32c4a439dbfdcb9276075eac42e56274#path:ui:
+    resolution: {path: ui, tarball: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/eb83db8c32c4a439dbfdcb9276075eac42e56274}
     name: '@holochain-open-dev/profiles'
     version: 0.300.0-rc.0
 
@@ -3051,13 +3048,13 @@ snapshots:
       - utf-8-validate
     dev: false
 
-  /@holochain-open-dev/signals@0.300.0-rc.1(@types/react@18.3.3):
+  /@holochain-open-dev/signals@0.300.0-rc.2(@types/react@18.3.3):
     dependencies:
       '@holochain-open-dev/utils': 0.300.0-rc.0
       '@holochain/client': 0.17.0-rc.0
       '@shoelace-style/shoelace': 2.15.1(@types/react@18.3.3)
-      async-signals: 0.1.9
-      lit-signal-watcher: 0.1.0
+      async-signals: 0.1.10
+      lit-signal-watcher: 0.1.1
       signal-polyfill: 0.1.1
     transitivePeerDependencies:
       - '@types/react'
@@ -3668,7 +3665,7 @@ snapshots:
   /assertion-error@1.1.0:
     dev: false
 
-  /async-signals@0.1.9:
+  /async-signals@0.1.10:
     dependencies:
       lit: 3.1.3
       signal-polyfill: 0.1.1
@@ -4683,10 +4680,10 @@ snapshots:
       '@types/trusted-types': 2.0.7
     dev: false
 
-  /lit-signal-watcher@0.1.0:
+  /lit-signal-watcher@0.1.1:
     dependencies:
       lit: 3.1.3
-      signal-polyfill: 0.1.0
+      signal-polyfill: 0.1.1
     dev: false
 
   /lit@2.8.0:
@@ -5257,9 +5254,6 @@ snapshots:
   /signal-exit@4.1.0:
     dev: false
 
-  /signal-polyfill@0.1.0:
-    dev: false
-
   /signal-polyfill@0.1.1:
     dev: false
 
@@ -5727,12 +5721,12 @@ snapshots:
       readable-stream: 3.6.2
     dev: true
 
-  github.com/darksoil-studio/notifications/6a54e9c03cf2a56e72d1205349280b4fc8f1a64a#path:ui(@types/react@18.3.3):
-    id: github.com/darksoil-studio/notifications/6a54e9c03cf2a56e72d1205349280b4fc8f1a64a#path:ui
+  github.com/darksoil-studio/notifications/e72a9b73ddcc638d44889289502b06ce7761d676#path:ui(@types/react@18.3.3):
+    id: github.com/darksoil-studio/notifications/e72a9b73ddcc638d44889289502b06ce7761d676#path:ui
     dependencies:
       '@holochain-open-dev/elements': 0.300.0-rc.0(@types/react@18.3.3)
-      '@holochain-open-dev/profiles': github.com/holochain-open-dev/profiles/63aafdb8e4f9eb97741b98634859cb48f3d1f046#path:ui(@types/react@18.3.3)
-      '@holochain-open-dev/signals': 0.300.0-rc.1(@types/react@18.3.3)
+      '@holochain-open-dev/profiles': github.com/holochain-open-dev/profiles/eb83db8c32c4a439dbfdcb9276075eac42e56274#path:ui(@types/react@18.3.3)
+      '@holochain-open-dev/signals': 0.300.0-rc.2(@types/react@18.3.3)
       '@holochain-open-dev/utils': 0.300.0-rc.0
       '@holochain/client': 0.17.0-rc.0
       '@lit/context': 1.1.1
@@ -5766,11 +5760,11 @@ snapshots:
       - utf-8-validate
     dev: false
 
-  github.com/holochain-open-dev/profiles/63aafdb8e4f9eb97741b98634859cb48f3d1f046#path:ui(@types/react@18.3.3):
-    id: github.com/holochain-open-dev/profiles/63aafdb8e4f9eb97741b98634859cb48f3d1f046#path:ui
+  github.com/holochain-open-dev/profiles/eb83db8c32c4a439dbfdcb9276075eac42e56274#path:ui(@types/react@18.3.3):
+    id: github.com/holochain-open-dev/profiles/eb83db8c32c4a439dbfdcb9276075eac42e56274#path:ui
     dependencies:
       '@holochain-open-dev/elements': 0.300.0-rc.0(@types/react@18.3.3)
-      '@holochain-open-dev/signals': 0.300.0-rc.1(@types/react@18.3.3)
+      '@holochain-open-dev/signals': 0.300.0-rc.2(@types/react@18.3.3)
       '@holochain-open-dev/utils': 0.300.0-rc.0
       '@holochain/client': 0.17.0-rc.0
       '@lit/context': 1.1.1
