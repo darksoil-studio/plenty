@@ -23,10 +23,10 @@ test("link a Household to a Requestor", async () => {
     const householdHash = household.actionHash;
 
     // Bob gets the links, should be empty
-    let linksOutput = await toPromise(
+    let requestors = await toPromise(
       bob.store.households.get(householdHash).requestors.live$,
     );
-    assert.equal(linksOutput.length, 0);
+    assert.equal(requestors.length, 0);
 
     // Wait for the created entry to be propagated to the other node.
     await dhtSync([alice.player, bob.player], alice.player.cells[0].cell_id[0]);
@@ -38,13 +38,13 @@ test("link a Household to a Requestor", async () => {
     await dhtSync([alice.player, bob.player], alice.player.cells[0].cell_id[0]);
 
     // Bob gets the links again
-    linksOutput = await toPromise(
+    requestors = await toPromise(
       bob.store.households.get(householdHash).requestors.live$,
     );
-    assert.equal(linksOutput.length, 1);
+    assert.equal(requestors.length, 1);
     assert.deepEqual(
       cleanNodeDecoding(bob.player.agentPubKey),
-      cleanNodeDecoding(linksOutput[0].target),
+      cleanNodeDecoding(requestors[0]),
     );
 
     await alice.store.client.rejectJoinRequest(
@@ -56,10 +56,10 @@ test("link a Household to a Requestor", async () => {
     await dhtSync([alice.player, bob.player], alice.player.cells[0].cell_id[0]);
 
     // Bob gets the links again
-    linksOutput = await toPromise(
+    requestors = await toPromise(
       alice.store.households.get(householdHash).requestors.live$,
     );
-    assert.equal(linksOutput.length, 0);
+    assert.equal(requestors.length, 0);
 
     // Bob gets the deleted links
     let deletedLinksOutput = await toPromise(
@@ -80,10 +80,10 @@ test("Request to join household and cancel it ", async () => {
     const baseAddress = baseRecord.actionHash;
 
     // Bob gets the links, should be empty
-    let linksOutput = await toPromise(
+    let requestors = await toPromise(
       bob.store.households.get(baseAddress).requestors.live$,
     );
-    assert.equal(linksOutput.length, 0);
+    assert.equal(requestors.length, 0);
 
     // Wait for the created entry to be propagated to the other node.
     await dhtSync([alice.player, bob.player], alice.player.cells[0].cell_id[0]);
@@ -95,13 +95,13 @@ test("Request to join household and cancel it ", async () => {
     await dhtSync([alice.player, bob.player], alice.player.cells[0].cell_id[0]);
 
     // Bob gets the links again
-    linksOutput = await toPromise(
+    requestors = await toPromise(
       bob.store.households.get(baseAddress).requestors.live$,
     );
-    assert.equal(linksOutput.length, 1);
+    assert.equal(requestors.length, 1);
     assert.deepEqual(
       cleanNodeDecoding(bob.player.agentPubKey),
-      cleanNodeDecoding(linksOutput[0].target),
+      cleanNodeDecoding(requestors[0]),
     );
 
     await bob.store.client.cancelJoinRequest(baseAddress);
@@ -110,10 +110,10 @@ test("Request to join household and cancel it ", async () => {
     await dhtSync([alice.player, bob.player], alice.player.cells[0].cell_id[0]);
 
     // Bob gets the links again
-    linksOutput = await toPromise(
+    requestors = await toPromise(
       alice.store.households.get(baseAddress).requestors.live$,
     );
-    assert.equal(linksOutput.length, 0);
+    assert.equal(requestors.length, 0);
 
     // Bob gets the deleted links
     let deletedLinksOutput = await toPromise(

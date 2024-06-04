@@ -13,7 +13,7 @@
     nixpkgs.follows = "holochain/nixpkgs";
     flake-parts.follows = "holochain/flake-parts";
 
-    p2p-shipyard.url = "github:darksoil-studio/p2p-shipyard/develop";
+    p2p-shipyard.url = "github:darksoil-studio/p2p-shipyard";
     hc-infra.url = "github:holochain-open-dev/infrastructure";
     scaffolding.url = "github:holochain-open-dev/templates";
   };

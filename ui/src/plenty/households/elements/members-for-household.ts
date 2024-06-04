@@ -81,7 +81,7 @@ export class MembersForHousehold extends SignalWatcher(LitElement) {
           .error=${members.error}
         ></display-error>`;
       case "completed":
-        return this.renderList(members.value);
+        return this.renderList(members.value.map((l) => l.target));
     }
   }
 

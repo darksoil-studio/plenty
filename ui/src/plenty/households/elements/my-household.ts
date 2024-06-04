@@ -307,7 +307,7 @@ export class MyHousehold extends SignalWatcher(LitElement) {
       value: {
         requestors: requestors.value,
         latestVersion: latestVersion.value,
-        members: members.value,
+        members: members.value.map((l) => l.target),
       },
     };
   }

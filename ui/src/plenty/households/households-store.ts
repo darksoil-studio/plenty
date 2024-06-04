@@ -81,7 +81,11 @@ export class HouseholdsStore {
           () => this.client.getMembersForHousehold(householdHash),
           "HouseholdToMembers",
         ),
-        (links) => links.map((l) => retype(l.target, HashType.AGENT)),
+        (links) =>
+          links.map((l) => ({
+            ...l,
+            target: retype(l.target, HashType.AGENT),
+          })),
       ),
       deleted$: mapCompleted(
         deletedLinksSignal(

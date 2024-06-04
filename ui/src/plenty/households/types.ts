@@ -1,23 +1,11 @@
-import { ActionCommittedSignal } from '@holochain-open-dev/utils';
-import {
-  ActionHash,
-  AgentPubKey,
-  Create,
-  CreateLink,
-  Delete,
-  DeleteLink,
-  DnaHash,
-  EntryHash,
-  Record,
-  SignedActionHashed,
-  Update,
-} from '@holochain/client';
+import { ActionCommittedSignal } from "@holochain-open-dev/utils";
+import { ActionHash, EntryHash } from "@holochain/client";
 
 export type HouseholdsSignal = ActionCommittedSignal<EntryTypes, LinkTypes>;
 
 export type EntryTypes =
-  | ({ type: 'HouseholdMembershipClaim' } & HouseholdMembershipClaim)
-  | ({ type: 'Household' } & Household);
+  | ({ type: "HouseholdMembershipClaim" } & HouseholdMembershipClaim)
+  | ({ type: "Household" } & Household);
 
 export type LinkTypes = string;
 

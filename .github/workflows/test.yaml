@@ -26,6 +26,10 @@ jobs:
         with:
           name: holochain-open-dev
 
+      - uses: cachix/cachix-action@v14
+        with:
+          name: darksoil-studio
+
       - name: Install and test
         env:
           CACHIX_AUTH_TOKEN: "${{ secrets.DARKSOIL_CACHIX_AUTH_TOKEN }}"
@@ -36,4 +40,4 @@ jobs:
         env:
           CACHIX_AUTH_TOKEN: "${{ secrets.DARKSOIL_CACHIX_AUTH_TOKEN }}"
         run: |
-          cachix watch-exec darksoil-studio -- nix develop --command bash -c "pnpm tauri build"
+          cachix watch-exec darksoil-studio -- nix develop --command bash -c "pnpm tauri build --no-bundle"

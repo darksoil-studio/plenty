@@ -144,7 +144,6 @@ export class HouseholdsClient extends ZomeClient<HouseholdsSignal> {
     const recipients = members.filter(
       (m) => m.toString() !== this.client.myPubKey.toString(),
     );
-    console.log(recipients);
 
     await this.notificationsStore.client.createNotification({
       content: notification,
@@ -208,10 +207,6 @@ export class HouseholdsClient extends ZomeClient<HouseholdsSignal> {
       unread,
       (n) => n.action.author === requestor,
     );
-    console.log(
-      readNotificationsForThisRequestor,
-      unreadNotificationsForThisRequestor,
-    );
 
     await this.notificationsStore.client.dismissNotifications([
       ...Array.from(readNotificationsForThisRequestor.keys()),
@@ -249,10 +244,6 @@ export class HouseholdsClient extends ZomeClient<HouseholdsSignal> {
     const unreadNotificationsForThisRequestor = pickBy(
       unread,
       (n) => n.action.author === requestor,
-    );
-    console.log(
-      readNotificationsForThisRequestor,
-      unreadNotificationsForThisRequestor,
     );
 
     await this.notificationsStore.client.dismissNotifications([
