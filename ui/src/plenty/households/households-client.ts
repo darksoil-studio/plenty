@@ -332,6 +332,17 @@ export class HouseholdsClient extends ZomeClient<HouseholdsSignal> {
     );
     return record ? new EntryRecord(record) : undefined;
   }
+
+  async queryMyHouseholdMembershipClaims(): Promise<
+    Array<EntryRecord<HouseholdMembershipClaim>>
+  > {
+    const records: Array<Record> = await this.callZome(
+      "query_my_household_membership_claims",
+      null,
+    );
+    return records.map((r) => new EntryRecord(r));
+  }
+
   /** Active Households */
 
   async getActiveHouseholds(): Promise<Array<Link>> {

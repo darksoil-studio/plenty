@@ -28,6 +28,7 @@ import {
   NOTIFICATIONS_TYPES,
   decodeRequestNotificationGroup,
 } from "./notifications.js";
+import { queryEntriesSignal } from "./signal.js";
 
 export class HouseholdsStore {
   constructor(
@@ -101,7 +102,7 @@ export class HouseholdsStore {
       ),
     },
   }));
-  /** Household Membership Claim */
+  /** Household Membership Claims */
 
   householdMembershipClaims = new LazyHoloHashMap(
     (householdMembershipClaimHash: ActionHash) => ({
@@ -109,6 +110,12 @@ export class HouseholdsStore {
         this.client.getHouseholdMembershipClaim(householdMembershipClaimHash),
       ),
     }),
+  );
+
+  myHouseholdMembershipClaims$ = queryEntriesSignal(
+    this.client,
+    () => this.client.queryMyHouseholdMembershipClaims(),
+    "HouseholdMembershipclaim",
   );
 
   /** Active Households */
@@ -164,10 +171,38 @@ export class HouseholdsStore {
 
   myHousehold$ = pipe(
     this.householdsForMember.get(this.client.client.myPubKey),
-    (households) => {
+    async (households) => {
       if (households.size === 0) return undefined;
       if (households.size > 1)
         throw new Error("You are a member of more than one household");
+
+      const myMembershipClaims = this.myHouseholdMembershipClaims$.get();
+
+      if (myMembershipClaims.status !== "completed") return myMembershipClaims;
+
+      const householdHash = Array.from(households.keys())[0];
+      if (
+        !myMembershipClaims.value.find(
+          (claim) =>
+            claim.entry.household_hash.toString() === householdHash.toString(),
+        )
+      ) {
+        const membersLinks = this.households
+          .get(householdHash)
+          .members.live$.get();
+        if (membersLinks.status !== "completed") return membersLinks;
+        const myMembershipLink = membersLinks.value.find(
+          (l) =>
+            retype(l.target, HashType.AGENT).toString() ===
+            this.client.client.myPubKey.toString(),
+        );
+        if (myMembershipLink) {
+          await this.client.createHouseholdMembershipClaim({
+            household_hash: householdHash,
+            member_create_link_hash: myMembershipLink.create_link_hash,
+          });
+        }
+      }
 
       return Array.from(households.values())[0];
     },
