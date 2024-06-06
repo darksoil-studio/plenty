@@ -56,7 +56,7 @@ export class HouseholdSummary extends SignalWatcher(LitElement) {
   renderHousehold() {
     const latestVersion = this.householdsStore.households
       .get(this.householdHash)
-      .latestVersion$.get();
+      .latestVersion.get();
 
     switch (latestVersion.status) {
       case "pending":

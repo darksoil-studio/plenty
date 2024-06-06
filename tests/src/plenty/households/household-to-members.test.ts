@@ -23,7 +23,7 @@ test("link a Household to a Member", async () => {
 
     // Bob gets the links, should be empty
     let linksOutput = await toPromise(
-      alice.store.households.get(baseAddress).members.live$,
+      alice.store.households.get(baseAddress).members.live,
     );
     assert.equal(linksOutput.length, 1);
     let householdsForMemberOutput = await toPromise(
@@ -39,7 +39,7 @@ test("link a Household to a Member", async () => {
 
     // Bob gets the links again
     linksOutput = await toPromise(
-      bob.store.households.get(baseAddress).members.live$,
+      bob.store.households.get(baseAddress).members.live,
     );
     assert.equal(linksOutput.length, 2);
     assert.deepEqual(
@@ -62,7 +62,7 @@ test("link a Household to a Member", async () => {
 
     // Bob gets the links again
     linksOutput = await toPromise(
-      bob.store.households.get(baseAddress).members.live$,
+      bob.store.households.get(baseAddress).members.live,
     );
     assert.equal(linksOutput.length, 1);
 
@@ -73,7 +73,7 @@ test("link a Household to a Member", async () => {
 
     // Bob gets the deleted links
     let deletedLinksOutput = await toPromise(
-      bob.store.households.get(baseAddress).members.deleted$,
+      bob.store.households.get(baseAddress).members.deleted,
     );
     assert.equal(deletedLinksOutput.length, 1);
   });

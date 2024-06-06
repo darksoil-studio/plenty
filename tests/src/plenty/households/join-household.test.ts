@@ -18,7 +18,7 @@ test("Alice creates a Household, bobs joins it", async () => {
     const household: EntryRecord<Household> =
       await alice.store.client.createHousehold(sample);
     let members = await toPromise(
-      alice.store.households.get(household.actionHash).members.live$,
+      alice.store.households.get(household.actionHash).members.live,
     );
     assert.equal(members.length, 1);
 
@@ -63,12 +63,12 @@ test("Alice creates a Household, bobs joins it", async () => {
       alice.player.cells[0].cell_id[0],
     );
     members = await toPromise(
-      alice.store.households.get(household.actionHash).members.live$,
+      alice.store.households.get(household.actionHash).members.live,
     );
     assert.equal(members.length, 1);
 
     let requestors = await toPromise(
-      alice.store.households.get(household.actionHash).requestors.live$,
+      alice.store.households.get(household.actionHash).requestors.live,
     );
     assert.equal(requestors.length, 2);
 
@@ -83,7 +83,7 @@ test("Alice creates a Household, bobs joins it", async () => {
     );
 
     requestors = await toPromise(
-      bob.store.households.get(household.actionHash).requestors.live$,
+      bob.store.households.get(household.actionHash).requestors.live,
     );
     assert.equal(requestors.length, 1);
 
@@ -94,7 +94,7 @@ test("Alice creates a Household, bobs joins it", async () => {
       alice.player.cells[0].cell_id[0],
     );
     requestors = await toPromise(
-      carol.store.households.get(household.actionHash).requestors.live$,
+      carol.store.households.get(household.actionHash).requestors.live,
     );
     assert.equal(requestors.length, 2);
 
@@ -109,7 +109,7 @@ test("Alice creates a Household, bobs joins it", async () => {
     );
 
     members = await toPromise(
-      bob.store.households.get(household.actionHash).members.live$,
+      bob.store.households.get(household.actionHash).members.live,
     );
     await bob.store.client.createHouseholdMembershipClaim({
       household_hash: household.actionHash,
@@ -121,12 +121,12 @@ test("Alice creates a Household, bobs joins it", async () => {
     });
 
     requestors = await toPromise(
-      alice.store.households.get(household.actionHash).requestors.live$,
+      alice.store.households.get(household.actionHash).requestors.live,
     );
     assert.equal(requestors.length, 1);
 
     members = await toPromise(
-      alice.store.households.get(household.actionHash).members.live$,
+      alice.store.households.get(household.actionHash).members.live,
     );
     assert.equal(members.length, 2);
 
@@ -142,7 +142,7 @@ test("Alice creates a Household, bobs joins it", async () => {
     );
 
     members = await toPromise(
-      carol.store.households.get(household.actionHash).members.live$,
+      carol.store.households.get(household.actionHash).members.live,
     );
     assert.equal(members.length, 3);
     await carol.store.client.createHouseholdMembershipClaim({

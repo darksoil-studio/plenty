@@ -66,7 +66,7 @@ export class MembersForHousehold extends SignalWatcher(LitElement) {
   render() {
     const members = this.householdsStore.households
       .get(this.householdHash)
-      .members.live$.get();
+      .members.live.get();
 
     switch (members.status) {
       case "pending":

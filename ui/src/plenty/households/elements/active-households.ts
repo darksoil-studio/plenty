@@ -51,7 +51,7 @@ export class ActiveHouseholds extends SignalWatcher(LitElement) {
   }
 
   render() {
-    const activeHouseholds = this.householdsStore.activeHouseholds$.get();
+    const activeHouseholds = this.householdsStore.activeHouseholds.get();
 
     switch (activeHouseholds.status) {
       case "pending":

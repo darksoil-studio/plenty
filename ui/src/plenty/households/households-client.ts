@@ -196,8 +196,8 @@ export class HouseholdsClient extends ZomeClient<HouseholdsSignal> {
         .get(NOTIFICATIONS_TYPES.REQUEST_TO_JOIN_HOUSEHOLD)
         .get(encodeRequestNotificationGroup(householdHash, requestor));
 
-    const read = await toPromise(notificationsToJoinMyHousehold.read$);
-    const unread = await toPromise(notificationsToJoinMyHousehold.unread$);
+    const read = await toPromise(notificationsToJoinMyHousehold.read);
+    const unread = await toPromise(notificationsToJoinMyHousehold.unread);
 
     const readNotificationsForThisRequestor = pickBy(
       read,
@@ -234,8 +234,8 @@ export class HouseholdsClient extends ZomeClient<HouseholdsSignal> {
         .get(NOTIFICATIONS_TYPES.REQUEST_TO_JOIN_HOUSEHOLD)
         .get(encodeRequestNotificationGroup(householdHash, requestor));
 
-    const read = await toPromise(notificationsToJoinMyHousehold.read$);
-    const unread = await toPromise(notificationsToJoinMyHousehold.unread$);
+    const read = await toPromise(notificationsToJoinMyHousehold.read);
+    const unread = await toPromise(notificationsToJoinMyHousehold.unread);
 
     const readNotificationsForThisRequestor = pickBy(
       read,

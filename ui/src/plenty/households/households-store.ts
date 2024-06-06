@@ -41,20 +41,20 @@ export class HouseholdsStore {
 
   households = new LazyHoloHashMap((householdHash: ActionHash) => ({
     householdHash,
-    latestVersion$: latestVersionOfEntrySignal(this.client, () =>
+    latestVersion: latestVersionOfEntrySignal(this.client, () =>
       this.client.getLatestHousehold(householdHash),
     ),
-    original$: immutableEntrySignal(() =>
+    original: immutableEntrySignal(() =>
       this.client.getOriginalHousehold(householdHash),
     ),
-    allRevisions$: allRevisionsOfEntrySignal(this.client, () =>
+    allRevisions: allRevisionsOfEntrySignal(this.client, () =>
       this.client.getAllRevisionsForHousehold(householdHash),
     ),
-    deletes$: deletesForEntrySignal(this.client, householdHash, () =>
+    deletes: deletesForEntrySignal(this.client, householdHash, () =>
       this.client.getAllDeletesForHousehold(householdHash),
     ),
     requestors: {
-      live$: pipe(
+      live: pipe(
         liveLinksSignal(
           this.client,
           householdHash,
@@ -63,7 +63,7 @@ export class HouseholdsStore {
         ),
         (links) => links.map((l) => retype(l.target, HashType.AGENT)),
       ),
-      deleted$: pipe(
+      deleted: pipe(
         deletedLinksSignal(
           this.client,
           householdHash,
@@ -77,7 +77,7 @@ export class HouseholdsStore {
       ),
     },
     members: {
-      live$: pipe(
+      live: pipe(
         liveLinksSignal(
           this.client,
           householdHash,
@@ -90,7 +90,7 @@ export class HouseholdsStore {
             target: retype(l.target, HashType.AGENT),
           })),
       ),
-      deleted$: pipe(
+      deleted: pipe(
         deletedLinksSignal(
           this.client,
           householdHash,
@@ -108,13 +108,13 @@ export class HouseholdsStore {
 
   householdMembershipClaims = new LazyHoloHashMap(
     (householdMembershipClaimHash: ActionHash) => ({
-      entry$: immutableEntrySignal(() =>
+      entry: immutableEntrySignal(() =>
         this.client.getHouseholdMembershipClaim(householdMembershipClaimHash),
       ),
     }),
   );
 
-  myHouseholdMembershipClaims$ = queryEntriesSignal(
+  myHouseholdMembershipClaims = queryEntriesSignal(
     this.client,
     () => this.client.queryMyHouseholdMembershipClaims(),
     "HouseholdMembershipclaim",
@@ -122,7 +122,7 @@ export class HouseholdsStore {
 
   /** Active Households */
 
-  activeHouseholds$ = pipe(
+  activeHouseholds = pipe(
     collectionSignal(
       this.client,
       () => this.client.getActiveHouseholds(),
@@ -154,7 +154,7 @@ export class HouseholdsStore {
     ),
   );
 
-  householdsIHaveRequestedToJoin$ = pipe(
+  householdsIHaveRequestedToJoin = pipe(
     liveLinksSignal(
       this.client,
       this.client.client.myPubKey,
@@ -171,7 +171,7 @@ export class HouseholdsStore {
       ),
   );
 
-  myHousehold$ = pipe(
+  myHousehold = pipe(
     this.householdsForMember.get(this.client.client.myPubKey),
     (households) => {
       if (households.size === 0) return undefined;
@@ -190,7 +190,7 @@ export class HouseholdsStore {
       return new AsyncComputed(() => {
         const household = this.households
           .get(householdHash)
-          .latestVersion$.get();
+          .latestVersion.get();
         if (household.status !== "completed") return household;
         return {
           status: "completed",

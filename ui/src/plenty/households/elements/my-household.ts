@@ -291,12 +291,12 @@ export class MyHousehold extends SignalWatcher(LitElement) {
   }
 
   myHouseholdLatestVersion() {
-    const myHousehold = this.householdsStore.myHousehold$.get();
+    const myHousehold = this.householdsStore.myHousehold.get();
     if (myHousehold.status !== "completed") return myHousehold;
 
-    const requestors = myHousehold.value!.requestors.live$.get();
-    const latestVersion = myHousehold.value!.latestVersion$.get();
-    const members = myHousehold.value!.members.live$.get();
+    const requestors = myHousehold.value!.requestors.live.get();
+    const latestVersion = myHousehold.value!.latestVersion.get();
+    const members = myHousehold.value!.members.live.get();
 
     if (requestors.status !== "completed") return requestors;
     if (latestVersion.status !== "completed") return latestVersion;

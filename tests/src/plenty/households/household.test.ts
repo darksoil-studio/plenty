@@ -45,7 +45,7 @@ test("create and read Household", async () => {
 
     // Bob gets the created Household
     const createReadOutput: EntryRecord<Household> = await toPromise(
-      bob.store.households.get(household.actionHash).original$,
+      bob.store.households.get(household.actionHash).original,
     );
     assert.deepEqual(sample, cleanNodeDecoding(createReadOutput.entry));
   });
@@ -80,7 +80,7 @@ test("create and update Household", async () => {
 
     // Bob gets the updated Household
     const readUpdatedOutput0: EntryRecord<Household> = await toPromise(
-      bob.store.households.get(household.actionHash).latestVersion$,
+      bob.store.households.get(household.actionHash).latestVersion,
     );
     assert.deepEqual(
       contentUpdate,
@@ -102,7 +102,7 @@ test("create and update Household", async () => {
 
     // Bob gets the updated Household
     const readUpdatedOutput1: EntryRecord<Household> = await toPromise(
-      bob.store.households.get(originalActionHash).latestVersion$,
+      bob.store.households.get(originalActionHash).latestVersion,
     );
     assert.deepEqual(
       contentUpdate,
@@ -133,7 +133,7 @@ test("create and delete Household", async () => {
 
     // Bob tries to get the deleted Household
     const deletes: Array<SignedActionHashed<Delete>> = await toPromise(
-      bob.store.households.get(household.actionHash).deletes$,
+      bob.store.households.get(household.actionHash).deletes,
     );
     assert.equal(deletes.length, 1);
   });

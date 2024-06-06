@@ -69,8 +69,8 @@ importers:
         specifier: github:darksoil-studio/notifications#c097afb50524e34564b78a0e8915ccbba6611526&path:ui
         version: https://codeload.github.com/darksoil-studio/notifications/tar.gz/c097afb50524e34564b78a0e8915ccbba6611526#path:ui(@types/react@18.3.3)
       '@holochain-open-dev/profiles':
-        specifier: github:holochain-open-dev/profiles#eb83db8c32c4a439dbfdcb9276075eac42e56274&path:ui
-        version: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/eb83db8c32c4a439dbfdcb9276075eac42e56274#path:ui(@types/react@18.3.3)
+        specifier: github:holochain-open-dev/profiles#5dae01ec753b997f0b0adbdb5accf3a1b50d27e6&path:ui
+        version: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/5dae01ec753b997f0b0adbdb5accf3a1b50d27e6#path:ui(@types/react@18.3.3)
       '@holochain-open-dev/signals':
         specifier: ^0.300.0-rc
         version: 0.300.0-rc.3(@types/react@18.3.3)
@@ -105,8 +105,8 @@ importers:
         specifier: github:holochain-open-dev/file-storage#7761b9e0057d14048a93a859bd6dc6170db24607&path:ui
         version: https://codeload.github.com/holochain-open-dev/file-storage/tar.gz/7761b9e0057d14048a93a859bd6dc6170db24607#path:ui(@types/react@18.3.3)
       '@holochain-open-dev/profiles':
-        specifier: github:holochain-open-dev/profiles#eb83db8c32c4a439dbfdcb9276075eac42e56274&path:ui
-        version: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/eb83db8c32c4a439dbfdcb9276075eac42e56274#path:ui(@types/react@18.3.3)
+        specifier: github:holochain-open-dev/profiles#5dae01ec753b997f0b0adbdb5accf3a1b50d27e6&path:ui
+        version: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/5dae01ec753b997f0b0adbdb5accf3a1b50d27e6#path:ui(@types/react@18.3.3)
       '@holochain-open-dev/signals':
         specifier: ^0.300.0-rc.2
         version: 0.300.0-rc.3(@types/react@18.3.3)
@@ -560,6 +560,10 @@ packages:
   '@holochain-open-dev/file-storage@https://codeload.github.com/holochain-open-dev/file-storage/tar.gz/7761b9e0057d14048a93a859bd6dc6170db24607#path:ui':
     resolution: {path: ui, tarball: https://codeload.github.com/holochain-open-dev/file-storage/tar.gz/7761b9e0057d14048a93a859bd6dc6170db24607}
     version: 0.300.0-rc
+
+  '@holochain-open-dev/profiles@https://codeload.github.com/holochain-open-dev/profiles/tar.gz/5dae01ec753b997f0b0adbdb5accf3a1b50d27e6#path:ui':
+    resolution: {path: ui, tarball: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/5dae01ec753b997f0b0adbdb5accf3a1b50d27e6}
+    version: 0.300.0-rc.0
 
   '@holochain-open-dev/profiles@https://codeload.github.com/holochain-open-dev/profiles/tar.gz/eb83db8c32c4a439dbfdcb9276075eac42e56274#path:ui':
     resolution: {path: ui, tarball: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/eb83db8c32c4a439dbfdcb9276075eac42e56274}
@@ -3023,6 +3027,23 @@ snapshots:
       '@scoped-elements/dropzone': 0.2.7(@types/react@18.3.3)
       '@shoelace-style/shoelace': 2.15.1(@types/react@18.3.3)
       idb-keyval: 6.2.1
+      lit: 3.1.4
+    transitivePeerDependencies:
+      - '@types/react'
+      - bufferutil
+      - utf-8-validate
+
+  '@holochain-open-dev/profiles@https://codeload.github.com/holochain-open-dev/profiles/tar.gz/5dae01ec753b997f0b0adbdb5accf3a1b50d27e6#path:ui(@types/react@18.3.3)':
+    dependencies:
+      '@holochain-open-dev/elements': 0.300.0-rc.0(@types/react@18.3.3)
+      '@holochain-open-dev/signals': 0.300.0-rc.3(@types/react@18.3.3)
+      '@holochain-open-dev/utils': 0.300.0-rc.0
+      '@holochain/client': 0.17.0-rc.0
+      '@lit/context': 1.1.2
+      '@lit/localize': 0.12.1
+      '@mdi/js': 7.4.47
+      '@msgpack/msgpack': 2.8.0
+      '@shoelace-style/shoelace': 2.15.1(@types/react@18.3.3)
       lit: 3.1.4
     transitivePeerDependencies:
       - '@types/react'

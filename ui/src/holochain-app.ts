@@ -118,14 +118,14 @@ export class HolochainApp extends SignalWatcher(LitElement) {
   }
 
   myHouseholdLatestVersion(): AsyncResult<EntryRecord<Household> | undefined> {
-    const myHousehold = this._householdStore.myHousehold$.get();
+    const myHousehold = this._householdStore.myHousehold.get();
     if (myHousehold.status !== "completed") return myHousehold;
     if (!myHousehold.value)
       return {
         status: "completed",
         value: undefined,
       };
-    return myHousehold.value?.latestVersion$.get();
+    return myHousehold.value?.latestVersion.get();
   }
 
   renderMyProfile() {

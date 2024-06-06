@@ -24,7 +24,7 @@ test("link a Household to a Requestor", async () => {
 
     // Bob gets the links, should be empty
     let requestors = await toPromise(
-      bob.store.households.get(householdHash).requestors.live$,
+      bob.store.households.get(householdHash).requestors.live,
     );
     assert.equal(requestors.length, 0);
 
@@ -39,7 +39,7 @@ test("link a Household to a Requestor", async () => {
 
     // Bob gets the links again
     requestors = await toPromise(
-      bob.store.households.get(householdHash).requestors.live$,
+      bob.store.households.get(householdHash).requestors.live,
     );
     assert.equal(requestors.length, 1);
     assert.deepEqual(
@@ -57,13 +57,13 @@ test("link a Household to a Requestor", async () => {
 
     // Bob gets the links again
     requestors = await toPromise(
-      alice.store.households.get(householdHash).requestors.live$,
+      alice.store.households.get(householdHash).requestors.live,
     );
     assert.equal(requestors.length, 0);
 
     // Bob gets the deleted links
     let deletedLinksOutput = await toPromise(
-      bob.store.households.get(householdHash).requestors.deleted$,
+      bob.store.households.get(householdHash).requestors.deleted,
     );
     assert.equal(deletedLinksOutput.length, 1);
   });
@@ -81,7 +81,7 @@ test("Request to join household and cancel it ", async () => {
 
     // Bob gets the links, should be empty
     let requestors = await toPromise(
-      bob.store.households.get(baseAddress).requestors.live$,
+      bob.store.households.get(baseAddress).requestors.live,
     );
     assert.equal(requestors.length, 0);
 
@@ -96,7 +96,7 @@ test("Request to join household and cancel it ", async () => {
 
     // Bob gets the links again
     requestors = await toPromise(
-      bob.store.households.get(baseAddress).requestors.live$,
+      bob.store.households.get(baseAddress).requestors.live,
     );
     assert.equal(requestors.length, 1);
     assert.deepEqual(
@@ -111,13 +111,13 @@ test("Request to join household and cancel it ", async () => {
 
     // Bob gets the links again
     requestors = await toPromise(
-      alice.store.households.get(baseAddress).requestors.live$,
+      alice.store.households.get(baseAddress).requestors.live,
     );
     assert.equal(requestors.length, 0);
 
     // Bob gets the deleted links
     let deletedLinksOutput = await toPromise(
-      bob.store.households.get(baseAddress).requestors.deleted$,
+      bob.store.households.get(baseAddress).requestors.deleted,
     );
     assert.equal(deletedLinksOutput.length, 1);
   });

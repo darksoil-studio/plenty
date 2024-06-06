@@ -104,11 +104,11 @@ export class HouseholdPrompt extends SignalWatcher(LitElement) {
   }
 
   getActiveHouseholds() {
-    const activeHouseholds = this.householdsStore.activeHouseholds$.get();
+    const activeHouseholds = this.householdsStore.activeHouseholds.get();
     if (activeHouseholds.status !== "completed") return activeHouseholds;
 
     return joinAsyncMap(
-      mapValues(activeHouseholds.value, (h) => h.latestVersion$.get()),
+      mapValues(activeHouseholds.value, (h) => h.latestVersion.get()),
     );
   }
 
@@ -248,13 +248,13 @@ export class HouseholdPrompt extends SignalWatcher(LitElement) {
   creatingMembershipClaim = false;
 
   getHouseholdStatus(): AsyncResult<HouseholdRequestStatus> {
-    const myHousehold = this.householdsStore.myHousehold$.get();
+    const myHousehold = this.householdsStore.myHousehold.get();
     if (myHousehold.status !== "completed") return myHousehold;
 
     if (myHousehold.value !== undefined) {
       const householdHash = myHousehold.value.householdHash;
 
-      const originalHousehold = myHousehold.value.original$.get();
+      const originalHousehold = myHousehold.value.original.get();
       if (originalHousehold.status !== "completed") return originalHousehold;
       if (
         originalHousehold.value.action.author.toString() ===
@@ -269,7 +269,7 @@ export class HouseholdPrompt extends SignalWatcher(LitElement) {
       }
 
       const myMembershipClaims =
-        this.householdsStore.myHouseholdMembershipClaims$.get();
+        this.householdsStore.myHouseholdMembershipClaims.get();
       if (myMembershipClaims.status !== "completed") return myMembershipClaims;
 
       if (
@@ -288,7 +288,7 @@ export class HouseholdPrompt extends SignalWatcher(LitElement) {
 
       const membersLinks = this.householdsStore.households
         .get(householdHash)
-        .members.live$.get();
+        .members.live.get();
       if (membersLinks.status !== "completed") return membersLinks;
       const myMembershipLink = membersLinks.value.find(
         (l) =>
@@ -307,7 +307,7 @@ export class HouseholdPrompt extends SignalWatcher(LitElement) {
           });
       }
 
-      const household = myHousehold.value.latestVersion$.get();
+      const household = myHousehold.value.latestVersion.get();
       if (household.status !== "completed") return household;
       return {
         status: "completed",
@@ -318,7 +318,7 @@ export class HouseholdPrompt extends SignalWatcher(LitElement) {
       };
     } else {
       const requestedHouseholds =
-        this.householdsStore.householdsIHaveRequestedToJoin$.get();
+        this.householdsStore.householdsIHaveRequestedToJoin.get();
       if (requestedHouseholds.status !== "completed")
         return requestedHouseholds;
 
@@ -331,7 +331,7 @@ export class HouseholdPrompt extends SignalWatcher(LitElement) {
         };
 
       const requestedHouseholdsLatestVersion = joinAsyncMap(
-        mapValues(requestedHouseholds.value, (h) => h.latestVersion$.get()),
+        mapValues(requestedHouseholds.value, (h) => h.latestVersion.get()),
       );
       if (requestedHouseholdsLatestVersion.status !== "completed")
         return requestedHouseholdsLatestVersion;
