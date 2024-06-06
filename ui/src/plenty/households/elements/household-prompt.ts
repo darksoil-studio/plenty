@@ -1,10 +1,15 @@
 import { sharedStyles, wrapPathInSvg } from "@holochain-open-dev/elements";
 import "@holochain-open-dev/elements/dist/elements/display-error.js";
 import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
-import { EntryRecord, mapValues } from "@holochain-open-dev/utils";
-import { ActionHash } from "@holochain/client";
+import {
+  EntryRecord,
+  HashType,
+  mapValues,
+  retype,
+} from "@holochain-open-dev/utils";
+import { ActionHash, Link } from "@holochain/client";
 import { consume } from "@lit/context";
-import { msg } from "@lit/localize";
+import { msg, str } from "@lit/localize";
 import { mdiInformationOutline, mdiPlus } from "@mdi/js";
 import { SlDialog } from "@shoelace-style/shoelace";
 import "@shoelace-style/shoelace/dist/components/button/button.js";
@@ -29,6 +34,7 @@ import { Household } from "../types.js";
 import "./create-household.js";
 
 type HouseholdRequestStatus =
+  | { status: "ACCEPTED_JOINING"; household: EntryRecord<Household> }
   | { status: "HOUSEHOLD_MEMBER" }
   | { status: "NOT_REQUESTED" }
   | {
@@ -239,42 +245,105 @@ export class HouseholdPrompt extends SignalWatcher(LitElement) {
     `;
   }
 
+  creatingMembershipClaim = false;
+
   getHouseholdStatus(): AsyncResult<HouseholdRequestStatus> {
     const myHousehold = this.householdsStore.myHousehold$.get();
     if (myHousehold.status !== "completed") return myHousehold;
-    if (myHousehold.value !== undefined)
+
+    if (myHousehold.value !== undefined) {
+      const householdHash = myHousehold.value.householdHash;
+
+      const originalHousehold = myHousehold.value.original$.get();
+      if (originalHousehold.status !== "completed") return originalHousehold;
+      if (
+        originalHousehold.value.action.author.toString() ===
+        this.householdsStore.client.client.myPubKey.toString()
+      ) {
+        return {
+          status: "completed",
+          value: {
+            status: "HOUSEHOLD_MEMBER",
+          },
+        };
+      }
+
+      const myMembershipClaims =
+        this.householdsStore.myHouseholdMembershipClaims$.get();
+      if (myMembershipClaims.status !== "completed") return myMembershipClaims;
+
+      if (
+        myMembershipClaims.value.find(
+          (claim) =>
+            claim.entry.household_hash.toString() === householdHash.toString(),
+        )
+      ) {
+        return {
+          status: "completed",
+          value: {
+            status: "HOUSEHOLD_MEMBER",
+          },
+        };
+      }
+
+      const membersLinks = this.householdsStore.households
+        .get(householdHash)
+        .members.live$.get();
+      if (membersLinks.status !== "completed") return membersLinks;
+      const myMembershipLink = membersLinks.value.find(
+        (l) =>
+          retype(l.target, HashType.AGENT).toString() ===
+          this.householdsStore.client.client.myPubKey.toString(),
+      );
+      if (myMembershipLink && !this.creatingMembershipClaim) {
+        this.creatingMembershipClaim = true;
+        this.householdsStore.client
+          .createHouseholdMembershipClaim({
+            household_hash: householdHash,
+            member_create_link_hash: myMembershipLink.create_link_hash,
+          })
+          .finally(() => {
+            this.creatingMembershipClaim = false;
+          });
+      }
+
+      const household = myHousehold.value.latestVersion$.get();
+      if (household.status !== "completed") return household;
       return {
         status: "completed",
         value: {
-          status: "HOUSEHOLD_MEMBER",
+          status: "ACCEPTED_JOINING",
+          household: household.value,
         },
       };
+    } else {
+      const requestedHouseholds =
+        this.householdsStore.householdsIHaveRequestedToJoin$.get();
+      if (requestedHouseholds.status !== "completed")
+        return requestedHouseholds;
 
-    const requestedHouseholds =
-      this.householdsStore.householdsIHaveRequestedToJoin$.get();
-    if (requestedHouseholds.status !== "completed") return requestedHouseholds;
+      if (requestedHouseholds.value.size === 0)
+        return {
+          status: "completed",
+          value: {
+            status: "NOT_REQUESTED",
+          },
+        };
 
-    if (requestedHouseholds.value.size === 0)
+      const requestedHouseholdsLatestVersion = joinAsyncMap(
+        mapValues(requestedHouseholds.value, (h) => h.latestVersion$.get()),
+      );
+      if (requestedHouseholdsLatestVersion.status !== "completed")
+        return requestedHouseholdsLatestVersion;
+
       return {
         status: "completed",
         value: {
-          status: "NOT_REQUESTED",
+          status: "REQUESTED",
+          requestedHouseholds: requestedHouseholdsLatestVersion.value,
         },
       };
-
-    const requestedHouseholdsLatestVersion = joinAsyncMap(
-      mapValues(requestedHouseholds.value, (h) => h.latestVersion$.get()),
-    );
-    if (requestedHouseholdsLatestVersion.status !== "completed")
-      return requestedHouseholdsLatestVersion;
-
-    return {
-      status: "completed",
-      value: {
-        status: "REQUESTED",
-        requestedHouseholds: requestedHouseholdsLatestVersion.value,
-      },
-    };
+    }
   }
 
   render() {
@@ -315,6 +384,20 @@ export class HouseholdPrompt extends SignalWatcher(LitElement) {
       case "completed":
         if (householdsStatus.value.status === "HOUSEHOLD_MEMBER")
           return html`<slot></slot>`;
+        if (householdsStatus.value.status === "ACCEPTED_JOINING")
+          return html`
+            <div
+              class="row"
+              style="flex: 1; flex-direction: column; height: 100%; align-items: center; justify-content: center; gap: 12px"
+            >
+              <sl-spinner style="font-size: 2rem"></sl-spinner>
+              <span
+                >${msg(
+                  str`You were accepted into the household ${householdsStatus.value.household.entry.name}! Joining...`,
+                )}</span
+              >
+            </div>
+          `;
         if (householdsStatus.value.status === "NOT_REQUESTED")
           return this.renderPrompt();
         return this.renderRequestedHouseholds(

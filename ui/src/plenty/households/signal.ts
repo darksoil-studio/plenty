@@ -6,6 +6,14 @@ import {
 } from "@holochain-open-dev/utils";
 import { HoloHash } from "@holochain/client";
 import { encode } from "@msgpack/msgpack";
+
+export function completed<T>(value: T): AsyncResult<T> {
+  return {
+    status: "completed",
+    value,
+  };
+}
+
 function areArrayHashesEqual(
   array1: Array<HoloHash>,
   array2: Array<HoloHash>,

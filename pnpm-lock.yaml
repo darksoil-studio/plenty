@@ -1027,8 +1027,8 @@ packages:
   assertion-error@1.1.0:
     resolution: {integrity: sha512-jgsaNduz+ndvGyFt3uSuWqvy4lCnIJiovtouQN5JZHOKCS2QuhEdbcQHFhVksz2N2U9hXJo8odG7ETyWlEeuDw==}
 
-  async-signals@0.1.10:
-    resolution: {integrity: sha512-sEiZ6wI7LuCcv70yaJnm8FPrHyy6QdtBmojaYpkB3m9k9+HbEftPfeJQNl9GCcvbqibbV5n1XFMogT0LNIEIMQ==}
+  async-signals@0.1.11:
+    resolution: {integrity: sha512-ooYxYRwcOOAVQ8QFVu+Xt0PRB3dHVzGgWyFyE+h6BkdGKXD+b1eecIrNWTDgBQGp5yV/le8zpSTp1KKVRYgtBg==}
 
   async@2.6.4:
     resolution: {integrity: sha512-mzo5dfJYwAn29PeiJ0zvwTo04zj8HDJj0Mn8TD7sno7q12prdbnasKJHhkm2c1LgrhlJ0teaea8860oxi51mGA==}
@@ -3051,7 +3051,7 @@ snapshots:
       '@holochain-open-dev/utils': 0.300.0-rc.0
       '@holochain/client': 0.17.0-rc.0
       '@shoelace-style/shoelace': 2.15.1(@types/react@18.3.3)
-      async-signals: 0.1.10
+      async-signals: 0.1.11
       lit-signal-watcher: 0.1.1
       signal-polyfill: 0.1.1
     transitivePeerDependencies:
@@ -3565,7 +3565,7 @@ snapshots:
 
   assertion-error@1.1.0: {}
 
-  async-signals@0.1.10:
+  async-signals@0.1.11:
     dependencies:
       lit: 3.1.4
       signal-polyfill: 0.1.1
