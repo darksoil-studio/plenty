@@ -13,6 +13,7 @@ pub enum EntryTypes {
 pub enum LinkTypes {
     LiasonToProducers,
     ProducerUpdates,
+    AllProducers,
 }
 #[hdk_extern]
 pub fn genesis_self_check(
@@ -189,6 +190,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         tag,
                     )
                 }
+                LinkTypes::AllProducers => {
+                    validate_create_link_all_producers(
+                        action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
             }
         }
         FlatOp::RegisterDeleteLink {
@@ -211,6 +220,15 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 }
                 LinkTypes::ProducerUpdates => {
                     validate_delete_link_producer_updates(
+                        action,
+                        original_action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
+                LinkTypes::AllProducers => {
+                    validate_delete_link_all_producers(
                         action,
                         original_action,
                         base_address,
@@ -367,6 +385,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 tag,
                             )
                         }
+                        LinkTypes::AllProducers => {
+                            validate_create_link_all_producers(
+                                action,
+                                base_address,
+                                target_address,
+                                tag,
+                            )
+                        }
                     }
                 }
                 OpRecord::DeleteLink { original_action_hash, base_address, action } => {
@@ -403,6 +429,15 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         }
                         LinkTypes::ProducerUpdates => {
                             validate_delete_link_producer_updates(
+                                action,
+                                create_link.clone(),
+                                base_address,
+                                create_link.target_address,
+                                create_link.tag,
+                            )
+                        }
+                        LinkTypes::AllProducers => {
+                            validate_delete_link_all_producers(
                                 action,
                                 create_link.clone(),
                                 base_address,

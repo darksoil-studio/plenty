@@ -126,7 +126,19 @@ export class ProducersZomeMock extends ZomeMock implements AppClient {
   async get_producers_for_liason(liason: AgentPubKey): Promise<Array<Link>> {
     return this.producersForLiason.get(liason) || [];
   }
-
+  
+  async get_all_producers(): Promise<Array<Link>> {
+    const records: Record[] = Array.from(this.producers.values()).map(r => r.revisions[r.revisions.length - 1]);
+    return Promise.all(records.map(async record => ({ 
+      target: record.signed_action.hashed.hash, 
+      author: record.signed_action.hashed.content.author,
+      timestamp: record.signed_action.hashed.content.timestamp,
+      zome_index: 0,
+      link_type: 0,
+      tag: new Uint8Array(),
+      create_link_hash: await fakeActionHash()
+    })));
+  }
 
 }
 
@@ -146,3 +158,4 @@ export async function sampleProducer(client: ProducersClient, partialProducer: P
         ...partialProducer
     };
 }
+

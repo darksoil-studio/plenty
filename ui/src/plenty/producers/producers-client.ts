@@ -71,4 +71,10 @@ export class ProducersClient extends ZomeClient<ProducersSignal> {
     return this.callZome('get_deleted_producers_for_liason', liason);
   }
 
+  /** All Producers */
+
+  async getAllProducers(): Promise<Array<Link>> {
+    return this.callZome('get_all_producers', undefined);
+  }
+
 }

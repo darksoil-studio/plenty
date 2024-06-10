@@ -17,8 +17,6 @@ import { NewEntryAction, Record, ActionHash, EntryHash, AgentPubKey } from '@hol
 import { ProducersClient } from './producers-client.js';
 
 export class ProducersStore {
-
-
   constructor(public client: ProducersClient) {}
   
   /** Producer */
@@ -48,4 +46,15 @@ export class ProducersStore {
         ), links=> slice(this.producers, links.map(l => l[0].hashed.content.target_address))
       ),
   }));
+  
+  /** All Producers */
+
+  allProducers = pipe(
+    collectionSignal(
+      this.client, 
+      () => this.client.getAllProducers(),
+      'AllProducers'
+    ),
+    allProducers => slice(this.producers, allProducers.map(l => l.target))
+  );
 }

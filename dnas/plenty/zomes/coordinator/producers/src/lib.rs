@@ -1,3 +1,5 @@
+pub mod all_producers;
+
 pub mod producer;
 use hdk::prelude::*;
 use producers_integrity::*;
