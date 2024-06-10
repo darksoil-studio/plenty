@@ -1,42 +1,39 @@
-import { 
-  Record, 
-  ActionHash, 
+import {
+  Record,
+  ActionHash,
   DnaHash,
   SignedActionHashed,
-  EntryHash, 
+  EntryHash,
   AgentPubKey,
   Create,
   Update,
   Delete,
   CreateLink,
-  DeleteLink
-} from '@holochain/client';
-import { ActionCommittedSignal } from '@holochain-open-dev/utils';
+  DeleteLink,
+} from "@holochain/client";
+import { ActionCommittedSignal } from "@holochain-open-dev/utils";
 
 export type ProducersSignal = ActionCommittedSignal<EntryTypes, LinkTypes>;
 
 export type EntryTypes =
- | ({ type: 'Product'; } & Product)
- | ({  type: 'Producer'; } & Producer);
+  | ({ type: "Product" } & Product)
+  | ({ type: "Producer" } & Producer);
 
 export type LinkTypes = string;
 
+export type ProducerEditors =
+  | {
+      type: "Liason";
+    }
+  | { type: "AllMembers" }
+  | { type: "Members"; members: Array<AgentPubKey> };
+export type ProducerSorters =
+  | {
+      type: "Liason";
+    }
+  | { type: "Members"; members: Array<AgentPubKey> };
 
-export interface ProducerEditors {
-  type:  
-    | 'Liason'
-        | 'AllMembers'
-        | 'Members'
-    ;
-}
-export interface ProducerSorters {
-  type:  
-    | 'Liason'
-        | 'Members'
-    ;
-}
-
-export interface Producer { 
+export interface Producer {
   name: string;
 
   photo: EntryHash;
@@ -56,20 +53,21 @@ export interface Producer {
   sorters: ProducerSorters;
 }
 
+export type PackagingUnit =
+  | "Piece"
+  | "Kilograms"
+  | "Grams"
+  | "Liters"
+  | "Pounds"
+  | "Ounces";
 
-
-export interface PackagingUnit {
-  type:  
-    | 'Piece'
-        | 'Kilograms'
-        | 'Grams'
-        | 'Liters'
-        | 'Pounds'
-        | 'Ounces'
-    ;
+export interface Packaging {
+  unit: PackagingUnit;
+  amount: number;
+  estimate: boolean;
 }
 
-export interface Product { 
+export interface Product {
   producer_hash: ActionHash;
 
   name: string;
@@ -80,7 +78,7 @@ export interface Product {
 
   categories: Array<string>;
 
-  packaging: PackagingUnit;
+  packaging: Packaging;
 
   maximum_available: number | undefined;
 
@@ -94,4 +92,3 @@ export interface Product {
 
   ingredients: string | undefined;
 }
-

@@ -1,6 +1,6 @@
-import { producersStoreContext } from './plenty/producers/context.js';
-import { ProducersClient } from './plenty/producers/producers-client.js';
-import { ProducersStore } from './plenty/producers/producers-store.js';
+import { producersStoreContext } from "./plenty/producers/context.js";
+import { ProducersClient } from "./plenty/producers/producers-client.js";
+import { ProducersStore } from "./plenty/producers/producers-store.js";
 
 import { sharedStyles, wrapPathInSvg } from "@holochain-open-dev/elements";
 import "@holochain-open-dev/elements/dist/elements/display-error.js";
@@ -21,8 +21,6 @@ import { provide } from "@lit/context";
 import { localized, msg } from "@lit/localize";
 import "@shoelace-style/shoelace/dist/components/icon-button/icon-button.js";
 import "@shoelace-style/shoelace/dist/components/spinner/spinner.js";
-import "@shoelace-style/shoelace/dist/components/tab-group/tab-group.js";
-import "@shoelace-style/shoelace/dist/components/tab-panel/tab-panel.js";
 import "@shoelace-style/shoelace/dist/components/tab/tab.js";
 import "@shoelace-style/shoelace/dist/themes/light.css";
 import { LitElement, css, html } from "lit";
@@ -35,12 +33,14 @@ import {
   notificationsStoreContext,
 } from "@darksoil-studio/notifications";
 import "@darksoil-studio/notifications/dist/elements/my-notifications-icon-button.js";
-import { Router } from "@lit-labs/router";
+import { Router, Routes } from "@lit-labs/router";
 import { mdiArrowLeft } from "@mdi/js";
 
+import "./home-page.js";
 import { householdsStoreContext } from "./plenty/households/context.js";
 import "./plenty/households/elements/household-prompt.js";
 import "./plenty/households/elements/my-household.js";
+import "./plenty/producers/elements/create-producer.js";
 import { HouseholdsClient } from "./plenty/households/households-client.js";
 import { HouseholdsStore } from "./plenty/households/households-store.js";
 
@@ -53,7 +53,7 @@ export class HolochainApp extends SignalWatcher(LitElement) {
   @property()
   _producersStore!: ProducersStore;
 
-@provide({ context: householdsStoreContext })
+  @provide({ context: householdsStoreContext })
   @property()
   _householdStore!: HouseholdsStore;
 
@@ -77,12 +77,20 @@ export class HolochainApp extends SignalWatcher(LitElement) {
 
   router = new Router(this, [
     {
-      path: "/index.html/",
-      render: () => this.renderMain(),
+      path: "/",
+      render: () => html``,
+      enter: () => {
+        this.router.goto("/home/");
+        return false;
+      },
     },
     {
-      path: "/",
-      render: () => this.renderMain(),
+      path: "/home/*",
+      render: () => html`<home-page style="flex: 1"></home-page>`,
+    },
+    {
+      path: "/create-producer",
+      render: () => this.renderCreateProducer(),
     },
     {
       path: "/my-household",
@@ -118,50 +126,15 @@ export class HolochainApp extends SignalWatcher(LitElement) {
     );
     this._notificationsStore.notificationsConfig.types = {
       ...this._notificationsStore.notificationsConfig.types,
-      ...this._householdStore.notificationsTypes(() =>
-        this.router.goto("/my-household"),
-      ),
+      ...this._householdStore.notificationsTypes(() => {
+        this.router.goto("/my-household");
+        window.history.pushState(null, "", "/my-household");
+      }),
     };
     this._fileStorageClient = new FileStorageClient(appClient, "plenty");
-    this._producersStore = new ProducersStore(new ProducersClient(appClient, 'plenty'));
-  }
-
-  myHouseholdLatestVersion(): AsyncResult<EntryRecord<Household> | undefined> {
-    const myHousehold = this._householdStore.myHousehold.get();
-    if (myHousehold.status !== "completed") return myHousehold;
-    if (!myHousehold.value)
-      return {
-        status: "completed",
-        value: undefined,
-      };
-    return myHousehold.value?.latestVersion.get();
-  }
-
-  renderMyProfile() {
-    const household = this.myHouseholdLatestVersion();
-
-    switch (household.status) {
-      case "pending":
-        return html`<profile-list-item-skeleton></profile-list-item-skeleton>`;
-      case "error":
-        return html`<display-error
-          .headline=${msg("Error fetching your household")}
-          .error=${household.error}
-          tooltip
-        ></display-error>`;
-      case "completed":
-        return html`<div
-          class="row"
-          style="align-items: center; cursor: pointer"
-          @click=${() => this.router.goto("/my-household")}
-        >
-          <show-image
-            style="width: 32px; height: 32px;"
-            .imageHash=${household.value?.entry.avatar}
-          ></show-image>
-          <span style="margin: 0 16px;">${household.value?.entry.name}</span>
-        </div>`;
-    }
+    this._producersStore = new ProducersStore(
+      new ProducersClient(appClient, "plenty"),
+    );
   }
 
   renderMyHousehold() {
@@ -172,7 +145,12 @@ export class HolochainApp extends SignalWatcher(LitElement) {
       >
         <sl-icon-button
           .src=${wrapPathInSvg(mdiArrowLeft)}
-          @click=${() => this.router.goto("/")}
+          @click=${() => {
+            window.history.back();
+            // if (window.location.pathname === "/my-household") {
+            // window.history.pushState(Date.now(), "", "/");
+            // }
+          }}
         ></sl-icon-button>
         <span class="title" style="flex: 1">${msg("My Household")}</span>
       </div>
@@ -183,34 +161,15 @@ export class HolochainApp extends SignalWatcher(LitElement) {
     </div>`;
   }
 
-  renderMain() {
+  renderCreateProducer() {
     return html`
-      <div class="column fill">
-        <div class="row top-bar">
-          <span class="title" style="flex: 1">${msg("Plenty")}</span>
-
-          <div class="row" style="gap: 16px" slot="actionItems">
-            <my-notifications-icon-button></my-notifications-icon-button>
-            ${this.renderMyProfile()}
-          </div>
-        </div>
-
-        <sl-tab-group placement="start">
-          <sl-tab slot="nav" panel="orders">${msg("Orders")}</sl-tab>
-          <sl-tab slot="nav" panel="producers">${msg("Producers")}</sl-tab>
-          <sl-tab slot="nav" panel="members">${msg("Members")}</sl-tab>
-
-          <sl-tab-panel name="orders"
-            >This is the general tab panel.</sl-tab-panel
-          >
-          <sl-tab-panel name="producers"
-            >This is the general tab panel.</sl-tab-panel
-          >
-          <sl-tab-panel name="members"
-            >This is the general tab panel.</sl-tab-panel
-          >
-        </sl-tab-group>
-      </div>
+      <create-producer
+        @producer-created=${() => {
+          // window.location.pathname = "/home/producers/";
+          window.history.pushState({}, "", "/home/producers/");
+          this.router.goto("/home/producers/");
+        }}
+      ></create-producer>
     `;
   }
 
@@ -258,4 +217,5 @@ export class HolochainApp extends SignalWatcher(LitElement) {
       }
     `,
     sharedStyles,
-  ];}
+  ];
+}

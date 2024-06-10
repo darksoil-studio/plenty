@@ -1,17 +1,20 @@
 use hdi::prelude::*;
+
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[serde(tag = "type")]
 pub enum ProducerEditors {
     Liason,
     AllMembers,
-    Members,
+    Members(Vec<AgentPubKey>),
 }
+
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[serde(tag = "type")]
 pub enum ProducerSorters {
     Liason,
-    Members,
+    Members(Vec<AgentPubKey>),
 }
+
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
 pub struct Producer {
@@ -25,6 +28,7 @@ pub struct Producer {
     pub editors: ProducerEditors,
     pub sorters: ProducerSorters,
 }
+
 pub fn validate_create_producer(
     _action: EntryCreationAction,
     _producer: Producer,
@@ -52,24 +56,20 @@ pub fn validate_create_link_liason_to_producers(
     target_address: AnyLinkableHash,
     _tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
-    let action_hash = target_address
-        .into_action_hash()
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest("No action hash associated with link".to_string())
-            ),
-        )?;
+    let action_hash =
+        target_address
+            .into_action_hash()
+            .ok_or(wasm_error!(WasmErrorInner::Guest(
+                "No action hash associated with link".to_string()
+            )))?;
     let record = must_get_valid_record(action_hash)?;
     let _producer: crate::Producer = record
         .entry()
         .to_app_option()
         .map_err(|e| wasm_error!(e))?
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest("Linked action must reference an entry"
-                .to_string())
-            ),
-        )?;
+        .ok_or(wasm_error!(WasmErrorInner::Guest(
+            "Linked action must reference an entry".to_string()
+        )))?;
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_delete_link_liason_to_producers(
@@ -89,40 +89,31 @@ pub fn validate_create_link_producer_updates(
 ) -> ExternResult<ValidateCallbackResult> {
     let action_hash = base_address
         .into_action_hash()
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest("No action hash associated with link".to_string())
-            ),
-        )?;
+        .ok_or(wasm_error!(WasmErrorInner::Guest(
+            "No action hash associated with link".to_string()
+        )))?;
     let record = must_get_valid_record(action_hash)?;
     let _producer: crate::Producer = record
         .entry()
         .to_app_option()
         .map_err(|e| wasm_error!(e))?
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest("Linked action must reference an entry"
-                .to_string())
-            ),
-        )?;
-    let action_hash = target_address
-        .into_action_hash()
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest("No action hash associated with link".to_string())
-            ),
-        )?;
+        .ok_or(wasm_error!(WasmErrorInner::Guest(
+            "Linked action must reference an entry".to_string()
+        )))?;
+    let action_hash =
+        target_address
+            .into_action_hash()
+            .ok_or(wasm_error!(WasmErrorInner::Guest(
+                "No action hash associated with link".to_string()
+            )))?;
     let record = must_get_valid_record(action_hash)?;
     let _producer: crate::Producer = record
         .entry()
         .to_app_option()
         .map_err(|e| wasm_error!(e))?
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest("Linked action must reference an entry"
-                .to_string())
-            ),
-        )?;
+        .ok_or(wasm_error!(WasmErrorInner::Guest(
+            "Linked action must reference an entry".to_string()
+        )))?;
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_delete_link_producer_updates(
@@ -132,11 +123,9 @@ pub fn validate_delete_link_producer_updates(
     _target: AnyLinkableHash,
     _tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
-    Ok(
-        ValidateCallbackResult::Invalid(
-            String::from("ProducerUpdates links cannot be deleted"),
-        ),
-    )
+    Ok(ValidateCallbackResult::Invalid(String::from(
+        "ProducerUpdates links cannot be deleted",
+    )))
 }
 pub fn validate_create_link_all_producers(
     _action: CreateLink,
@@ -145,24 +134,20 @@ pub fn validate_create_link_all_producers(
     _tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
     // Check the entry type for the given action hash
-    let action_hash = target_address
-        .into_action_hash()
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest("No action hash associated with link".to_string())
-            ),
-        )?;
+    let action_hash =
+        target_address
+            .into_action_hash()
+            .ok_or(wasm_error!(WasmErrorInner::Guest(
+                "No action hash associated with link".to_string()
+            )))?;
     let record = must_get_valid_record(action_hash)?;
     let _producer: crate::Producer = record
         .entry()
         .to_app_option()
         .map_err(|e| wasm_error!(e))?
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest("Linked action must reference an entry"
-                .to_string())
-            ),
-        )?;
+        .ok_or(wasm_error!(WasmErrorInner::Guest(
+            "Linked action must reference an entry".to_string()
+        )))?;
     // TODO: add the appropriate validation rules
     Ok(ValidateCallbackResult::Valid)
 }

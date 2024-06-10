@@ -397,7 +397,7 @@ export class HouseholdPrompt extends SignalWatcher(LitElement) {
               <sl-spinner style="font-size: 2rem"></sl-spinner>
               <span
                 >${msg(
-                  str`You were accepted into the household ${householdsStatus.value.household.entry.name}! Joining...`,
+                  str`You were accepted into the household "${householdsStatus.value.household.entry.name}"! Joining...`,
                 )}</span
               >
             </div>
