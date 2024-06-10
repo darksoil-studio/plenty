@@ -1,4 +1,4 @@
-import { Scenario } from "@holochain/tryorama";
+import { Scenario, dhtSync } from "@holochain/tryorama";
 import { ProfilesStore, ProfilesClient } from "@holochain-open-dev/profiles";
 import {
   NotificationsStore,
@@ -51,7 +51,14 @@ export async function setup(scenario: Scenario) {
   // conductor of the scenario.
   await scenario.shareAllAgents();
 
+  const awaitConsistency = async () => {
+    const start = Date.now();
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
+    console.log(`Took ${Date.now() - start}ms to reach consistency`);
+  };
+
   return {
+    awaitConsistency,
     alice: {
       player: alice,
       store: aliceStore,
@@ -86,7 +93,14 @@ export async function setup4(scenario: Scenario) {
   // conductor of the scenario.
   await scenario.shareAllAgents();
 
+  const awaitConsistency = async () => {
+    const start = Date.now();
+    await dhtSync([alice, bob, carol, dave], alice.cells[0].cell_id[0]);
+    console.log(`Took ${Date.now() - start}ms to reach consistency`);
+  };
+
   return {
+    awaitConsistency,
     alice: {
       player: alice,
       store: aliceStore,

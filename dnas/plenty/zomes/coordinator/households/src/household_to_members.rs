@@ -80,7 +80,7 @@ pub fn remove_member_for_household(input: RemoveMemberForHouseholdInput) -> Exte
             .clone()
             .into_action_hash()
             .ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
-                "No entry_hash associated with link"
+                "No action_hash associated with link"
             ))))?
             .eq(&input.household_hash)
         {

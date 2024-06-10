@@ -23,3 +23,15 @@ path = "dnas/plenty/zomes/coordinator/households"
 
 [workspace.dependencies.households_integrity]
 path = "dnas/plenty/zomes/integrity/households"
+
+[patch.crates-io]
+holochain = { git = "https://github.com/guillemcordoba/holochain", branch = "develop-0.3" }
+holochain_nonce = { git = "https://github.com/guillemcordoba/holochain", branch = "develop-0.3" }
+holochain_types = { git = "https://github.com/guillemcordoba/holochain", branch = "develop-0.3" }
+holochain_zome_types = { git = "https://github.com/guillemcordoba/holochain", branch = "develop-0.3" }
+holochain_integrity_types = { git = "https://github.com/guillemcordoba/holochain", branch = "develop-0.3" }
+holochain_keystore = { git = "https://github.com/guillemcordoba/holochain", branch = "develop-0.3" }
+holo_hash = { git = "https://github.com/guillemcordoba/holochain", branch = "develop-0.3" }
+kitsune_p2p_timestamp = { git = "https://github.com/guillemcordoba/holochain", branch = "develop-0.3" }
+holochain_conductor_api = { git = "https://github.com/guillemcordoba/holochain", branch = "develop-0.3" }
+mr_bundle = { git = "https://github.com/guillemcordoba/holochain", branch = "develop-0.3" }

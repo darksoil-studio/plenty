@@ -32,6 +32,7 @@ import { householdsStoreContext } from "../context.js";
 import { HouseholdsStore } from "../households-store.js";
 import { Household } from "../types.js";
 import "./create-household.js";
+import { tryAndRetry } from "../../../utils.js";
 
 type HouseholdRequestStatus =
   | { status: "ACCEPTED_JOINING"; household: EntryRecord<Household> }
@@ -297,14 +298,17 @@ export class HouseholdPrompt extends SignalWatcher(LitElement) {
       );
       if (myMembershipLink && !this.creatingMembershipClaim) {
         this.creatingMembershipClaim = true;
-        this.householdsStore.client
-          .createHouseholdMembershipClaim({
-            household_hash: householdHash,
-            member_create_link_hash: myMembershipLink.create_link_hash,
-          })
-          .finally(() => {
-            this.creatingMembershipClaim = false;
-          });
+        tryAndRetry(
+          () =>
+            this.householdsStore.client.createHouseholdMembershipClaim({
+              household_hash: householdHash,
+              member_create_link_hash: myMembershipLink.create_link_hash,
+            }),
+          10,
+          1000,
+        ).finally(() => {
+          this.creatingMembershipClaim = false;
+        });
       }
 
       const household = myHousehold.value.latestVersion.get();

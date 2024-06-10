@@ -10,8 +10,28 @@ pub mod member_to_households;
 
 #[hdk_extern]
 pub fn init(_: ()) -> ExternResult<InitCallbackResult> {
+    let mut fns: BTreeSet<GrantedFunction> = BTreeSet::new();
+    fns.insert((zome_info()?.name, FunctionName::from("recv_remote_signal")));
+    let functions = GrantedFunctions::Listed(fns);
+    let cap_grant = ZomeCallCapGrant {
+        tag: String::from("recv_remote_signal"),
+        access: CapAccess::Unrestricted,
+        functions,
+    };
+    create_cap_grant(cap_grant)?;
+
     Ok(InitCallbackResult::Pass)
 }
+
+#[derive(Serialize, Deserialize, Debug, SerializedBytes)]
+pub enum HouseholdsRemoteSignal {}
+
+#[hdk_extern]
+pub fn recv_remote_signal(signal: HouseholdsRemoteSignal) -> ExternResult<()> {
+    // TODO: take into account wether the recipient has the notification enabled in their settings
+    match signal {}
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(tag = "type")]
 pub enum Signal {
@@ -41,11 +61,12 @@ pub enum Signal {
 #[hdk_extern(infallible)]
 pub fn post_commit(committed_actions: Vec<SignedActionHashed>) {
     for action in committed_actions {
-        if let Err(err) = signal_action(action) {
+        if let Err(err) = signal_action(action.clone()) {
             error!("Error signaling new action: {:?}", err);
         }
     }
 }
+
 fn signal_action(action: SignedActionHashed) -> ExternResult<()> {
     match action.hashed.content.clone() {
         Action::CreateLink(create_link) => {

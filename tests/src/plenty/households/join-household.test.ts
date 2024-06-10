@@ -1,6 +1,6 @@
 import { assert, expect, test } from "vitest";
 
-import { runScenario, dhtSync } from "@holochain/tryorama";
+import { runScenario, dhtSync, pause } from "@holochain/tryorama";
 import { EntryRecord } from "@holochain-open-dev/utils";
 import { toPromise } from "@holochain-open-dev/signals";
 
@@ -10,7 +10,8 @@ import { setup, setup4 } from "./setup.js";
 
 test("Alice creates a Household, bobs joins it", async () => {
   await runScenario(async (scenario) => {
-    const { alice, bob, carol, dave } = await setup4(scenario);
+    const { alice, bob, carol, dave, awaitConsistency } =
+      await setup4(scenario);
 
     const sample = await sampleHousehold(alice.store.client);
 
@@ -25,19 +26,13 @@ test("Alice creates a Household, bobs joins it", async () => {
     assert.ok(household);
 
     // Wait for the created entry to be propagated to the other node.
-    await dhtSync(
-      [alice.player, bob.player, carol.player, dave.player],
-      alice.player.cells[0].cell_id[0],
-    );
+    await awaitConsistency();
 
     await bob.store.client.requestToJoinHousehold(household.actionHash);
     await carol.store.client.requestToJoinHousehold(household.actionHash);
 
-    // Wait for the created entry to be propagated to the other node.
-    await dhtSync(
-      [alice.player, bob.player, carol.player, dave.player],
-      alice.player.cells[0].cell_id[0],
-    );
+    // // Wait for the created entry to be propagated to the other node.
+    await awaitConsistency();
 
     // Bob can't reject or accept the join request because he's not a member of the household
     await expect(
@@ -58,10 +53,8 @@ test("Alice creates a Household, bobs joins it", async () => {
     ).rejects.toThrowError(undefined);
 
     // Wait for the created entry to be propagated to the other node.
-    await dhtSync(
-      [alice.player, bob.player, carol.player, dave.player],
-      alice.player.cells[0].cell_id[0],
-    );
+    await awaitConsistency();
+
     members = await toPromise(
       alice.store.households.get(household.actionHash).members.live,
     );
@@ -77,10 +70,7 @@ test("Alice creates a Household, bobs joins it", async () => {
       bob.player.agentPubKey,
     );
 
-    await dhtSync(
-      [alice.player, bob.player, carol.player, dave.player],
-      alice.player.cells[0].cell_id[0],
-    );
+    await awaitConsistency();
 
     requestors = await toPromise(
       bob.store.households.get(household.actionHash).requestors.live,
@@ -89,10 +79,8 @@ test("Alice creates a Household, bobs joins it", async () => {
 
     await bob.store.client.requestToJoinHousehold(household.actionHash);
 
-    await dhtSync(
-      [alice.player, bob.player, carol.player, dave.player],
-      alice.player.cells[0].cell_id[0],
-    );
+    await awaitConsistency();
+
     requestors = await toPromise(
       carol.store.households.get(household.actionHash).requestors.live,
     );
@@ -103,10 +91,7 @@ test("Alice creates a Household, bobs joins it", async () => {
       bob.player.agentPubKey,
     );
 
-    await dhtSync(
-      [alice.player, bob.player, carol.player, dave.player],
-      alice.player.cells[0].cell_id[0],
-    );
+    await awaitConsistency();
 
     members = await toPromise(
       bob.store.households.get(household.actionHash).members.live,
@@ -136,10 +121,7 @@ test("Alice creates a Household, bobs joins it", async () => {
       carol.player.agentPubKey,
     );
 
-    await dhtSync(
-      [alice.player, bob.player, carol.player, dave.player],
-      alice.player.cells[0].cell_id[0],
-    );
+    await awaitConsistency();
 
     members = await toPromise(
       carol.store.households.get(household.actionHash).members.live,
@@ -161,10 +143,7 @@ test("Alice creates a Household, bobs joins it", async () => {
       household.actionHash,
     );
 
-    await dhtSync(
-      [alice.player, bob.player, carol.player, dave.player],
-      alice.player.cells[0].cell_id[0],
-    );
+    await awaitConsistency();
 
     await expect(
       () =>

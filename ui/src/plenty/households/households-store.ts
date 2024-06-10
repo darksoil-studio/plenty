@@ -145,6 +145,7 @@ export class HouseholdsStore {
         member,
         () => this.client.getHouseholdsForMember(member),
         "MemberToHouseholds",
+        1000,
       ),
       (links) =>
         slice(
