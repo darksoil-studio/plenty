@@ -22,7 +22,7 @@
         dnaManifest = ./workdir/dna.yaml;
         holochain = inputs'.holochain;
         zomes = {
-          notifications_integrity = inputs'.notifications.packages.notifications_integrity;
+    notifications_integrity = inputs'.notifications.packages.notifications_integrity;
           notifications = inputs'.notifications.packages.notifications;
           file_storage_integrity = inputs'.file-storage.packages.file_storage_integrity;
           file_storage = inputs'.file-storage.packages.file_storage;
@@ -33,6 +33,8 @@
 
           households_integrity = self'.packages.households_integrity;
           households = self'.packages.households;
+          producers_integrity = self'.packages.producers_integrity;
+          producers = self'.packages.producers;
         };
       };
   	};

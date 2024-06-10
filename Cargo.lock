@@ -6619,6 +6619,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "producers"
+version = "0.0.1"
+dependencies = [
+ "fixt 0.3.1-rc.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "futures",
+ "hdk 0.3.1-rc.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "holochain",
+ "producers_integrity",
+ "serde",
+ "tokio",
+]
+
+[[package]]
+name = "producers_integrity"
+version = "0.0.1"
+dependencies = [
+ "hdi 0.4.1-rc.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde",
+]
+
+[[package]]
 name = "prometheus"
 version = "0.13.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"

@@ -1,3 +1,42 @@
+[patch.crates-io.holo_hash]
+branch = "develop-0.3"
+git = "https://github.com/guillemcordoba/holochain"
+
+[patch.crates-io.holochain]
+branch = "develop-0.3"
+git = "https://github.com/guillemcordoba/holochain"
+
+[patch.crates-io.holochain_conductor_api]
+branch = "develop-0.3"
+git = "https://github.com/guillemcordoba/holochain"
+
+[patch.crates-io.holochain_integrity_types]
+branch = "develop-0.3"
+git = "https://github.com/guillemcordoba/holochain"
+
+[patch.crates-io.holochain_keystore]
+branch = "develop-0.3"
+git = "https://github.com/guillemcordoba/holochain"
+
+[patch.crates-io.holochain_nonce]
+branch = "develop-0.3"
+git = "https://github.com/guillemcordoba/holochain"
+
+[patch.crates-io.holochain_types]
+branch = "develop-0.3"
+git = "https://github.com/guillemcordoba/holochain"
+
+[patch.crates-io.holochain_zome_types]
+branch = "develop-0.3"
+git = "https://github.com/guillemcordoba/holochain"
+
+[patch.crates-io.kitsune_p2p_timestamp]
+branch = "develop-0.3"
+git = "https://github.com/guillemcordoba/holochain"
+
+[patch.crates-io.mr_bundle]
+branch = "develop-0.3"
+git = "https://github.com/guillemcordoba/holochain"
 [profile.dev]
 opt-level = "z"
 
@@ -9,9 +48,9 @@ members = ["src-tauri", "dnas/*/zomes/coordinator/*", "dnas/*/zomes/integrity/*"
 resolver = "2"
 
 [workspace.dependencies]
-hdi = "0.4.1-rc"
-hdk = "0.3.1-rc"
-serde = "1.0.197"
+hdi = "=0.4.1-rc.1"
+hdk = "=0.3.1-rc.1"
+serde = "1.0"
 
 [workspace.dependencies.holochain]
 default-features = false
@@ -24,14 +63,8 @@ path = "dnas/plenty/zomes/coordinator/households"
 [workspace.dependencies.households_integrity]
 path = "dnas/plenty/zomes/integrity/households"
 
-[patch.crates-io]
-holochain = { git = "https://github.com/guillemcordoba/holochain", branch = "develop-0.3" }
-holochain_nonce = { git = "https://github.com/guillemcordoba/holochain", branch = "develop-0.3" }
-holochain_types = { git = "https://github.com/guillemcordoba/holochain", branch = "develop-0.3" }
-holochain_zome_types = { git = "https://github.com/guillemcordoba/holochain", branch = "develop-0.3" }
-holochain_integrity_types = { git = "https://github.com/guillemcordoba/holochain", branch = "develop-0.3" }
-holochain_keystore = { git = "https://github.com/guillemcordoba/holochain", branch = "develop-0.3" }
-holo_hash = { git = "https://github.com/guillemcordoba/holochain", branch = "develop-0.3" }
-kitsune_p2p_timestamp = { git = "https://github.com/guillemcordoba/holochain", branch = "develop-0.3" }
-holochain_conductor_api = { git = "https://github.com/guillemcordoba/holochain", branch = "develop-0.3" }
-mr_bundle = { git = "https://github.com/guillemcordoba/holochain", branch = "develop-0.3" }
+[workspace.dependencies.producers]
+path = "dnas/plenty/zomes/coordinator/producers"
+
+[workspace.dependencies.producers_integrity]
+path = "dnas/plenty/zomes/integrity/producers"

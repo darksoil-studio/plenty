@@ -1,53 +1,65 @@
-manifest_version: '1'
+---
+manifest_version: "1"
 name: plenty
 integrity:
-  network_seed: null
-  properties: null
+  network_seed: ~
+  properties: ~
   origin_time: 1712757789015560
   zomes:
-  - name: profiles_integrity
-    hash: null
-    bundled: <NIX_PACKAGE>
-    dependencies: null
-    dylib: null
-  - name: file_storage_integrity
-    hash: null
-    bundled: <NIX_PACKAGE>
-    dependencies: null
-    dylib: null
-  - name: households_integrity
-    hash: null
-    bundled: ../../../target/wasm32-unknown-unknown/release/households_integrity.wasm
-    dependencies: null
-    dylib: null
-  - name: notifications_integrity
-    hash: null
-    bundled: <NIX_PACKAGE>
-    dependencies: null
-    dylib: null
+    - name: profiles_integrity
+      hash: ~
+      bundled: "<NIX_PACKAGE>"
+      dependencies: ~
+      dylib: ~
+    - name: file_storage_integrity
+      hash: ~
+      bundled: "<NIX_PACKAGE>"
+      dependencies: ~
+      dylib: ~
+    - name: households_integrity
+      hash: ~
+      bundled: "../../../target/wasm32-unknown-unknown/release/households_integrity.wasm"
+      dependencies: ~
+      dylib: ~
+    - name: notifications_integrity
+      hash: ~
+      bundled: "<NIX_PACKAGE>"
+      dependencies: ~
+      dylib: ~
+    - name: producers_integrity
+      hash: ~
+      bundled: "../../../target/wasm32-unknown-unknown/release/producers_integrity.wasm"
+      dependencies: ~
+      dylib: ~
 coordinator:
   zomes:
-  - name: profiles
-    hash: null
-    bundled: <NIX_PACKAGE>
-    dependencies:
-    - name: profiles_integrity
-    dylib: null
-  - name: file_storage
-    hash: null
-    bundled: <NIX_PACKAGE>
-    dependencies:
-    - name: file_storage_integrity
-    dylib: null
-  - name: households
-    hash: null
-    bundled: ../../../target/wasm32-unknown-unknown/release/households.wasm
-    dependencies:
-    - name: households_integrity
-    dylib: null
-  - name: notifications
-    hash: null
-    bundled: <NIX_PACKAGE>
-    dependencies:
-    - name: notifications_integrity
-    dylib: null
+    - name: profiles
+      hash: ~
+      bundled: "<NIX_PACKAGE>"
+      dependencies:
+        - name: profiles_integrity
+      dylib: ~
+    - name: file_storage
+      hash: ~
+      bundled: "<NIX_PACKAGE>"
+      dependencies:
+        - name: file_storage_integrity
+      dylib: ~
+    - name: households
+      hash: ~
+      bundled: "../../../target/wasm32-unknown-unknown/release/households.wasm"
+      dependencies:
+        - name: households_integrity
+      dylib: ~
+    - name: notifications
+      hash: ~
+      bundled: "<NIX_PACKAGE>"
+      dependencies:
+        - name: notifications_integrity
+      dylib: ~
+    - name: producers
+      hash: ~
+      bundled: "../../../target/wasm32-unknown-unknown/release/producers.wasm"
+      dependencies:
+        - name: producers_integrity
+      dylib: ~

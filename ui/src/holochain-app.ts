@@ -1,3 +1,7 @@
+import { producersStoreContext } from './plenty/producers/context.js';
+import { ProducersClient } from './plenty/producers/producers-client.js';
+import { ProducersStore } from './plenty/producers/producers-store.js';
+
 import { sharedStyles, wrapPathInSvg } from "@holochain-open-dev/elements";
 import "@holochain-open-dev/elements/dist/elements/display-error.js";
 import {
@@ -45,7 +49,11 @@ import { Household } from "./plenty/households/types.js";
 @localized()
 @customElement("holochain-app")
 export class HolochainApp extends SignalWatcher(LitElement) {
-  @provide({ context: householdsStoreContext })
+  @provide({ context: producersStoreContext })
+  @property()
+  _producersStore!: ProducersStore;
+
+@provide({ context: householdsStoreContext })
   @property()
   _householdStore!: HouseholdsStore;
 
@@ -115,6 +123,7 @@ export class HolochainApp extends SignalWatcher(LitElement) {
       ),
     };
     this._fileStorageClient = new FileStorageClient(appClient, "plenty");
+    this._producersStore = new ProducersStore(new ProducersClient(appClient, 'plenty'));
   }
 
   myHouseholdLatestVersion(): AsyncResult<EntryRecord<Household> | undefined> {
@@ -249,5 +258,4 @@ export class HolochainApp extends SignalWatcher(LitElement) {
       }
     `,
     sharedStyles,
-  ];
-}
+  ];}
