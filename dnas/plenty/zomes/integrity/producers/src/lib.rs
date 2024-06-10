@@ -1,3 +1,5 @@
+pub mod product;
+pub use product::*;
 pub mod producer;
 pub use producer::*;
 use hdi::prelude::*;
@@ -7,6 +9,7 @@ use hdi::prelude::*;
 #[unit_enum(UnitEntryTypes)]
 pub enum EntryTypes {
     Producer(Producer),
+    Product(Product),
 }
 #[derive(Serialize, Deserialize)]
 #[hdk_link_types]
@@ -14,6 +17,8 @@ pub enum LinkTypes {
     LiasonToProducers,
     ProducerUpdates,
     AllProducers,
+    ProducerToProducts,
+    ProductUpdates,
 }
 #[hdk_extern]
 pub fn genesis_self_check(
@@ -40,6 +45,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 producer,
                             )
                         }
+                        EntryTypes::Product(product) => {
+                            validate_create_product(
+                                EntryCreationAction::Create(action),
+                                product,
+                            )
+                        }
                     }
                 }
                 OpEntry::UpdateEntry { app_entry, action, .. } => {
@@ -48,6 +59,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                             validate_create_producer(
                                 EntryCreationAction::Update(action),
                                 producer,
+                            )
+                        }
+                        EntryTypes::Product(product) => {
+                            validate_create_product(
+                                EntryCreationAction::Update(action),
+                                product,
                             )
                         }
                     }
@@ -78,6 +95,29 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         }
                     };
                     match app_entry {
+                        EntryTypes::Product(product) => {
+                            let original_app_entry = must_get_valid_record(
+                                action.clone().original_action_address,
+                            )?;
+                            let original_product = match Product::try_from(
+                                original_app_entry,
+                            ) {
+                                Ok(entry) => entry,
+                                Err(e) => {
+                                    return Ok(
+                                        ValidateCallbackResult::Invalid(
+                                            format!("Expected to get Product from Record: {e:?}"),
+                                        ),
+                                    );
+                                }
+                            };
+                            validate_update_product(
+                                action,
+                                product,
+                                original_create_action,
+                                original_product,
+                            )
+                        }
                         EntryTypes::Producer(producer) => {
                             let original_app_entry = must_get_valid_record(
                                 action.clone().original_action_address,
@@ -157,6 +197,13 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 }
             };
             match original_app_entry {
+                EntryTypes::Product(original_product) => {
+                    validate_delete_product(
+                        delete_entry.clone().action,
+                        original_action,
+                        original_product,
+                    )
+                }
                 EntryTypes::Producer(original_producer) => {
                     validate_delete_producer(
                         delete_entry.clone().action,
@@ -192,6 +239,22 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 }
                 LinkTypes::AllProducers => {
                     validate_create_link_all_producers(
+                        action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
+                LinkTypes::ProducerToProducts => {
+                    validate_create_link_producer_to_products(
+                        action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
+                LinkTypes::ProductUpdates => {
+                    validate_create_link_product_updates(
                         action,
                         base_address,
                         target_address,
@@ -236,6 +299,24 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         tag,
                     )
                 }
+                LinkTypes::ProducerToProducts => {
+                    validate_delete_link_producer_to_products(
+                        action,
+                        original_action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
+                LinkTypes::ProductUpdates => {
+                    validate_delete_link_product_updates(
+                        action,
+                        original_action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
             }
         }
         FlatOp::StoreRecord(store_record) => {
@@ -246,6 +327,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                             validate_create_producer(
                                 EntryCreationAction::Create(action),
                                 producer,
+                            )
+                        }
+                        EntryTypes::Product(product) => {
+                            validate_create_product(
+                                EntryCreationAction::Create(action),
+                                product,
                             )
                         }
                     }
@@ -297,6 +384,37 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                     producer,
                                     original_action,
                                     original_producer,
+                                )
+                            } else {
+                                Ok(result)
+                            }
+                        }
+                        EntryTypes::Product(product) => {
+                            let result = validate_create_product(
+                                EntryCreationAction::Update(action.clone()),
+                                product.clone(),
+                            )?;
+                            if let ValidateCallbackResult::Valid = result {
+                                let original_product: Option<Product> = original_record
+                                    .entry()
+                                    .to_app_option()
+                                    .map_err(|e| wasm_error!(e))?;
+                                let original_product = match original_product {
+                                    Some(product) => product,
+                                    None => {
+                                        return Ok(
+                                            ValidateCallbackResult::Invalid(
+                                                "The updated entry type must be the same as the original entry type"
+                                                    .to_string(),
+                                            ),
+                                        );
+                                    }
+                                };
+                                validate_update_product(
+                                    action,
+                                    product,
+                                    original_action,
+                                    original_product,
                                 )
                             } else {
                                 Ok(result)
@@ -359,6 +477,13 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 original_producer,
                             )
                         }
+                        EntryTypes::Product(original_product) => {
+                            validate_delete_product(
+                                action,
+                                original_action,
+                                original_product,
+                            )
+                        }
                     }
                 }
                 OpRecord::CreateLink {
@@ -387,6 +512,22 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         }
                         LinkTypes::AllProducers => {
                             validate_create_link_all_producers(
+                                action,
+                                base_address,
+                                target_address,
+                                tag,
+                            )
+                        }
+                        LinkTypes::ProducerToProducts => {
+                            validate_create_link_producer_to_products(
+                                action,
+                                base_address,
+                                target_address,
+                                tag,
+                            )
+                        }
+                        LinkTypes::ProductUpdates => {
+                            validate_create_link_product_updates(
                                 action,
                                 base_address,
                                 target_address,
@@ -438,6 +579,24 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         }
                         LinkTypes::AllProducers => {
                             validate_delete_link_all_producers(
+                                action,
+                                create_link.clone(),
+                                base_address,
+                                create_link.target_address,
+                                create_link.tag,
+                            )
+                        }
+                        LinkTypes::ProducerToProducts => {
+                            validate_delete_link_producer_to_products(
+                                action,
+                                create_link.clone(),
+                                base_address,
+                                create_link.target_address,
+                                create_link.tag,
+                            )
+                        }
+                        LinkTypes::ProductUpdates => {
+                            validate_delete_link_product_updates(
                                 action,
                                 create_link.clone(),
                                 base_address,

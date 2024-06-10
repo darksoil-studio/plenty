@@ -1,4 +1,7 @@
-pub mod all_producers;
+
+            pub mod product;
+
+            pub mod all_producers;
 
 pub mod producer;
 use hdk::prelude::*;
@@ -140,3 +143,5 @@ fn get_entry_for_action(action_hash: &ActionHash) -> ExternResult<Option<EntryTy
     };
     EntryTypes::deserialize_from_type(*zome_index, *entry_index, entry)
 }
+
+            

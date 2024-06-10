@@ -16,6 +16,7 @@ import { ActionCommittedSignal } from '@holochain-open-dev/utils';
 export type ProducersSignal = ActionCommittedSignal<EntryTypes, LinkTypes>;
 
 export type EntryTypes =
+ | ({ type: 'Product'; } & Product)
  | ({  type: 'Producer'; } & Producer);
 
 export type LinkTypes = string;
@@ -53,5 +54,44 @@ export interface Producer {
   editors: ProducerEditors;
 
   sorters: ProducerSorters;
+}
+
+
+
+export interface PackagingUnit {
+  type:  
+    | 'Piece'
+        | 'Kilograms'
+        | 'Grams'
+        | 'Liters'
+        | 'Pounds'
+        | 'Ounces'
+    ;
+}
+
+export interface Product { 
+  producer_hash: ActionHash;
+
+  name: string;
+
+  product_id: string;
+
+  description: string;
+
+  categories: Array<string>;
+
+  packaging: PackagingUnit;
+
+  maximum_available: number | undefined;
+
+  price: number;
+
+  vat_percentage: number;
+
+  margin_percentage: number | undefined;
+
+  origin: string | undefined;
+
+  ingredients: string | undefined;
 }
 

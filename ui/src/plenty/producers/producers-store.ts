@@ -1,3 +1,5 @@
+import { Product } from './types.js';
+
 import { Producer } from './types.js';
 
 import { 
@@ -17,6 +19,7 @@ import { NewEntryAction, Record, ActionHash, EntryHash, AgentPubKey } from '@hol
 import { ProducersClient } from './producers-client.js';
 
 export class ProducersStore {
+
   constructor(public client: ProducersClient) {}
   
   /** Producer */
@@ -26,6 +29,25 @@ export class ProducersStore {
     original: immutableEntrySignal(() => this.client.getOriginalProducer(producerHash)),
     allRevisions: allRevisionsOfEntrySignal(this.client, () => this.client.getAllRevisionsForProducer(producerHash)),
     deletes: deletesForEntrySignal(this.client, producerHash, () => this.client.getAllDeletesForProducer(producerHash)),
+    products: {
+      live: pipe(
+        liveLinksSignal(
+          this.client,
+          producerHash,
+          () => this.client.getProductsForProducer(producerHash),
+          'ProducerToProducts'
+        ), 
+        links => slice(this.products, links.map(l => l.target))
+      ),
+      deleted: pipe(
+        deletedLinksSignal(
+          this.client,
+          producerHash,
+          () => this.client.getDeletedProductsForProducer(producerHash),
+          'ProducerToProducts'
+        ), links => slice(this.products, links.map(l => l[0].hashed.content.target_address))
+      ),
+    },
   }));
 
   producersForLiason = new LazyHoloHashMap((liason: AgentPubKey) => ({
@@ -57,4 +79,13 @@ export class ProducersStore {
     ),
     allProducers => slice(this.producers, allProducers.map(l => l.target))
   );
+  /** Product */
+
+  products = new LazyHoloHashMap((productHash: ActionHash) => ({
+    latestVersion: latestVersionOfEntrySignal(this.client, () => this.client.getLatestProduct(productHash)),
+    original: immutableEntrySignal(() => this.client.getOriginalProduct(productHash)),
+    allRevisions: allRevisionsOfEntrySignal(this.client, () => this.client.getAllRevisionsForProduct(productHash)),
+    deletes: deletesForEntrySignal(this.client, productHash, () => this.client.getAllDeletesForProduct(productHash)),
+  }));
+
 }

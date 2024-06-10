@@ -1,3 +1,5 @@
+import { Product } from './types.js';
+
 import { Producer } from './types.js';
 
 import {
@@ -139,6 +141,93 @@ export class ProducersZomeMock extends ZomeMock implements AppClient {
       create_link_hash: await fakeActionHash()
     })));
   }
+  /** Product */
+  products = new HoloHashMap<ActionHash, {
+    deletes: Array<SignedActionHashed<Delete>>;
+    revisions: Array<Record>;
+  }>();
+  productsForProducer = new HoloHashMap<ActionHash, Link[]>();
+
+  async create_product(product: Product): Promise<Record> {
+    const entryHash = hash(product, HashType.ENTRY);
+    const record = await fakeRecord(await fakeCreateAction(entryHash), fakeEntry(product));
+    
+    this.products.set(record.signed_action.hashed.hash, {
+      deletes: [],
+      revisions: [record]
+    });
+  
+    const existingProducerHash = this.productsForProducer.get(product.producer_hash) || [];
+    this.productsForProducer.set(product.producer_hash, [...existingProducerHash, { 
+      target: record.signed_action.hashed.hash, 
+      author: this.myPubKey,
+      timestamp: Date.now() * 1000,
+      zome_index: 0,
+      link_type: 0,
+      tag: new Uint8Array(),
+      create_link_hash: await fakeActionHash()
+    }]);
+
+    return record;
+  }
+  
+  async get_latest_product(productHash: ActionHash): Promise<Record | undefined> {
+    const product = this.products.get(productHash);
+    return product ? product.revisions[product.revisions.length - 1] : undefined;
+  }
+  
+  async get_all_revisions_for_product(productHash: ActionHash): Promise<Record[] | undefined> {
+    const product = this.products.get(productHash);
+    return product ? product.revisions : undefined;
+  }
+  
+  async get_original_product(productHash: ActionHash): Promise<Record | undefined> {
+    const product = this.products.get(productHash);
+    return product ? product.revisions[0] : undefined;
+  }
+  
+  async get_all_deletes_for_product(productHash: ActionHash): Promise<Array<SignedActionHashed<Delete>> | undefined> {
+    const product = this.products.get(productHash);
+    return product ? product.deletes : undefined;
+  }
+
+  async get_oldest_delete_for_product(productHash: ActionHash): Promise<SignedActionHashed<Delete> | undefined> {
+    const product = this.products.get(productHash);
+    return product ? product.deletes[0] : undefined;
+  }
+  async delete_product(original_product_hash: ActionHash): Promise<ActionHash> {
+    const record = await fakeRecord(await fakeDeleteEntry(original_product_hash));
+    
+    this.products.get(original_product_hash).deletes.push(record.signed_action as SignedActionHashed<Delete>);
+    
+    return record.signed_action.hashed.hash;
+  }
+
+  async update_product(input: { original_product_hash: ActionHash; previous_product_hash: ActionHash; updated_product: Product; }): Promise<Record> {
+    const record = await fakeRecord(await fakeUpdateEntry(input.previous_product_hash, undefined, undefined, fakeEntry(input.updated_product)), fakeEntry(input.updated_product));
+
+  this.products.get(input.original_product_hash).revisions.push(record);
+     
+    const product = input.updated_product;
+    
+    const existingProducerHash = this.productsForProducer.get(product.producer_hash) || [];
+    this.productsForProducer.set(product.producer_hash, [...existingProducerHash, {
+      target: record.signed_action.hashed.hash, 
+      author: record.signed_action.hashed.content.author,
+      timestamp: record.signed_action.hashed.content.timestamp,
+      zome_index: 0,
+      link_type: 0,
+      tag: new Uint8Array(),
+      create_link_hash: await fakeActionHash()
+    }]);
+    
+    return record;
+  }
+  
+  async get_products_for_producer(producerHash: ActionHash): Promise<Array<Link>> {
+    return this.productsForProducer.get(producerHash) || [];
+  }
+
 
 }
 
@@ -159,3 +248,23 @@ export async function sampleProducer(client: ProducersClient, partialProducer: P
     };
 }
 
+
+export async function sampleProduct(client: ProducersClient, partialProduct: Partial<Product> = {}): Promise<Product> {
+    return {
+        ...{
+          producer_hash: partialProduct.producer_hash || (await client.createProducer(await sampleProducer(client))).actionHash,
+          name: "Lorem ipsum 2",
+          product_id: "Lorem ipsum 2",
+          description: "Lorem ipsum 2",
+          categories: ["Lorem ipsum 2"],
+          packaging: { type: 'Piece' },
+          maximum_available: 3,
+          price: 3,
+          vat_percentage: 3,
+          margin_percentage: 3,
+          origin: "Lorem ipsum 2",
+          ingredients: "Lorem ipsum 2",
+        },
+        ...partialProduct
+    };
+}

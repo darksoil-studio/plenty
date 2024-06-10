@@ -6322,11 +6322,11 @@
         "scaffolding": "scaffolding_18"
       },
       "locked": {
-        "lastModified": 1718027407,
-        "narHash": "sha256-ol8hrtKPt1UQJNDmuEJSE9LpayMyCOSZ56jO/3/JbGI=",
+        "lastModified": 1718029119,
+        "narHash": "sha256-eH+Hng0OKCUhcYr4HYC1RiHyldAGC4SatVNUAMmEEz4=",
         "owner": "holochain-open-dev",
         "repo": "templates",
-        "rev": "c202e494882d78727810804a73622a21f8ea69f9",
+        "rev": "2b6e9f77b1bf512522c096411a9ce65d6f78d4b8",
         "type": "github"
       },
       "original": {
