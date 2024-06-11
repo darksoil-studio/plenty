@@ -9,14 +9,14 @@ pub enum PackagingUnit {
     Pounds,
     Ounces,
 }
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct Packaging {
-    unit: PackagingUnit,
-    amount: u32,
-    estimate: bool,
+    pub unit: PackagingUnit,
+    pub amount: u32,
+    pub estimate: bool,
 }
 #[hdk_entry_helper]
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub struct Product {
     pub producer_hash: ActionHash,
     pub name: String,
