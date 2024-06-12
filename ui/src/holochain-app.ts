@@ -2,7 +2,11 @@ import { producersStoreContext } from "./plenty/producers/context.js";
 import { ProducersClient } from "./plenty/producers/producers-client.js";
 import { ProducersStore } from "./plenty/producers/producers-store.js";
 
-import { sharedStyles, wrapPathInSvg } from "@holochain-open-dev/elements";
+import {
+  Router,
+  sharedStyles,
+  wrapPathInSvg,
+} from "@holochain-open-dev/elements";
 import "@holochain-open-dev/elements/dist/elements/display-error.js";
 import {
   FileStorageClient,
@@ -17,7 +21,7 @@ import "@holochain-open-dev/profiles/dist/elements/agent-avatar.js";
 import "@holochain-open-dev/profiles/dist/elements/profile-list-item-skeleton.js";
 import "@holochain-open-dev/profiles/dist/elements/profile-prompt.js";
 import { AppClient, AppWebsocket } from "@holochain/client";
-import { provide } from "@lit/context";
+import { createContext, provide } from "@lit/context";
 import { localized, msg } from "@lit/localize";
 import "@shoelace-style/shoelace/dist/components/icon-button/icon-button.js";
 import "@shoelace-style/shoelace/dist/components/spinner/spinner.js";
@@ -33,7 +37,6 @@ import {
   notificationsStoreContext,
 } from "@darksoil-studio/notifications";
 import "@darksoil-studio/notifications/dist/elements/my-notifications-icon-button.js";
-import { Router, Routes } from "@lit-labs/router";
 import { mdiArrowLeft } from "@mdi/js";
 
 import "./home-page.js";
@@ -43,8 +46,7 @@ import "./plenty/households/elements/my-household.js";
 import "./plenty/producers/elements/create-producer.js";
 import { HouseholdsClient } from "./plenty/households/households-client.js";
 import { HouseholdsStore } from "./plenty/households/households-store.js";
-
-import { Household } from "./plenty/households/types.js";
+import { routerContext } from "./context.js";
 
 @localized()
 @customElement("holochain-app")
@@ -75,10 +77,10 @@ export class HolochainApp extends SignalWatcher(LitElement) {
 
   _client!: AppClient;
 
+  @provide({ context: routerContext })
   router = new Router(this, [
     {
       path: "/",
-      render: () => html``,
       enter: () => {
         this.router.goto("/home/");
         return false;
@@ -128,7 +130,6 @@ export class HolochainApp extends SignalWatcher(LitElement) {
       ...this._notificationsStore.notificationsConfig.types,
       ...this._householdStore.notificationsTypes(() => {
         this.router.goto("/my-household");
-        window.history.pushState(null, "", "/my-household");
       }),
     };
     this._fileStorageClient = new FileStorageClient(appClient, "plenty");
@@ -146,10 +147,13 @@ export class HolochainApp extends SignalWatcher(LitElement) {
         <sl-icon-button
           .src=${wrapPathInSvg(mdiArrowLeft)}
           @click=${() => {
-            window.history.back();
-            // if (window.location.pathname === "/my-household") {
-            // window.history.pushState(Date.now(), "", "/");
-            // }
+            this.router.back();
+
+            setTimeout(() => {
+              if (this.router.currentPathname() === "/my-household") {
+                this.router.goto("/");
+              }
+            });
           }}
         ></sl-icon-button>
         <span class="title" style="flex: 1">${msg("My Household")}</span>
@@ -165,8 +169,6 @@ export class HolochainApp extends SignalWatcher(LitElement) {
     return html`
       <create-producer
         @producer-created=${() => {
-          // window.location.pathname = "/home/producers/";
-          window.history.pushState({}, "", "/home/producers/");
           this.router.goto("/home/producers/");
         }}
       ></create-producer>

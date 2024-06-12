@@ -1,6 +1,5 @@
-import { sharedStyles, wrapPathInSvg } from "@holochain-open-dev/elements";
+import { Router, Routes, sharedStyles } from "@holochain-open-dev/elements";
 import { AsyncResult, SignalWatcher } from "@holochain-open-dev/signals";
-import { Routes } from "@lit-labs/router";
 import { LitElement, css, html } from "lit";
 import { customElement } from "lit/decorators.js";
 import "@shoelace-style/shoelace/dist/components/tab-group/tab-group.js";
@@ -13,7 +12,7 @@ import { Household } from "./plenty/households/types.js";
 import { HouseholdsStore } from "./plenty/households/households-store.js";
 import { householdsStoreContext } from "./plenty/households/context.js";
 import { msg } from "@lit/localize";
-import { mdiArrowLeft } from "@mdi/js";
+import { routerContext } from "./context.js";
 
 @customElement("home-page")
 export class HomePage extends SignalWatcher(LitElement) {
@@ -23,37 +22,28 @@ export class HomePage extends SignalWatcher(LitElement) {
   @consume({ context: householdsStoreContext, subscribe: true })
   householdsStore!: HouseholdsStore;
 
+  @consume({ context: routerContext, subscribe: true })
+  router!: Router;
+
   routes = new Routes(this, [
     {
       path: "",
       enter: () => {
-        this.routes.goto("orders");
-
+        this.routes.goto("orders/");
         return false;
       },
-      // render: () => html`
-      //   <sl-tab-panel name="orders"><all-orders></all-orders></sl-tab-panel>
-      // `,
     },
     {
       path: "orders/*",
-      render: () => html`
-        <sl-tab-panel name="orders"><all-orders></all-orders></sl-tab-panel>
-      `,
+      render: () => html` <all-orders></all-orders> `,
     },
     {
       path: "producers/*",
-      render: () => html`
-        <sl-tab-panel name="producers" style="height: 100%"
-          ><producers-page></producers-page>
-        </sl-tab-panel>
-      `,
+      render: () => html` <producers-page></producers-page> `,
     },
     {
-      path: "members",
-      render: () => html`
-        <sl-tab-panel name="members"> <all-members></all-members></sl-tab-panel>
-      `,
+      path: "members/",
+      render: () => html` <all-members></all-members> `,
     },
   ]);
 
@@ -81,10 +71,10 @@ export class HomePage extends SignalWatcher(LitElement) {
           tooltip
         ></display-error>`;
       case "completed":
-        return html`<a
+        return html`<div
           class="row"
           style="align-items: center; cursor: pointer"
-          href="/my-household"
+          @click=${() => this.router.goto("/my-household")}
         >
           <show-image
             style="width: 32px; height: 32px;"
@@ -110,32 +100,30 @@ export class HomePage extends SignalWatcher(LitElement) {
         <sl-tab-group placement="start" style="flex: 1">
           <sl-tab
             slot="nav"
-            .active=${window.location.pathname.endsWith("/orders/")}
-            panel="orders"
+            .active=${this.routes.currentPathname().endsWith("orders/")}
             @click=${() => {
-              window.history.pushState({}, "", this.routes.link("orders/"));
               this.routes.goto("orders/");
             }}
             >${msg("Orders")}</sl-tab
           >
           <sl-tab
             slot="nav"
-            panel="producers"
-            .active=${window.location.pathname.endsWith("/producers/")}
+            .active=${this.routes.currentPathname().endsWith("producers/")}
             @click=${() => {
-              window.history.pushState({}, "", this.routes.link("producers/"));
               this.routes.goto("producers/");
             }}
             >${msg("Producers")}</sl-tab
           >
           <sl-tab
             slot="nav"
-            .active=${window.location.pathname.endsWith("/members/")}
-            panel="members"
+            .active=${this.routes.currentPathname().endsWith("members/")}
+            @click=${() => {
+              this.routes.goto("members/");
+            }}
             >${msg("Members")}</sl-tab
           >
 
-          ${this.routes.outlet()}
+          <sl-tab-panel> ${this.routes.outlet()}</sl-tab-panel>
         </sl-tab-group>
       </div>
     `;
