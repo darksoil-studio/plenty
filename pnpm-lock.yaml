@@ -69,20 +69,20 @@ importers:
         specifier: github:darksoil-studio/notifications#5c5940e33e37084cfe846b6be205efcee7892fc5&path:ui
         version: https://codeload.github.com/darksoil-studio/notifications/tar.gz/5c5940e33e37084cfe846b6be205efcee7892fc5#path:ui(@types/react@18.3.3)
       '@holochain-open-dev/profiles':
-        specifier: github:holochain-open-dev/profiles#5dae01ec753b997f0b0adbdb5accf3a1b50d27e6&path:ui
-        version: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/5dae01ec753b997f0b0adbdb5accf3a1b50d27e6#path:ui(@types/react@18.3.3)
+        specifier: github:holochain-open-dev/profiles#d7ea5ffc05312b00acd6c9446cba81d7e7852752&path:ui
+        version: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/d7ea5ffc05312b00acd6c9446cba81d7e7852752#path:ui(@types/react@18.3.3)
       '@holochain-open-dev/signals':
-        specifier: ^0.300.0-rc
-        version: 0.300.0-rc.3(@types/react@18.3.3)
+        specifier: ^0.300.0
+        version: 0.300.0(@types/react@18.3.3)
       '@holochain-open-dev/utils':
-        specifier: ^0.300.0-rc
-        version: 0.300.0-rc.0
+        specifier: ^0.300.0
+        version: 0.300.0
       '@holochain/client':
-        specifier: ^0.17.0-rc
-        version: 0.17.0-rc.0
+        specifier: ^0.17.0
+        version: 0.17.0
       '@holochain/tryorama':
-        specifier: ^v0.16.0-dev.7
-        version: 0.16.0-dev.7
+        specifier: ^v0.16.0
+        version: 0.16.0
       '@msgpack/msgpack':
         specifier: ^2.7.0
         version: 2.8.0
@@ -99,23 +99,23 @@ importers:
         specifier: github:darksoil-studio/notifications#5c5940e33e37084cfe846b6be205efcee7892fc5&path:ui
         version: https://codeload.github.com/darksoil-studio/notifications/tar.gz/5c5940e33e37084cfe846b6be205efcee7892fc5#path:ui(@types/react@18.3.3)
       '@holochain-open-dev/elements':
-        specifier: ^0.300.0-rc.2
-        version: 0.300.0-rc.2(@types/react@18.3.3)
+        specifier: ^0.300.0
+        version: 0.300.0(@types/react@18.3.3)
       '@holochain-open-dev/file-storage':
-        specifier: github:holochain-open-dev/file-storage#7761b9e0057d14048a93a859bd6dc6170db24607&path:ui
-        version: https://codeload.github.com/holochain-open-dev/file-storage/tar.gz/7761b9e0057d14048a93a859bd6dc6170db24607#path:ui(@types/react@18.3.3)
+        specifier: github:holochain-open-dev/file-storage#bd25db205ecf2b493045adcdcfdfc7fc1d93758e&path:ui
+        version: https://codeload.github.com/holochain-open-dev/file-storage/tar.gz/bd25db205ecf2b493045adcdcfdfc7fc1d93758e#path:ui(@types/react@18.3.3)
       '@holochain-open-dev/profiles':
-        specifier: github:holochain-open-dev/profiles#5dae01ec753b997f0b0adbdb5accf3a1b50d27e6&path:ui
-        version: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/5dae01ec753b997f0b0adbdb5accf3a1b50d27e6#path:ui(@types/react@18.3.3)
+        specifier: github:holochain-open-dev/profiles#d7ea5ffc05312b00acd6c9446cba81d7e7852752&path:ui
+        version: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/d7ea5ffc05312b00acd6c9446cba81d7e7852752#path:ui(@types/react@18.3.3)
       '@holochain-open-dev/signals':
-        specifier: ^0.300.0-rc.2
-        version: 0.300.0-rc.3(@types/react@18.3.3)
+        specifier: ^0.300.0
+        version: 0.300.0(@types/react@18.3.3)
       '@holochain-open-dev/utils':
-        specifier: ^0.300.0-rc
-        version: 0.300.0-rc.0
+        specifier: ^0.300.0
+        version: 0.300.0
       '@holochain/client':
-        specifier: ^0.17.0-rc
-        version: 0.17.0-rc.0
+        specifier: ^0.17.0
+        version: 0.17.0
       '@lit/context':
         specifier: ^1.0.0
         version: 1.1.2
@@ -551,36 +551,43 @@ packages:
   '@holo-host/identicon@0.1.0':
     resolution: {integrity: sha512-Dn5pTV/m3XaK1Zvq3liw/vQUt7goM7Y84x2zUyH8cb9CNMs4kPCNHs3kalbJZ/ymzFvwcdiLwwNW8AKk+WWN5A==}
 
-  '@holochain-open-dev/elements@0.300.0-rc.2':
-    resolution: {integrity: sha512-lw8VXxTp457dUQl4dwf3X/3al83hmcdLoy8hpEoPesCO1iV6YIHabJDm+I+Jg9s2/Kxfaa3mNBrNsQUiVpLLDA==}
+  '@holochain-open-dev/elements@0.300.0':
+    resolution: {integrity: sha512-ooctMs2f/tPqrjdNLaRFYM8HhoBSmB41sXz6peAAI3k40/ZNIgTRPd73+Ww/fjNKsMifDloiBF4hm4ZdmaU1rA==}
 
-  '@holochain-open-dev/file-storage@https://codeload.github.com/holochain-open-dev/file-storage/tar.gz/7761b9e0057d14048a93a859bd6dc6170db24607#path:ui':
-    resolution: {path: ui, tarball: https://codeload.github.com/holochain-open-dev/file-storage/tar.gz/7761b9e0057d14048a93a859bd6dc6170db24607}
-    version: 0.300.0-rc
+  '@holochain-open-dev/elements@0.300.0-rc.3':
+    resolution: {integrity: sha512-XFUsVWsII3KrgnaVp5tLubzljcqAqgn0sXIBBcXml4LYqQJ6p5bPpfu5/vtne4PEodD9xdDSKpFsNNqW7yJPRA==}
+
+  '@holochain-open-dev/file-storage@https://codeload.github.com/holochain-open-dev/file-storage/tar.gz/bd25db205ecf2b493045adcdcfdfc7fc1d93758e#path:ui':
+    resolution: {path: ui, tarball: https://codeload.github.com/holochain-open-dev/file-storage/tar.gz/bd25db205ecf2b493045adcdcfdfc7fc1d93758e}
+    version: 0.300.0
 
   '@holochain-open-dev/profiles@https://codeload.github.com/holochain-open-dev/profiles/tar.gz/5dae01ec753b997f0b0adbdb5accf3a1b50d27e6#path:ui':
     resolution: {path: ui, tarball: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/5dae01ec753b997f0b0adbdb5accf3a1b50d27e6}
     version: 0.300.0-rc.0
 
-  '@holochain-open-dev/signals@0.300.0-rc.3':
-    resolution: {integrity: sha512-B8hhxOYX22kUcmVwSUSIQY34SA4EKpEA/aY7fK/eN9DFU9T81RDESQnO+hHZsUCdxw+xcblVMm5s0Yc4jkBFZw==}
+  '@holochain-open-dev/profiles@https://codeload.github.com/holochain-open-dev/profiles/tar.gz/d7ea5ffc05312b00acd6c9446cba81d7e7852752#path:ui':
+    resolution: {path: ui, tarball: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/d7ea5ffc05312b00acd6c9446cba81d7e7852752}
+    version: 0.300.0
 
-  '@holochain-open-dev/utils@0.300.0-rc.0':
-    resolution: {integrity: sha512-D1mqrpnWnJPnEceGzxzCjo3xe4ADgpTd+CX+F4+HZpyWkxUIIFiQIpjm6i0HO+WmEJblvLWXSN5xG1neC1UU0g==}
+  '@holochain-open-dev/signals@0.300.0':
+    resolution: {integrity: sha512-3qk/vsV1rUaL6mkaCP/MxeKWXx3isnqBzWA0Qe2nqBkXRs4b4w9wVdBZunhN5CKJEDz7/2hcE3fa7k0H8whMDA==}
+
+  '@holochain-open-dev/utils@0.300.0':
+    resolution: {integrity: sha512-wGS4zEufxSm45tLjKRUt+4jJ4UjXhUh228UDtEjqWY9oUpYMj2BDbgAqHUg7M9dqU0z9+FVmhdyUVQEzX5C0mg==}
 
   '@holochain-playground/cli@0.300.0-rc.0':
     resolution: {integrity: sha512-8LBZHl6u1NRdbltNxmxfBZCpg8KBH0xvsQJzv0+Gc7kBgtP186bISVoGlugyx8IqK3nxI7mi5J9mGZfqhjIfHQ==}
     hasBin: true
 
-  '@holochain/client@0.17.0-rc.0':
-    resolution: {integrity: sha512-DyoAe6Gf7Atpn5f+WO8Lj08G4Vfu5p5U9PuUlOkm5gjfwTxHU6rOTAmdEWz1QcA2Yne3cmUj+qqpofTSVqB/Eg==}
+  '@holochain/client@0.17.0':
+    resolution: {integrity: sha512-jDIv2kjfa+oBiQO7wjl09ELaPbVFoNu7f+2Sk3aLdf5AfVE/O8C6iZFGtF1huLKDJM8LPjRlKrt/Obt5ThMhbQ==}
     engines: {node: '>=18.0.0 || >=20.0.0'}
 
   '@holochain/serialization@0.1.0-beta-rc.3':
     resolution: {integrity: sha512-DJx4V2KXHVLciyOGjOYKTM/JLBpBEZ3RsPIRCgf7qmwhQdxXvhi2p+oFFRD51yUT5uC1/MzIVeJCl/R60PwFbw==}
 
-  '@holochain/tryorama@0.16.0-dev.7':
-    resolution: {integrity: sha512-4YlGM7EkgIPhmkoLxHIWlVj1z2Z1WzSKybzhYozysB/BQoifIXN1vkw42bDfCc6EE/4UBU7MT7ynYAVMsOADpw==}
+  '@holochain/tryorama@0.16.0':
+    resolution: {integrity: sha512-5cp01iHqj/DL7cujXanZ85x4M9LZj27k333qGJUg1JfBJ5kfS89kdQLGIM6h97lvuBqqkhTL4pq7M2Mo6MLe8A==}
     engines: {node: '>=18.0.0 || >=20.0.0'}
 
   '@humanwhocodes/config-array@0.11.14':
@@ -2807,11 +2814,11 @@ snapshots:
 
   '@darksoil-studio/notifications@https://codeload.github.com/darksoil-studio/notifications/tar.gz/5c5940e33e37084cfe846b6be205efcee7892fc5#path:ui(@types/react@18.3.3)':
     dependencies:
-      '@holochain-open-dev/elements': 0.300.0-rc.2(@types/react@18.3.3)
+      '@holochain-open-dev/elements': 0.300.0-rc.3(@types/react@18.3.3)
       '@holochain-open-dev/profiles': https://codeload.github.com/holochain-open-dev/profiles/tar.gz/5dae01ec753b997f0b0adbdb5accf3a1b50d27e6#path:ui(@types/react@18.3.3)
-      '@holochain-open-dev/signals': 0.300.0-rc.3(@types/react@18.3.3)
-      '@holochain-open-dev/utils': 0.300.0-rc.0
-      '@holochain/client': 0.17.0-rc.0
+      '@holochain-open-dev/signals': 0.300.0(@types/react@18.3.3)
+      '@holochain-open-dev/utils': 0.300.0
+      '@holochain/client': 0.17.0
       '@lit/context': 1.1.2
       '@lit/localize': 0.12.1
       '@mdi/js': 7.4.47
@@ -2994,10 +3001,10 @@ snapshots:
 
   '@holo-host/identicon@0.1.0': {}
 
-  '@holochain-open-dev/elements@0.300.0-rc.2(@types/react@18.3.3)':
+  '@holochain-open-dev/elements@0.300.0(@types/react@18.3.3)':
     dependencies:
       '@holo-host/identicon': 0.1.0
-      '@holochain/client': 0.17.0-rc.0
+      '@holochain/client': 0.17.0
       '@lit-labs/router': 0.1.3
       '@lit/localize': 0.12.1
       '@mdi/js': 7.4.47
@@ -3012,11 +3019,29 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@holochain-open-dev/file-storage@https://codeload.github.com/holochain-open-dev/file-storage/tar.gz/7761b9e0057d14048a93a859bd6dc6170db24607#path:ui(@types/react@18.3.3)':
+  '@holochain-open-dev/elements@0.300.0-rc.3(@types/react@18.3.3)':
     dependencies:
-      '@holochain-open-dev/elements': 0.300.0-rc.2(@types/react@18.3.3)
-      '@holochain-open-dev/utils': 0.300.0-rc.0
-      '@holochain/client': 0.17.0-rc.0
+      '@holo-host/identicon': 0.1.0
+      '@holochain/client': 0.17.0
+      '@lit-labs/router': 0.1.3
+      '@lit/localize': 0.12.1
+      '@mdi/js': 7.4.47
+      '@shoelace-style/shoelace': 2.15.1(@types/react@18.3.3)
+      lit: 3.1.4
+      prosemirror-commands: 1.5.2
+      prosemirror-keymap: 1.2.2
+      prosemirror-state: 1.4.3
+      prosemirror-view: 1.33.8
+    transitivePeerDependencies:
+      - '@types/react'
+      - bufferutil
+      - utf-8-validate
+
+  '@holochain-open-dev/file-storage@https://codeload.github.com/holochain-open-dev/file-storage/tar.gz/bd25db205ecf2b493045adcdcfdfc7fc1d93758e#path:ui(@types/react@18.3.3)':
+    dependencies:
+      '@holochain-open-dev/elements': 0.300.0(@types/react@18.3.3)
+      '@holochain-open-dev/utils': 0.300.0
+      '@holochain/client': 0.17.0
       '@lit-labs/task': 2.1.2
       '@lit/context': 1.1.2
       '@lit/localize': 0.12.1
@@ -3031,10 +3056,10 @@ snapshots:
 
   '@holochain-open-dev/profiles@https://codeload.github.com/holochain-open-dev/profiles/tar.gz/5dae01ec753b997f0b0adbdb5accf3a1b50d27e6#path:ui(@types/react@18.3.3)':
     dependencies:
-      '@holochain-open-dev/elements': 0.300.0-rc.2(@types/react@18.3.3)
-      '@holochain-open-dev/signals': 0.300.0-rc.3(@types/react@18.3.3)
-      '@holochain-open-dev/utils': 0.300.0-rc.0
-      '@holochain/client': 0.17.0-rc.0
+      '@holochain-open-dev/elements': 0.300.0(@types/react@18.3.3)
+      '@holochain-open-dev/signals': 0.300.0(@types/react@18.3.3)
+      '@holochain-open-dev/utils': 0.300.0
+      '@holochain/client': 0.17.0
       '@lit/context': 1.1.2
       '@lit/localize': 0.12.1
       '@mdi/js': 7.4.47
@@ -3046,10 +3071,27 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@holochain-open-dev/signals@0.300.0-rc.3(@types/react@18.3.3)':
+  '@holochain-open-dev/profiles@https://codeload.github.com/holochain-open-dev/profiles/tar.gz/d7ea5ffc05312b00acd6c9446cba81d7e7852752#path:ui(@types/react@18.3.3)':
     dependencies:
-      '@holochain-open-dev/utils': 0.300.0-rc.0
-      '@holochain/client': 0.17.0-rc.0
+      '@holochain-open-dev/elements': 0.300.0(@types/react@18.3.3)
+      '@holochain-open-dev/signals': 0.300.0(@types/react@18.3.3)
+      '@holochain-open-dev/utils': 0.300.0
+      '@holochain/client': 0.17.0
+      '@lit/context': 1.1.2
+      '@lit/localize': 0.12.1
+      '@mdi/js': 7.4.47
+      '@msgpack/msgpack': 2.8.0
+      '@shoelace-style/shoelace': 2.15.1(@types/react@18.3.3)
+      lit: 3.1.4
+    transitivePeerDependencies:
+      - '@types/react'
+      - bufferutil
+      - utf-8-validate
+
+  '@holochain-open-dev/signals@0.300.0(@types/react@18.3.3)':
+    dependencies:
+      '@holochain-open-dev/utils': 0.300.0
+      '@holochain/client': 0.17.0
       '@shoelace-style/shoelace': 2.15.1(@types/react@18.3.3)
       async-signals: 0.1.11
       lit-signal-watcher: 0.1.1
@@ -3059,9 +3101,9 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@holochain-open-dev/utils@0.300.0-rc.0':
+  '@holochain-open-dev/utils@0.300.0':
     dependencies:
-      '@holochain/client': 0.17.0-rc.0
+      '@holochain/client': 0.17.0
       '@msgpack/msgpack': 2.8.0
       blakejs: 1.2.1
       emittery: 1.0.3
@@ -3073,7 +3115,7 @@ snapshots:
 
   '@holochain-playground/cli@0.300.0-rc.0': {}
 
-  '@holochain/client@0.17.0-rc.0':
+  '@holochain/client@0.17.0':
     dependencies:
       '@bitgo/blake2b': 3.2.4
       '@holochain/serialization': 0.1.0-beta-rc.3
@@ -3090,9 +3132,9 @@ snapshots:
 
   '@holochain/serialization@0.1.0-beta-rc.3': {}
 
-  '@holochain/tryorama@0.16.0-dev.7':
+  '@holochain/tryorama@0.16.0':
     dependencies:
-      '@holochain/client': 0.17.0-rc.0
+      '@holochain/client': 0.17.0
       get-port: 6.1.2
       lodash: 4.17.21
       uuid: 8.3.2

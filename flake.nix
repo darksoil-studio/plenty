@@ -6,7 +6,7 @@
     file-storage.url = "github:holochain-open-dev/file-storage/nixify";
     profiles.url = "github:holochain-open-dev/profiles/nixify";
 
-    versions.url = "github:holochain/holochain?dir=versions/0_3_rc";
+    versions.url = "github:holochain/holochain?dir=versions/0_3";
     holochain.url = "github:holochain/holochain";
     holochain.inputs.versions.follows = "versions";
 

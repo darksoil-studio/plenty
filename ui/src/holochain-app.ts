@@ -4,6 +4,7 @@ import { ProducersStore } from "./plenty/producers/producers-store.js";
 
 import {
   Router,
+  Routes,
   sharedStyles,
   wrapPathInSvg,
 } from "@holochain-open-dev/elements";
@@ -29,8 +30,7 @@ import "@shoelace-style/shoelace/dist/components/tab/tab.js";
 import "@shoelace-style/shoelace/dist/themes/light.css";
 import { LitElement, css, html } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-import { AsyncResult, SignalWatcher } from "@holochain-open-dev/signals";
-import { EntryRecord } from "@holochain-open-dev/utils";
+import { SignalWatcher } from "@holochain-open-dev/signals";
 import {
   NotificationsClient,
   NotificationsStore,
@@ -79,6 +79,13 @@ export class HolochainApp extends SignalWatcher(LitElement) {
 
   @provide({ context: routerContext })
   router = new Router(this, [
+    {
+      path: "",
+      enter: () => {
+        this.router.goto("/home/");
+        return false;
+      },
+    },
     {
       path: "/",
       enter: () => {
@@ -147,13 +154,7 @@ export class HolochainApp extends SignalWatcher(LitElement) {
         <sl-icon-button
           .src=${wrapPathInSvg(mdiArrowLeft)}
           @click=${() => {
-            this.router.back();
-
-            setTimeout(() => {
-              if (this.router.currentPathname() === "/my-household") {
-                this.router.goto("/");
-              }
-            });
+            this.router.pop();
           }}
         ></sl-icon-button>
         <span class="title" style="flex: 1">${msg("My Household")}</span>
