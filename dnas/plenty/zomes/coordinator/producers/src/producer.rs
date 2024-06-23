@@ -1,7 +1,7 @@
 use hdk::prelude::*;
 use producers_integrity::*;
 #[hdk_extern]
-pub fn create_producer(producer: Producer) -> ExternResult<Record> {
+pub fn create_producer(producer: Producer) -> ExternResult<Vec<Record>> {
     let producer_hash = create_entry(&EntryTypes::Producer(producer.clone()))?;
     create_link(
         producer.liason.clone(),
@@ -9,31 +9,25 @@ pub fn create_producer(producer: Producer) -> ExternResult<Record> {
         LinkTypes::LiasonToProducers,
         (),
     )?;
-    let record = get(producer_hash.clone(), GetOptions::default())?
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest("Could not find the newly created Producer"
-                .to_string())
-            ),
-        )?;
+    let record = get(producer_hash.clone(), GetOptions::default())?.ok_or(wasm_error!(
+        WasmErrorInner::Guest("Could not find the newly created Producer".to_string())
+    ))?;
     let path = Path::from("all_producers");
-    create_link(
+    let link_hash = create_link(
         path.path_entry_hash()?,
         producer_hash.clone(),
         LinkTypes::AllProducers,
         (),
     )?;
-    Ok(record)
+    let record2 = get(link_hash.clone(), GetOptions::default())?.ok_or(wasm_error!(
+        WasmErrorInner::Guest("Could not find the newly created Producer".to_string())
+    ))?;
+    Ok(vec![record, record2])
 }
 #[hdk_extern]
-pub fn get_latest_producer(
-    original_producer_hash: ActionHash,
-) -> ExternResult<Option<Record>> {
+pub fn get_latest_producer(original_producer_hash: ActionHash) -> ExternResult<Option<Record>> {
     let links = get_links(
-        GetLinksInputBuilder::try_new(
-                original_producer_hash.clone(),
-                LinkTypes::ProducerUpdates,
-            )?
+        GetLinksInputBuilder::try_new(original_producer_hash.clone(), LinkTypes::ProducerUpdates)?
             .build(),
     )?;
     let latest_link = links
@@ -44,67 +38,50 @@ pub fn get_latest_producer(
             link.target
                 .clone()
                 .into_action_hash()
-                .ok_or(
-                    wasm_error!(
-                        WasmErrorInner::Guest("No action hash associated with link"
-                        .to_string())
-                    ),
-                )?
+                .ok_or(wasm_error!(WasmErrorInner::Guest(
+                    "No action hash associated with link".to_string()
+                )))?
         }
         None => original_producer_hash.clone(),
     };
     get(latest_producer_hash, GetOptions::default())
 }
 #[hdk_extern]
-pub fn get_original_producer(
-    original_producer_hash: ActionHash,
-) -> ExternResult<Option<Record>> {
+pub fn get_original_producer(original_producer_hash: ActionHash) -> ExternResult<Option<Record>> {
     let Some(details) = get_details(original_producer_hash, GetOptions::default())? else {
         return Ok(None);
     };
     match details {
         Details::Record(details) => Ok(Some(details.record)),
-        _ => {
-            Err(
-                wasm_error!(
-                    WasmErrorInner::Guest("Malformed get details response".to_string())
-                ),
-            )
-        }
+        _ => Err(wasm_error!(WasmErrorInner::Guest(
+            "Malformed get details response".to_string()
+        ))),
     }
 }
 #[hdk_extern]
 pub fn get_all_revisions_for_producer(
     original_producer_hash: ActionHash,
 ) -> ExternResult<Vec<Record>> {
-    let Some(original_record) = get_original_producer(original_producer_hash.clone())?
-    else {
+    let Some(original_record) = get_original_producer(original_producer_hash.clone())? else {
         return Ok(vec![]);
     };
     let links = get_links(
-        GetLinksInputBuilder::try_new(
-                original_producer_hash.clone(),
-                LinkTypes::ProducerUpdates,
-            )?
+        GetLinksInputBuilder::try_new(original_producer_hash.clone(), LinkTypes::ProducerUpdates)?
             .build(),
     )?;
     let get_input: Vec<GetInput> = links
         .into_iter()
-        .map(|link| Ok(
-            GetInput::new(
-                link
-                    .target
+        .map(|link| {
+            Ok(GetInput::new(
+                link.target
                     .into_action_hash()
-                    .ok_or(
-                        wasm_error!(
-                            WasmErrorInner::Guest("No action hash associated with link"
-                            .to_string())
-                        ),
-                    )?
+                    .ok_or(wasm_error!(WasmErrorInner::Guest(
+                        "No action hash associated with link".to_string()
+                    )))?
                     .into(),
                 GetOptions::default(),
-            ),
-        ))
+            ))
+        })
         .collect::<ExternResult<Vec<GetInput>>>()?;
     let records = HDK.with(|hdk| hdk.borrow().get(get_input))?;
     let mut records: Vec<Record> = records.into_iter().flatten().collect();
@@ -129,47 +106,32 @@ pub fn update_producer(input: UpdateProducerInput) -> ExternResult<Record> {
         LinkTypes::ProducerUpdates,
         (),
     )?;
-    let record = get(updated_producer_hash.clone(), GetOptions::default())?
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest("Could not find the newly updated Producer"
-                .to_string())
-            ),
-        )?;
+    let record = get(updated_producer_hash.clone(), GetOptions::default())?.ok_or(wasm_error!(
+        WasmErrorInner::Guest("Could not find the newly updated Producer".to_string())
+    ))?;
     Ok(record)
 }
 #[hdk_extern]
 pub fn delete_producer(original_producer_hash: ActionHash) -> ExternResult<ActionHash> {
-    let details = get_details(original_producer_hash.clone(), GetOptions::default())?
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest(String::from("{pascal_entry_def_name} not found"))
-            ),
-        )?;
+    let details =
+        get_details(original_producer_hash.clone(), GetOptions::default())?.ok_or(wasm_error!(
+            WasmErrorInner::Guest(String::from("{pascal_entry_def_name} not found"))
+        ))?;
     let record = match details {
         Details::Record(details) => Ok(details.record),
-        _ => {
-            Err(
-                wasm_error!(
-                    WasmErrorInner::Guest(String::from("Malformed get details response"))
-                ),
-            )
-        }
+        _ => Err(wasm_error!(WasmErrorInner::Guest(String::from(
+            "Malformed get details response"
+        )))),
     }?;
     let entry = record
         .entry()
         .as_option()
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest("Producer record has no entry".to_string())
-            ),
-        )?;
+        .ok_or(wasm_error!(WasmErrorInner::Guest(
+            "Producer record has no entry".to_string()
+        )))?;
     let producer = Producer::try_from(entry)?;
     let links = get_links(
-        GetLinksInputBuilder::try_new(
-                producer.liason.clone(),
-                LinkTypes::LiasonToProducers,
-            )?
+        GetLinksInputBuilder::try_new(producer.liason.clone(), LinkTypes::LiasonToProducers)?
             .build(),
     )?;
     for link in links {
@@ -181,8 +143,7 @@ pub fn delete_producer(original_producer_hash: ActionHash) -> ExternResult<Actio
     }
     let path = Path::from("all_producers");
     let links = get_links(
-        GetLinksInputBuilder::try_new(path.path_entry_hash()?, LinkTypes::AllProducers)?
-            .build(),
+        GetLinksInputBuilder::try_new(path.path_entry_hash()?, LinkTypes::AllProducers)?.build(),
     )?;
     for link in links {
         if let Some(hash) = link.target.into_action_hash() {
@@ -201,9 +162,9 @@ pub fn get_all_deletes_for_producer(
         return Ok(None);
     };
     match details {
-        Details::Entry(_) => {
-            Err(wasm_error!(WasmErrorInner::Guest("Malformed details".into())))
-        }
+        Details::Entry(_) => Err(wasm_error!(WasmErrorInner::Guest(
+            "Malformed details".into()
+        ))),
         Details::Record(record_details) => Ok(Some(record_details.deletes)),
     }
 }
@@ -214,17 +175,17 @@ pub fn get_oldest_delete_for_producer(
     let Some(mut deletes) = get_all_deletes_for_producer(original_producer_hash)? else {
         return Ok(None);
     };
-    deletes
-        .sort_by(|delete_a, delete_b| {
-            delete_a.action().timestamp().cmp(&delete_b.action().timestamp())
-        });
+    deletes.sort_by(|delete_a, delete_b| {
+        delete_a
+            .action()
+            .timestamp()
+            .cmp(&delete_b.action().timestamp())
+    });
     Ok(deletes.first().cloned())
 }
 #[hdk_extern]
 pub fn get_producers_for_liason(liason: AgentPubKey) -> ExternResult<Vec<Link>> {
-    get_links(
-        GetLinksInputBuilder::try_new(liason, LinkTypes::LiasonToProducers)?.build(),
-    )
+    get_links(GetLinksInputBuilder::try_new(liason, LinkTypes::LiasonToProducers)?.build())
 }
 #[hdk_extern]
 pub fn get_deleted_producers_for_liason(
@@ -236,11 +197,9 @@ pub fn get_deleted_producers_for_liason(
         None,
         GetOptions::default(),
     )?;
-    Ok(
-        details
-            .into_inner()
-            .into_iter()
-            .filter(|(_link, deletes)| !deletes.is_empty())
-            .collect(),
-    )
+    Ok(details
+        .into_inner()
+        .into_iter()
+        .filter(|(_link, deletes)| !deletes.is_empty())
+        .collect())
 }

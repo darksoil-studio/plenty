@@ -35,15 +35,16 @@ pub async fn create_producer(
     conductor: &SweetConductor,
     zome: &SweetZome,
     producer: Producer,
-) -> Record {
-    let record: Record = conductor.call(zome, "create_producer", producer).await;
+) -> Vec<Record> {
+    let record: Vec<Record> = conductor.call(zome, "create_producer", producer).await;
     record
 }
 
 pub async fn sample_product_1(conductor: &SweetConductor, zome: &SweetZome) -> Product {
     Product {
         producer_hash: create_producer(conductor, zome, sample_producer_1(conductor, zome).await)
-            .await
+            .await[0]
+            .clone()
             .signed_action
             .hashed
             .hash,
@@ -68,7 +69,8 @@ pub async fn sample_product_1(conductor: &SweetConductor, zome: &SweetZome) -> P
 pub async fn sample_product_2(conductor: &SweetConductor, zome: &SweetZome) -> Product {
     Product {
         producer_hash: create_producer(conductor, zome, sample_producer_2(conductor, zome).await)
-            .await
+            .await[0]
+            .clone()
             .signed_action
             .hashed
             .hash,
