@@ -9,7 +9,7 @@
     "@holochain/client": "^0.17.0",
     "@holochain/tryorama": "^v0.16.0",
     "@holochain-open-dev/profiles": "github:holochain-open-dev/profiles#d7ea5ffc05312b00acd6c9446cba81d7e7852752&path:ui",
-    "@darksoil-studio/notifications": "github:darksoil-studio/notifications#5c5940e33e37084cfe846b6be205efcee7892fc5&path:ui",
+    "@darksoil-studio/notifications": "github:darksoil-studio/notifications#f88cdd9dd952d6107274526d0559de36b35741d2&path:ui",
     "@holochain-open-dev/signals": "^0.300.0",
     "@holochain-open-dev/utils": "^0.300.0",
     "typescript": "^5.4.0",

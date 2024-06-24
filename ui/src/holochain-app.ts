@@ -21,7 +21,7 @@ import {
 import "@holochain-open-dev/profiles/dist/elements/agent-avatar.js";
 import "@holochain-open-dev/profiles/dist/elements/profile-list-item-skeleton.js";
 import "@holochain-open-dev/profiles/dist/elements/profile-prompt.js";
-import { AppClient, AppWebsocket } from "@holochain/client";
+import { AppClient, AppWebsocket, encodeHashToBase64 } from "@holochain/client";
 import { createContext, provide } from "@lit/context";
 import { localized, msg } from "@lit/localize";
 import "@shoelace-style/shoelace/dist/components/icon-button/icon-button.js";
@@ -169,8 +169,12 @@ export class HolochainApp extends SignalWatcher(LitElement) {
   renderCreateProducer() {
     return html`
       <create-producer
-        @producer-created=${() => {
-          this.router.goto("/home/producers/");
+        style="flex: 1"
+        @close-requested=${() => this.router.pop()}
+        @producer-created=${(e: CustomEvent) => {
+          this.router.goto(
+            `/home/producers/${encodeHashToBase64(e.detail.producerHash)}`,
+          );
         }}
       ></create-producer>
     `;
@@ -210,13 +214,6 @@ export class HolochainApp extends SignalWatcher(LitElement) {
       :host {
         display: flex;
         flex: 1;
-      }
-
-      .top-bar {
-        align-items: center;
-        color: white;
-        background-color: var(--sl-color-primary-900);
-        padding: 16px;
       }
     `,
     sharedStyles,

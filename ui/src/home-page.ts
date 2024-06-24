@@ -13,6 +13,7 @@ import { HouseholdsStore } from "./plenty/households/households-store.js";
 import { householdsStoreContext } from "./plenty/households/context.js";
 import { msg } from "@lit/localize";
 import { routerContext } from "./context.js";
+import { appStyles } from "./app-styles.js";
 
 @customElement("home-page")
 export class HomePage extends SignalWatcher(LitElement) {
@@ -135,13 +136,7 @@ export class HomePage extends SignalWatcher(LitElement) {
         display: flex;
         flex: 1;
       }
-
-      .top-bar {
-        align-items: center;
-        background-color: var(--sl-color-primary-600);
-        padding: 16px;
-      }
     `,
-    sharedStyles,
+    ...appStyles,
   ];
 }

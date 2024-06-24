@@ -1,6 +1,5 @@
 import {
   AsyncComputed,
-  AsyncResult,
   AsyncState,
   allRevisionsOfEntrySignal,
   collectionSignal,
@@ -19,17 +18,18 @@ import {
 } from "@holochain-open-dev/utils";
 import { ActionHash, AgentPubKey } from "@holochain/client";
 
-import { HouseholdsClient } from "./households-client.js";
 import { ProfilesStore } from "@holochain-open-dev/profiles";
-import { wrapPathInSvg } from "@holochain-open-dev/elements";
+import { wrapPathInSvg } from "@holochain-open-dev/elements/dist/icon.js";
 import { mdiAccountCancel, mdiAccountCheck, mdiAccountPlus } from "@mdi/js";
 import { msg, str } from "@lit/localize";
 import { NotificationType } from "@darksoil-studio/notifications";
+
 import {
   NOTIFICATIONS_TYPES,
   decodeRequestNotificationGroup,
 } from "./notifications.js";
-import { completed, queryEntriesSignal } from "./signal.js";
+import { queryEntriesSignal } from "./signal.js";
+import { HouseholdsClient } from "./households-client.js";
 
 export class HouseholdsStore {
   constructor(

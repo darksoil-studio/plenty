@@ -4,10 +4,11 @@ import {
   NotificationsStore,
   NotificationsClient,
 } from "@darksoil-studio/notifications";
+import { AppClient } from "@holochain/client";
+
 import { appPath } from "../../app-path.js";
 import { HouseholdsClient } from "../../../../ui/src/plenty/households/households-client.js";
 import { HouseholdsStore } from "../../../../ui/src/plenty/households/households-store.js";
-import { AppClient } from "@holochain/client";
 
 function setupStore(appClient: AppClient): HouseholdsStore {
   const profilesStore = new ProfilesStore(
