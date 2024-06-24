@@ -116,14 +116,12 @@ export class CreateProducer extends SignalWatcher(LitElement) {
           <form
             id="create-form"
             class="column"
-            style="flex: 1; gap: 12px;"
+            style="flex: 1; gap: 20px;"
             ${onSubmit((fields) => this.createProducer(fields))}
           >
-            <div class="row" style="gap: 12px; flex: 1">
+            <div class="row" style="gap: 20px; flex: 1">
               <div class="column" style="gap: 12px; flex: 1">
-                <span class="title" style="margin-bottom: 12px"
-                  >${msg("Producer Details")}</span
-                >
+                <span class="title">${msg("Producer Details")}</span>
                 <div class="column" style="gap: 8px">
                   <span>${msg("Photo")}*</span>
                   <upload-files
@@ -175,9 +173,7 @@ export class CreateProducer extends SignalWatcher(LitElement) {
                 </div>
               </div>
               <div class="column" style="flex: 1; gap: 12px">
-                <span class="title" style="margin-bottom: 12px"
-                  >${msg("Roles")}</span
-                >
+                <span class="title">${msg("Roles")}</span>
                 <div>
                   <sl-select name="editors" .label=${msg("Editors")} required>
                     <sl-option value="Liason">${msg("Liason")}</sl-option>

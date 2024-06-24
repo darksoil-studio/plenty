@@ -20,12 +20,12 @@ import {
 } from "@holochain-open-dev/elements";
 import { consume } from "@lit/context";
 import { localized, msg } from "@lit/localize";
-import { mdiAlertCircleOutline, mdiDelete } from "@mdi/js";
+import { mdiAlertCircleOutline, mdiClose, mdiDelete } from "@mdi/js";
 
 import SlAlert from "@shoelace-style/shoelace/dist/components/alert/alert.js";
 import "@shoelace-style/shoelace/dist/components/input/input.js";
 import "@shoelace-style/shoelace/dist/components/button/button.js";
-import "@shoelace-style/shoelace/dist/elements/select/select.js";
+import "@shoelace-style/shoelace/dist/components/select/select.js";
 
 import "@shoelace-style/shoelace/dist/components/card/card.js";
 import "@holochain-open-dev/elements/dist/elements/display-error.js";
@@ -37,6 +37,9 @@ import "@shoelace-style/shoelace/dist/components/option/option.js";
 import { ProducersStore } from "../producers-store.js";
 import { producersStoreContext } from "../context.js";
 import { Product, PackagingUnit } from "../types.js";
+import { appStyles } from "../../../app-styles.js";
+
+import "../../../sl-combobox.js";
 
 /**
  * @element create-product
@@ -90,7 +93,7 @@ export class CreateProduct extends SignalWatcher(LitElement) {
         ? fields.categories!
         : ([fields.categories!] as unknown as Array<string>)
       ).map((el) => el),
-      packaging: fields.packaging!,
+      packaging: fields.packaging!, // TODO HEEEERE
       maximum_available: fields.maximum_available!,
       price: fields.price!,
       vat_percentage: fields.vat_percentage!,
@@ -122,130 +125,109 @@ export class CreateProduct extends SignalWatcher(LitElement) {
     this.committing = false;
   }
 
-  render() {
-    return html` <sl-card style="flex: 1;">
-      <span slot="header">${msg("Create Product")}</span>
+  renderCategoriesSelect() {
+    const categories = this.producersStore.allCategories.get();
 
-      <form
-        id="create-form"
-        class="column"
-        style="flex: 1; gap: 16px;"
-        ${onSubmit((fields) => this.createProduct(fields))}
+    return html`
+      <sl-combobox
+        .label=${msg("Categories")}
+        multiple
+        .options=${categories.status === "completed" ? categories.value : []}
+        name="categories"
       >
-        <div>
-          <sl-input name="name" .label=${msg("Name")} required></sl-input>
-        </div>
-
-        <div>
-          <sl-input
-            name="product_id"
-            .label=${msg("Product Id")}
-            required
-          ></sl-input>
-        </div>
-
-        <div>
-          <sl-textarea
-            name="description"
-            .label=${msg("Description")}
-            required
-          ></sl-textarea>
-        </div>
-
-        <div>
-          <div class="column" style="gap: 8px">
-            <span>${msg("Categories")}</span>
-
-            ${repeat(
-              this._categoriesFields,
-              (i) => i,
-              (index) =>
-                html`<div class="row" style="align-items: center;">
-                  <sl-input name="categories" .label=${msg("")}></sl-input>
-                  <sl-icon-button
-                    .src=${wrapPathInSvg(mdiDelete)}
-                    @click=${() => {
-                      this._categoriesFields = this._categoriesFields.filter(
-                        (i) => i !== index,
-                      );
-                    }}
-                  ></sl-icon-button>
-                </div>`,
-            )}
-            <sl-button
-              @click=${() => {
-                this._categoriesFields = [
-                  ...this._categoriesFields,
-                  Math.max(...this._categoriesFields) + 1,
-                ];
-              }}
-              >${msg("Add Categories")}</sl-button
-            >
-          </div>
-        </div>
-
-        <div>
-          <sl-select name="packaging" .helpText=${msg("Packaging")} required>
-            <sl-option value="Piece">Piece</sl-option>
-            <sl-option value="Kilograms">Kilograms</sl-option>
-            <sl-option value="Grams">Grams</sl-option>
-            <sl-option value="Liters">Liters</sl-option>
-            <sl-option value="Pounds">Pounds</sl-option>
-            <sl-option value="Ounces">Ounces</sl-option>
-          </sl-select>
-        </div>
-
-        <div>
-          <sl-input
-            type="number"
-            name="maximum_available"
-            .label=${msg("Maximum Available")}
-          ></sl-input>
-        </div>
-
-        <div>
-          <sl-input
-            type="number"
-            name="price"
-            .label=${msg("Price")}
-            required
-          ></sl-input>
-        </div>
-
-        <div>
-          <sl-input
-            type="number"
-            name="vat_percentage"
-            .label=${msg("Vat Percentage")}
-            required
-          ></sl-input>
-        </div>
-
-        <div>
-          <sl-input
-            type="number"
-            name="margin_percentage"
-            .label=${msg("Margin Percentage")}
-          ></sl-input>
-        </div>
-
-        <div>
-          <sl-input name="origin" .label=${msg("Origin")}></sl-input>
-        </div>
-
-        <div>
-          <sl-textarea
-            name="ingredients"
-            .label=${msg("Ingredients")}
-          ></sl-textarea>
-        </div>
-
-        <sl-button variant="primary" type="submit" .loading=${this.committing}
-          >${msg("Create Product")}</sl-button
-        >
-      </form>
-    </sl-card>`;
+      </sl-combobox>
+    `;
   }
 
-  static styles = [sharedStyles];
+  render() {
+    return html` <div class="column fill">
+      <div class="row top-bar">
+        <sl-icon-button
+          @click=${() => this.dispatchEvent(new CustomEvent("close-requested"))}
+          .src=${wrapPathInSvg(mdiClose)}
+        ></sl-icon-button>
+        <span>${msg("Create Product")}</span>
+      </div>
+
+      <sl-card style="align-self: center; width: 50rem; margin-top: 12px">
+        <form
+          id="create-form"
+          class="column"
+          style="flex: 1; gap: 16px;"
+          ${onSubmit((fields) => this.createProduct(fields))}
+        >
+          <div class="row" style="flex: 1; gap: 16px">
+            <div class="column" style="flex: 1; gap: 12px">
+              <span class="title">${msg("Product Details")}</span>
+              <sl-input name="name" .label=${msg("Name")} required></sl-input>
+
+              <sl-input
+                name="product_id"
+                .label=${msg("Product Id")}
+                required
+              ></sl-input>
+
+              <sl-textarea
+                name="description"
+                .label=${msg("Description")}
+                required
+              ></sl-textarea>
+
+              ${this.renderCategoriesSelect()}
+            </div>
+
+            <div class="column" style="flex: 1; gap: 12px">
+              <sl-select name="packaging" .label=${msg("Packaging")} required>
+                <sl-option value="Piece">${msg("Piece")}</sl-option>
+                <sl-option value="Kilograms">${msg("Kilograms")}</sl-option>
+                <sl-option value="Grams">${msg("Grams")}</sl-option>
+                <sl-option value="Liters">${msg("Liters")}</sl-option>
+                <sl-option value="Pounds">${msg("Pounds")}</sl-option>
+                <sl-option value="Ounces">${msg("Ounces")}</sl-option>
+              </sl-select>
+
+              <sl-input
+                type="number"
+                name="maximum_available"
+                .label=${msg("Maximum Available")}
+              ></sl-input>
+
+              <sl-input
+                type="number"
+                name="price"
+                .label=${msg("Price")}
+                required
+              ></sl-input>
+
+              <sl-input
+                type="number"
+                name="vat_percentage"
+                .label=${msg("Vat Percentage")}
+                required
+              ></sl-input>
+
+              <sl-input
+                type="number"
+                name="margin_percentage"
+                .label=${msg("Margin Percentage")}
+              ></sl-input>
+
+              <sl-input name="origin" .label=${msg("Origin")}></sl-input>
+
+              <sl-textarea
+                name="ingredients"
+                .label=${msg("Ingredients")}
+              ></sl-textarea>
+            </div>
+          </div>
+
+          <sl-button variant="primary" type="submit" .loading=${this.committing}
+            >${msg("Create Product")}</sl-button
+          >
+        </form>
+      </sl-card>
+    </div>`;
+  }
+
+  static styles = appStyles;
 }

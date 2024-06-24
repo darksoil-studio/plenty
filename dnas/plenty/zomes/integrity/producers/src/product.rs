@@ -31,6 +31,7 @@ pub struct Product {
     pub origin: Option<String>,
     pub ingredients: Option<String>,
 }
+
 pub fn validate_create_product(
     _action: EntryCreationAction,
     product: Product,

@@ -8732,7 +8732,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-holochain"
 version = "0.0.0"
-source = "git+https://github.com/darksoil-studio/tauri-plugin-holochain?branch=main#7cb0c29dd1505e9b827d7a9c08e6d575176e5e9d"
+source = "git+https://github.com/darksoil-studio/tauri-plugin-holochain?branch=main#46dcdeb2bd966ebaa557ee9bd0d2b5ff7478aca3"
 dependencies = [
  "async-std",
  "bzip2",
