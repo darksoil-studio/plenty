@@ -12,6 +12,7 @@ import {
   DeleteLink,
 } from "@holochain/client";
 import { ActionCommittedSignal } from "@holochain-open-dev/utils";
+import { msg } from "@lit/localize";
 
 export type ProducersSignal = ActionCommittedSignal<EntryTypes, LinkTypes>;
 
@@ -51,6 +52,25 @@ export interface Producer {
   editors: ProducerEditors;
 
   sorters: ProducerSorters;
+}
+
+export function renderPackaging(packaging: Packaging) {
+  return `${packaging.amount}${renderPackagingUnit(packaging.unit, packaging.amount !== 1)}`;
+}
+
+export function renderPackagingUnit(unit: PackagingUnit, plural: boolean) {
+  switch (unit) {
+    case "Piece":
+      return plural ? msg("pieces") : msg("piece");
+    case "Kilograms":
+      return msg("Kg");
+    case "Grams":
+      return msg("g");
+    case "Liters":
+      return msg("L");
+    case "Ounces":
+      return msg("oz");
+  }
 }
 
 export type PackagingUnit =

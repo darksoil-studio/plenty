@@ -6,8 +6,10 @@ import "@shoelace-style/shoelace/dist/components/input/input.js";
 import "@shoelace-style/shoelace/dist/components/tag/tag.js";
 import "@shoelace-style/shoelace/dist/components/dropdown/dropdown.js";
 import "@shoelace-style/shoelace/dist/components/menu/menu.js";
+import "@shoelace-style/shoelace/dist/components/menu-item/menu-item.js";
 import SlInput from "@shoelace-style/shoelace/dist/components/input/input.js";
 import { FormField, FormFieldController } from "@holochain-open-dev/elements";
+import SlDropdown from "@shoelace-style/shoelace/dist/components/dropdown/dropdown.js";
 
 @customElement("sl-combobox")
 export class SlCombobox extends LitElement implements FormField {
@@ -28,6 +30,9 @@ export class SlCombobox extends LitElement implements FormField {
 
   @property()
   multiple: boolean = false;
+
+  @property({ attribute: "no-repeated-values", type: Boolean })
+  noRepeatedValues: boolean = false;
 
   @property()
   defaultValue: Array<String> = [];
@@ -62,59 +67,100 @@ export class SlCombobox extends LitElement implements FormField {
     this.input.value = "";
   }
 
-  render() {
-    return html` <sl-dropdown
-      .open=${this.filter.length > 0}
-      hoist
-      style="flex: 1"
-    >
-      ${this.options.length > 0
-        ? html`
-            <sl-menu
-              @sl-select=${(e: CustomEvent) =>
-                (this.value = [...this.value, e.detail.item.value])}
-            >
-              ${this.options
-                .filter((option) => option.startsWith(this.input.value))
-                .map(
-                  (option) =>
-                    html`<sl-menu-item .value=${option}
-                      >${option}</sl-menu-item
-                    >`,
-                )}
-            </sl-menu>
-          `
-        : html``}
-      <sl-input
-        slot="trigger"
-        .label=${this.label}
-        .required=${this.required}
-        .disabled=${this.disabled}
-        @input=${(e: CustomEvent) => {
-          this.filter = this.input.value;
-          this.requestUpdate();
-        }}
-        @keydown=${(e: KeyboardEvent) => {
-          if (e.key === "Enter") {
-            e.stopPropagation();
-            this.value = [...this.value, this.input.value];
-            this.input.value = "";
-          }
+  renderMenu() {
+    if (this.options.length === 0 || !this.input || this.input.value === "")
+      return html``;
+    let matchingOptions = this.options.filter((option) =>
+      option.startsWith(this.input.value),
+    );
+    if (this.noRepeatedValues) {
+      matchingOptions = matchingOptions.filter(
+        (option) => !this.value.includes(option),
+      );
+    }
+    if (matchingOptions.length === 0) return html``;
+    return html`
+      <sl-menu
+        @sl-select=${(e: CustomEvent) => {
+          this.value = [...this.value, e.detail.item.value];
+          this.input.value = "";
         }}
       >
-        <div class="row" style="flex-wrap: wrap; gap: 8px" slot="prefix">
-          ${this.value.map(
-            (v, i) =>
-              html`<sl-tag
-                removable
-                @sl-remove=${() =>
-                  (this.value = this.value.filter((_, j) => i !== j))}
-                >${v}</sl-tag
-              >`,
-          )}
-        </div>
-      </sl-input></sl-dropdown
-    >`;
+        ${matchingOptions.map(
+          (option) =>
+            html`<sl-menu-item .value=${option}>${option}</sl-menu-item>`,
+        )}
+      </sl-menu>
+    `;
+  }
+
+  firstUpdated() {
+    this.addEventListener("blur", () => {
+      if (this.input?.value !== "") {
+        this.addValue();
+      }
+    });
+  }
+
+  addValue() {
+    if (!(this.noRepeatedValues && this.value.includes(this.input.value))) {
+      this.value = [...this.value, this.input.value];
+    }
+    this.input.value = "";
+  }
+
+  render() {
+    return html`
+      <sl-dropdown
+        id="dropdown"
+        .open=${this.filter.length > 0}
+        hoist
+        style="flex: 1"
+      >
+        ${this.renderMenu()}
+        <sl-input
+          slot="trigger"
+          .label=${this.label}
+          .required=${this.required}
+          .disabled=${this.disabled}
+          @input=${(e: CustomEvent) => {
+            this.filter = this.input.value;
+            this.requestUpdate();
+          }}
+          @click=${(e: Event) => {
+            if (
+              (this.shadowRoot?.getElementById("dropdown") as SlDropdown).open
+            ) {
+              e.stopPropagation();
+            }
+          }}
+          @keydown=${(e: KeyboardEvent) => {
+            if (e.key === "Enter" && this.input.value.length > 0) {
+              e.stopPropagation();
+              this.addValue();
+            } else if (e.key === "Backspace" && this.input.value.length === 0) {
+              this.value = this.value.slice(0, this.value.length - 1);
+            }
+          }}
+        >
+          <div
+            class="row"
+            style="flex-wrap: wrap; gap: 8px; margin: 2px"
+            slot="prefix"
+          >
+            ${this.value.map(
+              (v, i) =>
+                html`<sl-tag
+                  removable
+                  @sl-remove=${() =>
+                    (this.value = this.value.filter((_, j) => i !== j))}
+                  >${v}</sl-tag
+                >`,
+            )}
+          </div>
+        </sl-input></sl-dropdown
+      >
+    `;
   }
 
   static styles = css`
@@ -133,7 +179,7 @@ export class SlCombobox extends LitElement implements FormField {
     }
 
     sl-input::part(prefix) {
-      width: 100%;
+      max-width: 100%;
     }
   `;
 }

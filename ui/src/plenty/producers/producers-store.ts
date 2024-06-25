@@ -81,6 +81,19 @@ export class ProducersStore {
     },
   }));
 
+  canIEdit(producer: EntryRecord<Producer>) {
+    const editors = producer.entry.editors;
+    if (editors.type === "AllMembers") return true;
+    if (editors.type === "Liason")
+      return (
+        this.client.client.myPubKey.toString() ===
+        producer.entry.liason.toString()
+      );
+    return !!editors.members.find(
+      (m) => m.toString() === this.client.client.myPubKey.toString(),
+    );
+  }
+
   producersForLiason = new LazyHoloHashMap((liason: AgentPubKey) => ({
     live: pipe(
       liveLinksSignal(
@@ -124,22 +137,25 @@ export class ProducersStore {
         allProducers.map((l) => l.target),
       ),
   );
+
   /** Product */
 
-  products = new LazyHoloHashMap((productHash: ActionHash) => ({
-    latestVersion: latestVersionOfEntrySignal(this.client, () =>
-      this.client.getLatestProduct(productHash),
-    ),
-    original: immutableEntrySignal(() =>
-      this.client.getOriginalProduct(productHash),
-    ),
-    allRevisions: allRevisionsOfEntrySignal(this.client, () =>
-      this.client.getAllRevisionsForProduct(productHash),
-    ),
-    deletes: deletesForEntrySignal(this.client, productHash, () =>
-      this.client.getAllDeletesForProduct(productHash),
-    ),
-  }));
+  products = new LazyHoloHashMap((productHash: ActionHash) => {
+    return {
+      latestVersion: latestVersionOfEntrySignal(this.client, () =>
+        this.client.getLatestProduct(productHash),
+      ),
+      original: immutableEntrySignal(() =>
+        this.client.getOriginalProduct(productHash),
+      ),
+      allRevisions: allRevisionsOfEntrySignal(this.client, () =>
+        this.client.getAllRevisionsForProduct(productHash),
+      ),
+      deletes: deletesForEntrySignal(this.client, productHash, () =>
+        this.client.getAllDeletesForProduct(productHash),
+      ),
+    };
+  });
 
   allCategories = lazyLoadAndPoll(() => this.client.getAllCategories(), 10000);
 }

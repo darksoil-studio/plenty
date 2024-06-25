@@ -103,105 +103,88 @@ export class CreateProducer extends SignalWatcher(LitElement) {
 
   render() {
     return html`
-      <div class="column fill">
-        <div class="row top-bar">
-          <sl-icon-button
-            @click=${() =>
-              this.dispatchEvent(new CustomEvent("close-requested"))}
-            .src=${wrapPathInSvg(mdiClose)}
-          ></sl-icon-button>
-          <span>${msg("Create Producer")}</span>
-        </div>
-        <sl-card style="align-self: center; margin: 16px; min-width: 50rem;">
-          <form
-            id="create-form"
-            class="column"
-            style="flex: 1; gap: 20px;"
-            ${onSubmit((fields) => this.createProducer(fields))}
-          >
-            <div class="row" style="gap: 20px; flex: 1">
-              <div class="column" style="gap: 12px; flex: 1">
-                <span class="title">${msg("Producer Details")}</span>
-                <div class="column" style="gap: 8px">
-                  <span>${msg("Photo")}*</span>
-                  <upload-files
-                    name="photo"
-                    one-file
-                    accepted-files="image/jpeg,image/png,image/gif"
-                    required
-                  ></upload-files>
-                </div>
-
-                <div>
-                  <sl-input
-                    name="name"
-                    .label=${msg("Name")}
-                    required
-                  ></sl-input>
-                </div>
-
-                <div>
-                  <sl-input
-                    name="contact_email"
-                    .label=${msg("Contact Email")}
-                    required
-                  ></sl-input>
-                </div>
-
-                <div>
-                  <sl-input
-                    name="phone_number"
-                    .label=${msg("Phone Number")}
-                    required
-                  ></sl-input>
-                </div>
-
-                <div>
-                  <sl-input
-                    name="location"
-                    .label=${msg("Location")}
-                    required
-                  ></sl-input>
-                </div>
-
-                <div>
-                  <sl-textarea
-                    name="producer_details"
-                    .label=${msg("Producer Details")}
-                    required
-                  ></sl-textarea>
-                </div>
+      <sl-card>
+        <form
+          id="create-form"
+          class="column"
+          style="flex: 1; gap: 20px;"
+          ${onSubmit((fields) => this.createProducer(fields))}
+        >
+          <div class="row" style="gap: 20px; flex: 1">
+            <div class="column" style="gap: 12px; flex: 1">
+              <span class="title">${msg("Producer Details")}</span>
+              <div class="column" style="gap: 8px">
+                <span>${msg("Photo")}*</span>
+                <upload-files
+                  name="photo"
+                  one-file
+                  accepted-files="image/jpeg,image/png,image/gif"
+                  required
+                ></upload-files>
               </div>
-              <div class="column" style="flex: 1; gap: 12px">
-                <span class="title">${msg("Roles")}</span>
-                <div>
-                  <sl-select name="editors" .label=${msg("Editors")} required>
-                    <sl-option value="Liason">${msg("Liason")}</sl-option>
-                    <sl-option value="AllMembers"
-                      >${msg("All Members")}</sl-option
-                    >
-                    <sl-option value="Members">${msg("Members")}</sl-option>
-                  </sl-select>
-                </div>
 
-                <div>
-                  <sl-select name="sorters" .label=${msg("Sorters")} required>
-                    <sl-option value="Liason">${msg("Liason")}</sl-option>
-                    <sl-option value="Members">${msg("Members")}</sl-option>
-                  </sl-select>
-                </div>
+              <div>
+                <sl-input name="name" .label=${msg("Name")} required></sl-input>
+              </div>
+
+              <div>
+                <sl-input
+                  name="contact_email"
+                  .label=${msg("Contact Email")}
+                  required
+                ></sl-input>
+              </div>
+
+              <div>
+                <sl-input
+                  name="phone_number"
+                  .label=${msg("Phone Number")}
+                  required
+                ></sl-input>
+              </div>
+
+              <div>
+                <sl-input
+                  name="location"
+                  .label=${msg("Location")}
+                  required
+                ></sl-input>
+              </div>
+
+              <div>
+                <sl-textarea
+                  name="producer_details"
+                  .label=${msg("Producer Details")}
+                  required
+                ></sl-textarea>
               </div>
             </div>
+            <div class="column" style="flex: 1; gap: 12px">
+              <span class="title">${msg("Roles")}</span>
+              <div>
+                <sl-select name="editors" .label=${msg("Editors")} required>
+                  <sl-option value="Liason">${msg("Liason")}</sl-option>
+                  <sl-option value="AllMembers"
+                    >${msg("All Members")}</sl-option
+                  >
+                  <sl-option value="Members">${msg("Members")}</sl-option>
+                </sl-select>
+              </div>
 
-            <sl-button
-              variant="primary"
-              type="submit"
-              .loading=${this.committing}
-              >${msg("Create Producer")}</sl-button
-            >
-          </form>
-        </sl-card>
-      </div>
+              <div>
+                <sl-select name="sorters" .label=${msg("Sorters")} required>
+                  <sl-option value="Liason">${msg("Liason")}</sl-option>
+                  <sl-option value="Members">${msg("Members")}</sl-option>
+                </sl-select>
+              </div>
+            </div>
+          </div>
+
+          <sl-button variant="primary" type="submit" .loading=${this.committing}
+            >${msg("Create Producer")}</sl-button
+          >
+        </form>
+      </sl-card>
     `;
   }
 

@@ -8,8 +8,13 @@ import {
   AgentPubKey,
   EntryHash,
 } from "@holochain/client";
-import { EntryRecord } from "@holochain-open-dev/utils";
-import { SignalWatcher } from "@holochain-open-dev/signals";
+import { EntryRecord, mapValues } from "@holochain-open-dev/utils";
+import {
+  AsyncComputed,
+  SignalWatcher,
+  joinAsyncMap,
+  toPromise,
+} from "@holochain-open-dev/signals";
 import {
   hashProperty,
   notifyError,
@@ -26,6 +31,7 @@ import SlAlert from "@shoelace-style/shoelace/dist/components/alert/alert.js";
 import "@shoelace-style/shoelace/dist/components/input/input.js";
 import "@shoelace-style/shoelace/dist/components/button/button.js";
 import "@shoelace-style/shoelace/dist/components/select/select.js";
+import "@shoelace-style/shoelace/dist/components/checkbox/checkbox.js";
 
 import "@shoelace-style/shoelace/dist/components/card/card.js";
 import "@holochain-open-dev/elements/dist/elements/display-error.js";
@@ -36,7 +42,7 @@ import "@shoelace-style/shoelace/dist/components/textarea/textarea.js";
 import "@shoelace-style/shoelace/dist/components/option/option.js";
 import { ProducersStore } from "../producers-store.js";
 import { producersStoreContext } from "../context.js";
-import { Product, PackagingUnit } from "../types.js";
+import { Product, PackagingUnit, Packaging } from "../types.js";
 import { appStyles } from "../../../app-styles.js";
 
 import "../../../sl-combobox.js";
@@ -84,6 +90,21 @@ export class CreateProduct extends SignalWatcher(LitElement) {
         "Cannot create a new Product without its producer_hash field",
       );
 
+    const productsIds = await toPromise(
+      new AsyncComputed(() => this.allProductsIds()),
+    );
+
+    if (productsIds.includes(fields.product_id!)) {
+      notifyError(msg("There already is a product with this product ID."));
+      return;
+    }
+
+    const packaging: Packaging = {
+      unit: (fields as any).packaging_unit!,
+      amount: parseInt((fields as any).amount),
+      estimate: (fields as any).estimate === "on",
+    };
+
     const product: Product = {
       producer_hash: this.producerHash!,
       name: fields.name!,
@@ -91,13 +112,19 @@ export class CreateProduct extends SignalWatcher(LitElement) {
       description: fields.description!,
       categories: (Array.isArray(fields.categories!)
         ? fields.categories!
-        : ([fields.categories!] as unknown as Array<string>)
+        : fields.categories
+          ? ([fields.categories!] as unknown as Array<string>)
+          : []
       ).map((el) => el),
-      packaging: fields.packaging!, // TODO HEEEERE
-      maximum_available: fields.maximum_available!,
-      price: fields.price!,
-      vat_percentage: fields.vat_percentage!,
-      margin_percentage: fields.margin_percentage!,
+      packaging,
+      maximum_available: fields.maximum_available
+        ? parseInt(fields.maximum_available as any)
+        : undefined,
+      price: parseInt(fields.price as any),
+      vat_percentage: parseInt(fields.vat_percentage as any),
+      margin_percentage: fields.margin_percentage
+        ? parseInt(fields.margin_percentage as any)
+        : undefined,
       origin: fields.origin!,
       ingredients: fields.ingredients!,
     };
@@ -130,6 +157,7 @@ export class CreateProduct extends SignalWatcher(LitElement) {
 
     return html`
       <sl-combobox
+        no-repeated-values
         .label=${msg("Categories")}
         multiple
         .options=${categories.status === "completed" ? categories.value : []}
@@ -139,26 +167,40 @@ export class CreateProduct extends SignalWatcher(LitElement) {
     `;
   }
 
-  render() {
-    return html` <div class="column fill">
-      <div class="row top-bar">
-        <sl-icon-button
-          @click=${() => this.dispatchEvent(new CustomEvent("close-requested"))}
-          .src=${wrapPathInSvg(mdiClose)}
-        ></sl-icon-button>
-        <span>${msg("Create Product")}</span>
-      </div>
+  allProductsIds() {
+    const products = this.producersStore.producers
+      .get(this.producerHash)
+      .products.live.get();
+    if (products.status !== "completed") return products;
 
-      <sl-card style="align-self: center; width: 50rem; margin-top: 12px">
+    const productsLatestVersion = joinAsyncMap(
+      mapValues(products.value, (p) => p.latestVersion.get()),
+    );
+    if (productsLatestVersion.status !== "completed")
+      return productsLatestVersion;
+
+    const productsIds = Array.from(productsLatestVersion.value.values()).map(
+      (p) => p.entry.product_id,
+    );
+
+    return {
+      status: "completed" as "completed",
+      value: productsIds,
+    };
+  }
+
+  render() {
+    return html`
+      <sl-card>
         <form
           id="create-form"
           class="column"
-          style="flex: 1; gap: 16px;"
+          style="flex: 1; gap: 24px;"
           ${onSubmit((fields) => this.createProduct(fields))}
         >
-          <div class="row" style="flex: 1; gap: 16px">
+          <span class="title">${msg("Product Details")}</span>
+          <div class="row" style="flex: 1; gap: 24px">
             <div class="column" style="flex: 1; gap: 12px">
-              <span class="title">${msg("Product Details")}</span>
               <sl-input name="name" .label=${msg("Name")} required></sl-input>
 
               <sl-input
@@ -174,43 +216,6 @@ export class CreateProduct extends SignalWatcher(LitElement) {
               ></sl-textarea>
 
               ${this.renderCategoriesSelect()}
-            </div>
-
-            <div class="column" style="flex: 1; gap: 12px">
-              <sl-select name="packaging" .label=${msg("Packaging")} required>
-                <sl-option value="Piece">${msg("Piece")}</sl-option>
-                <sl-option value="Kilograms">${msg("Kilograms")}</sl-option>
-                <sl-option value="Grams">${msg("Grams")}</sl-option>
-                <sl-option value="Liters">${msg("Liters")}</sl-option>
-                <sl-option value="Pounds">${msg("Pounds")}</sl-option>
-                <sl-option value="Ounces">${msg("Ounces")}</sl-option>
-              </sl-select>
-
-              <sl-input
-                type="number"
-                name="maximum_available"
-                .label=${msg("Maximum Available")}
-              ></sl-input>
-
-              <sl-input
-                type="number"
-                name="price"
-                .label=${msg("Price")}
-                required
-              ></sl-input>
-
-              <sl-input
-                type="number"
-                name="vat_percentage"
-                .label=${msg("Vat Percentage")}
-                required
-              ></sl-input>
-
-              <sl-input
-                type="number"
-                name="margin_percentage"
-                .label=${msg("Margin Percentage")}
-              ></sl-input>
 
               <sl-input name="origin" .label=${msg("Origin")}></sl-input>
 
@@ -219,6 +224,64 @@ export class CreateProduct extends SignalWatcher(LitElement) {
                 .label=${msg("Ingredients")}
               ></sl-textarea>
             </div>
+
+            <div class="column" style="flex: 1; gap: 12px">
+              <div class="row" style="gap: 12px; align-items: end">
+                <sl-input
+                  type="number"
+                  name="amount"
+                  .label=${msg("Packaging")}
+                  required
+                  style="width: 6rem"
+                ></sl-input>
+                <div class="row" style="gap: 12px; align-items: center">
+                  <sl-select name="packaging_unit" value="Kilograms">
+                    <sl-option value="Piece">${msg("Piece")}</sl-option>
+                    <sl-option value="Kilograms">${msg("Kilograms")}</sl-option>
+                    <sl-option value="Grams">${msg("Grams")}</sl-option>
+                    <sl-option value="Liters">${msg("Liters")}</sl-option>
+                    <sl-option value="Pounds">${msg("Pounds")}</sl-option>
+                    <sl-option value="Ounces">${msg("Ounces")}</sl-option>
+                  </sl-select>
+                  <sl-checkbox name="estimate">${msg("Estimate")}</sl-checkbox>
+                </div>
+              </div>
+
+              <sl-input
+                type="number"
+                name="maximum_available"
+                .label=${msg("Maximum Available")}
+              ></sl-input>
+
+              <div class="row" style="gap: 12px">
+                <sl-input
+                  type="number"
+                  name="price"
+                  .label=${msg("Price (Excluding VAT)")}
+                  required
+                  no-spin-buttons
+                  style="flex: 1"
+                ></sl-input>
+
+                <sl-input
+                  type="number"
+                  name="vat_percentage"
+                  .label=${msg("VAT")}
+                  required
+                  no-spin-buttons
+                  style="width: 6rem"
+                  ><span slot="suffix">%</span></sl-input
+                >
+              </div>
+
+              <sl-input
+                type="number"
+                no-spin-buttons
+                name="margin_percentage"
+                .label=${msg("Margin")}
+                ><span slot="suffix">%</span></sl-input
+              >
+            </div>
           </div>
 
           <sl-button variant="primary" type="submit" .loading=${this.committing}
@@ -226,7 +289,7 @@ export class CreateProduct extends SignalWatcher(LitElement) {
           >
         </form>
       </sl-card>
-    </div>`;
+    `;
   }
 
   static styles = appStyles;

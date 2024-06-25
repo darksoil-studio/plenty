@@ -15,9 +15,10 @@
         margin: 0;
         padding: 0;
         font-family: sans-serif;
-        background-color: #ededed;
+        background-color: var(--background-color);
         height: 100%;
         width: 100%;
+        --sl-z-index-toast: 1002; /* 1 more than overlay-page */
       }
 
       body {
@@ -26,6 +27,7 @@
 
       :root {
         /* Changes the primary theme color to purple using primitives */
+        --background-color: #ededed;
         --sl-color-primary-50: var(--sl-color-purple-50);
         --sl-color-primary-100: var(--sl-color-purple-100);
         --sl-color-primary-200: var(--sl-color-purple-200);

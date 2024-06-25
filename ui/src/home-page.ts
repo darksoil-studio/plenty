@@ -101,7 +101,7 @@ export class HomePage extends SignalWatcher(LitElement) {
         <sl-tab-group placement="start" style="flex: 1">
           <sl-tab
             slot="nav"
-            .active=${this.routes.currentPathname().endsWith("orders/")}
+            .active=${this.routes.currentPathname().startsWith("orders/")}
             @click=${() => {
               this.routes.goto("orders/");
             }}
@@ -109,7 +109,7 @@ export class HomePage extends SignalWatcher(LitElement) {
           >
           <sl-tab
             slot="nav"
-            .active=${this.routes.currentPathname().endsWith("producers/")}
+            .active=${this.routes.currentPathname().startsWith("producers/")}
             @click=${() => {
               this.routes.goto("producers/");
             }}
@@ -117,7 +117,7 @@ export class HomePage extends SignalWatcher(LitElement) {
           >
           <sl-tab
             slot="nav"
-            .active=${this.routes.currentPathname().endsWith("members/")}
+            .active=${this.routes.currentPathname().startsWith("members/")}
             @click=${() => {
               this.routes.goto("members/");
             }}

@@ -54,6 +54,7 @@ import "./plenty/producers/elements/create-product.js";
 import { HouseholdsClient } from "./plenty/households/households-client.js";
 import { HouseholdsStore } from "./plenty/households/households-store.js";
 import { routerContext } from "./context.js";
+import { appStyles } from "./app-styles.js";
 
 @localized()
 @customElement("holochain-app")
@@ -103,39 +104,6 @@ export class HolochainApp extends SignalWatcher(LitElement) {
     {
       path: "/home/*",
       render: () => html`<home-page style="flex: 1"></home-page>`,
-    },
-    {
-      path: "/create-producer",
-      render: () => html`
-        <create-producer
-          style="flex: 1"
-          @close-requested=${() => this.router.pop()}
-          @producer-created=${(e: CustomEvent) => {
-            this.router.goto(
-              `/home/producers/${encodeHashToBase64(e.detail.producerHash)}`,
-            );
-          }}
-        ></create-producer>
-      `,
-    },
-    {
-      path: "/create-product/:producerHash",
-      render: (params) => html`
-        <create-product
-          .producerHash=${decodeHashFromBase64(
-            params.producerHash as ActionHashB64,
-          )}
-          style="flex: 1"
-          @close-requested=${() => this.router.pop()}
-          @product-created=${(e: CustomEvent) => {
-            this.router.goto(
-              `/home/producers/${
-                params.producerHash
-              }/products/${encodeHashToBase64(e.detail.productHash)}`,
-            );
-          }}
-        ></create-product>
-      `,
     },
     {
       path: "/my-household",
@@ -238,6 +206,6 @@ export class HolochainApp extends SignalWatcher(LitElement) {
         flex: 1;
       }
     `,
-    sharedStyles,
+    ...appStyles,
   ];
 }

@@ -36,6 +36,7 @@ import {
   ProfilesStore,
   profilesStoreContext,
 } from "@holochain-open-dev/profiles";
+import { appStyles } from "../../../app-styles.js";
 
 /**
  * @element my-household
@@ -349,5 +350,5 @@ export class MyHousehold extends SignalWatcher(LitElement) {
     }
   }
 
-  static styles = [sharedStyles];
+  static styles = [...appStyles];
 }

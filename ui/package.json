@@ -24,6 +24,7 @@
     "@mdi/js": "^7.2.0",
     "@msgpack/msgpack": "^2.8.0",
     "@shoelace-style/shoelace": "^2.11.0",
+    "@vaadin/grid": "^24.4.0",
     "lit": "^3.0.0",
     "urlpattern-polyfill": "^10.0.0"
   },

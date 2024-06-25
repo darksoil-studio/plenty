@@ -1,8 +1,8 @@
-import { LitElement, html } from "lit";
+import { LitElement, html, nothing } from "lit";
 import { repeat } from "lit/directives/repeat.js";
 import { state, customElement, property } from "lit/decorators.js";
 import { ActionHash, Record, EntryHash, AgentPubKey } from "@holochain/client";
-import { EntryRecord } from "@holochain-open-dev/utils";
+import { EntryRecord, mapValues } from "@holochain-open-dev/utils";
 import {
   hashState,
   notifyError,
@@ -11,7 +11,12 @@ import {
   wrapPathInSvg,
   onSubmit,
 } from "@holochain-open-dev/elements";
-import { SignalWatcher, toPromise } from "@holochain-open-dev/signals";
+import {
+  AsyncComputed,
+  SignalWatcher,
+  joinAsyncMap,
+  toPromise,
+} from "@holochain-open-dev/signals";
 import { consume } from "@lit/context";
 import { localized, msg } from "@lit/localize";
 import { mdiAlertCircleOutline, mdiDelete } from "@mdi/js";
@@ -29,7 +34,7 @@ import "@shoelace-style/shoelace/dist/components/icon/icon.js";
 import "@shoelace-style/shoelace/dist/components/input/input.js";
 import { ProducersStore } from "../producers-store.js";
 import { producersStoreContext } from "../context.js";
-import { Product, PackagingUnit } from "../types.js";
+import { Product, PackagingUnit, Packaging } from "../types.js";
 
 /**
  * @element edit-product
@@ -74,10 +79,52 @@ export class EditProduct extends SignalWatcher(LitElement) {
     });
   }
 
+  otherProductsIds(producerHash: ActionHash) {
+    const products = this.producersStore.producers
+      .get(producerHash)
+      .products.live.get();
+    if (products.status !== "completed") return products;
+
+    const productsLatestVersion = joinAsyncMap(
+      mapValues(products.value, (p) => p.latestVersion.get()),
+    );
+    if (productsLatestVersion.status !== "completed")
+      return productsLatestVersion;
+
+    const productsIds = Array.from(productsLatestVersion.value.entries())
+      .filter(
+        ([productHash]) =>
+          productHash.toString() !== this.productHash.toString(),
+      )
+      .map(([, p]) => p.entry.product_id);
+
+    return {
+      status: "completed" as "completed",
+      value: productsIds,
+    };
+  }
+
   async updateProduct(
     currentRecord: EntryRecord<Product>,
     fields: Partial<Product>,
   ) {
+    const productsIds = await toPromise(
+      new AsyncComputed(() =>
+        this.otherProductsIds(currentRecord.entry.producer_hash),
+      ),
+    );
+
+    if (productsIds.includes(fields.product_id!)) {
+      notifyError(msg("There already is a product with this product ID."));
+      return;
+    }
+
+    const packaging: Packaging = {
+      unit: (fields as any).packaging_unit!,
+      amount: parseInt((fields as any).amount),
+      estimate: (fields as any).estimate === "on",
+    };
+
     const product: Product = {
       producer_hash: currentRecord.entry.producer_hash!,
       name: fields.name!,
@@ -85,13 +132,19 @@ export class EditProduct extends SignalWatcher(LitElement) {
       description: fields.description!,
       categories: (Array.isArray(fields.categories!)
         ? fields.categories!
-        : ([fields.categories!] as unknown as Array<string>)
+        : fields.categories
+          ? ([fields.categories!] as unknown as Array<string>)
+          : []
       ).map((el) => el),
-      packaging: fields.packaging!,
-      maximum_available: fields.maximum_available!,
-      price: fields.price!,
-      vat_percentage: fields.vat_percentage!,
-      margin_percentage: fields.margin_percentage!,
+      packaging,
+      maximum_available: fields.maximum_available
+        ? parseInt(fields.maximum_available as any)
+        : undefined,
+      price: parseInt(fields.price as any),
+      vat_percentage: parseInt(fields.vat_percentage as any),
+      margin_percentage: fields.margin_percentage
+        ? parseInt(fields.margin_percentage as any)
+        : undefined,
       origin: fields.origin!,
       ingredients: fields.ingredients!,
     };
@@ -124,146 +177,131 @@ export class EditProduct extends SignalWatcher(LitElement) {
   }
 
   renderEditForm(currentRecord: EntryRecord<Product>) {
+    const categories = this.producersStore.allCategories.get();
     return html` <sl-card>
-      <span slot="header">${msg("Edit Product")}</span>
-
       <form
         id="form"
         class="column"
         style="flex: 1; gap: 16px;"
         ${onSubmit((fields) => this.updateProduct(currentRecord, fields))}
       >
-        <div>
-          <sl-input
-            name="name"
-            .label=${msg("Name")}
-            required
-            .defaultValue=${currentRecord.entry.name}
-          ></sl-input>
-        </div>
+        <span class="title">${msg("Product Details")}</span>
+        <div class="row" style="flex: 1; gap: 24px">
+          <div class="column" style="flex: 1; gap: 12px">
+            <sl-input
+              name="name"
+              .label=${msg("Name")}
+              required
+              .defaultValue=${currentRecord.entry.name}
+            ></sl-input>
 
-        <div>
-          <sl-input
-            name="product_id"
-            .label=${msg("Product Id")}
-            required
-            .defaultValue=${currentRecord.entry.product_id}
-          ></sl-input>
-        </div>
+            <sl-input
+              name="product_id"
+              .label=${msg("Product Id")}
+              required
+              .defaultValue=${currentRecord.entry.product_id}
+            ></sl-input>
 
-        <div>
-          <sl-textarea
-            name="description"
-            .label=${msg("Description")}
-            required
-            .defaultValue=${currentRecord.entry.description}
-          ></sl-textarea>
-        </div>
+            <sl-textarea
+              name="description"
+              .label=${msg("Description")}
+              required
+              .defaultValue=${currentRecord.entry.description}
+            ></sl-textarea>
 
-        <div>
-          <div class="column" style="gap: 8px">
-            <span>${msg("Categories")}</span>
+            <sl-combobox
+              no-repeated-values
+              .label=${msg("Categories")}
+              multiple
+              .options=${categories.status === "completed"
+                ? categories.value
+                : []}
+              name="categories"
+              .defaultValue=${currentRecord.entry.categories}
+            >
+            </sl-combobox>
+            <sl-input
+              name="origin"
+              .label=${msg("Origin")}
+              .defaultValue=${currentRecord.entry.origin}
+            ></sl-input>
 
-            ${repeat(
-              this._categoriesFields,
-              (i) => i,
-              (index) =>
-                html`<div class="row" style="align-items: center;">
-                  <sl-input
-                    name="categories"
-                    .label=${msg("")}
-                    .defaultValue=${currentRecord.entry.categories[index]}
-                  ></sl-input>
-                  <sl-icon-button
-                    .src=${wrapPathInSvg(mdiDelete)}
-                    @click=${() => {
-                      this._categoriesFields = this._categoriesFields.filter(
-                        (i) => i !== index,
-                      );
-                    }}
-                  ></sl-icon-button>
-                </div>`,
-            )}
-            <sl-button
-              @click=${() => {
-                this._categoriesFields = [
-                  ...this._categoriesFields,
-                  Math.max(...this._categoriesFields) + 1,
-                ];
-              }}
-              >${msg("Add Categories")}</sl-button
+            <sl-textarea
+              name="ingredients"
+              .label=${msg("Ingredients")}
+              .defaultValue=${currentRecord.entry.ingredients}
+            ></sl-textarea>
+          </div>
+
+          <div class="column" style="flex: 1; gap: 12px">
+            <div class="row" style="gap: 12px; align-items: end">
+              <sl-input
+                type="number"
+                name="amount"
+                .label=${msg("Packaging")}
+                .defaultValue=${currentRecord.entry.packaging.amount}
+                required
+                style="width: 6rem"
+              ></sl-input>
+              <div class="row" style="gap: 12px; align-items: center">
+                <sl-select
+                  name="packaging_unit"
+                  .defaultValue=${currentRecord.entry.packaging.unit}
+                >
+                  <sl-option value="Piece">${msg("Piece")}</sl-option>
+                  <sl-option value="Kilograms">${msg("Kilograms")}</sl-option>
+                  <sl-option value="Grams">${msg("Grams")}</sl-option>
+                  <sl-option value="Liters">${msg("Liters")}</sl-option>
+                  <sl-option value="Pounds">${msg("Pounds")}</sl-option>
+                  <sl-option value="Ounces">${msg("Ounces")}</sl-option>
+                </sl-select>
+                <sl-checkbox
+                  name="estimate"
+                  .defaultValue=${currentRecord.entry.packaging.estimate}
+                  >${msg("Estimate")}</sl-checkbox
+                >
+              </div>
+            </div>
+
+            <sl-input
+              type="number"
+              name="maximum_available"
+              .label=${msg("Maximum Available")}
+              .defaultValue=${currentRecord.entry.maximum_available || nothing}
+            ></sl-input>
+
+            <div class="row" style="gap: 12px">
+              <sl-input
+                type="number"
+                name="price"
+                .label=${msg("Price (Excluding VAT)")}
+                required
+                no-spin-buttons
+                style="flex: 1"
+                .defaultValue=${currentRecord.entry.price}
+              ></sl-input>
+
+              <sl-input
+                type="number"
+                name="vat_percentage"
+                .label=${msg("VAT")}
+                required
+                no-spin-buttons
+                style="width: 6rem"
+                .defaultValue=${currentRecord.entry.vat_percentage}
+                ><span slot="suffix">%</span></sl-input
+              >
+            </div>
+
+            <sl-input
+              type="number"
+              name="margin_percentage"
+              .label=${msg("Margin")}
+              no-spin-buttons
+              .defaultValue=${currentRecord.entry.margin_percentage || nothing}
+              ><span slot="suffix">%</span></sl-input
             >
           </div>
-        </div>
-
-        <div>
-          <sl-select
-            name="packaging"
-            .helpText=${msg("Packaging")}
-            required
-            .defaultValue=${currentRecord.entry.packaging}
-          >
-            <sl-option value="Piece">Piece</sl-option>
-            <sl-option value="Kilograms">Kilograms</sl-option>
-            <sl-option value="Grams">Grams</sl-option>
-            <sl-option value="Liters">Liters</sl-option>
-            <sl-option value="Pounds">Pounds</sl-option>
-            <sl-option value="Ounces">Ounces</sl-option>
-          </sl-select>
-        </div>
-
-        <div>
-          <sl-input
-            type="number"
-            name="maximum_available"
-            .label=${msg("Maximum Available")}
-            .defaultValue=${currentRecord.entry.maximum_available}
-          ></sl-input>
-        </div>
-
-        <div>
-          <sl-input
-            type="number"
-            name="price"
-            .label=${msg("Price")}
-            required
-            .defaultValue=${currentRecord.entry.price}
-          ></sl-input>
-        </div>
-
-        <div>
-          <sl-input
-            type="number"
-            name="vat_percentage"
-            .label=${msg("Vat Percentage")}
-            required
-            .defaultValue=${currentRecord.entry.vat_percentage}
-          ></sl-input>
-        </div>
-
-        <div>
-          <sl-input
-            type="number"
-            name="margin_percentage"
-            .label=${msg("Margin Percentage")}
-            .defaultValue=${currentRecord.entry.margin_percentage}
-          ></sl-input>
-        </div>
-
-        <div>
-          <sl-input
-            name="origin"
-            .label=${msg("Origin")}
-            .defaultValue=${currentRecord.entry.origin}
-          ></sl-input>
-        </div>
-
-        <div>
-          <sl-textarea
-            name="ingredients"
-            .label=${msg("Ingredients")}
-            .defaultValue=${currentRecord.entry.ingredients}
-          ></sl-textarea>
         </div>
 
         <div class="row" style="gap: 8px;">
