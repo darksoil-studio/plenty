@@ -4,12 +4,17 @@ import { customElement } from "lit/decorators.js";
 import { consume } from "@lit/context";
 import "@shoelace-style/shoelace/dist/components/button/button.js";
 import "@shoelace-style/shoelace/dist/components/breadcrumb/breadcrumb.js";
+import "@shoelace-style/shoelace/dist/components/icon/icon.js";
 import "@shoelace-style/shoelace/dist/components/skeleton/skeleton.js";
 import "@shoelace-style/shoelace/dist/components/breadcrumb-item/breadcrumb-item.js";
 import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
 import "@holochain-open-dev/profiles/dist/elements/profile-list-item.js";
 import { msg } from "@lit/localize";
-import { Router, sharedStyles } from "@holochain-open-dev/elements";
+import {
+  Router,
+  sharedStyles,
+  wrapPathInSvg,
+} from "@holochain-open-dev/elements";
 
 import "./plenty/producers/elements/all-producers.js";
 import "./plenty/producers/elements/producer-detail.js";
@@ -30,6 +35,7 @@ import { ProducersStore } from "./plenty/producers/producers-store.js";
 import { EntryRecord } from "@holochain-open-dev/utils";
 import { Producer } from "./plenty/producers/types.js";
 import { appStyles } from "./app-styles.js";
+import { mdiPencil } from "@mdi/js";
 
 @customElement("producers-page")
 export class ProducersPage extends SignalWatcher(LitElement) {
@@ -79,6 +85,27 @@ export class ProducersPage extends SignalWatcher(LitElement) {
         this.renderProducer(
           decodeHashFromBase64(params.producerHash as ActionHashB64),
         ),
+    },
+    {
+      path: ":producerHash/edit",
+      render: (params) => html`
+        <overlay-page
+          .title=${msg("Edit Producer")}
+          @close-requested=${() => {
+            this.routes.pop();
+          }}
+        >
+          <edit-producer
+            .producerHash=${decodeHashFromBase64(
+              params.producerHash as ActionHashB64,
+            )}
+            @edit-canceled=${() => this.routes.pop()}
+            @producer-updated=${(e: CustomEvent) => {
+              this.routes.pop();
+            }}
+          ></edit-producer>
+        </overlay-page>
+      `,
     },
     {
       path: ":producerHash/products/:productHash",
@@ -155,45 +182,65 @@ export class ProducersPage extends SignalWatcher(LitElement) {
 
       case "completed":
         return html`
-          <div class="column" style="gap: 16px; max-width: 1000px;">
-            <div class="row" style="align-items: center; gap: 12px">
-              <show-image
-                .imageHash=${producer.value.entry.photo}
-                style="height: 100px; width: 100px"
-              ></show-image>
-              <div class="column" style="gap: 12px">
-                <span class="title">${producer.value.entry.name}</span>
+          <div class="column" style="align-items: center">
+            <div class="column" style="gap: 16px; width: 1000px;">
+              <div class="row" style="align-items: center; gap: 12px; flex: 1">
+                <show-image
+                  .imageHash=${producer.value.entry.photo}
+                  style="height: 100px; width: 100px"
+                ></show-image>
+                <div class="column" style="gap: 12px">
+                  <span class="title">${producer.value.entry.name}</span>
 
-                <div class="row" style="gap: 8px; align-items: center">
-                  <span>${msg("Liason")}:</span>
-                  <profile-list-item
-                    .agentPubKey=${producer.value.entry.liason}
-                  ></profile-list-item>
+                  <div class="row" style="gap: 8px; align-items: center">
+                    <span>${msg("Liason")}:</span>
+                    <profile-list-item
+                      .agentPubKey=${producer.value.entry.liason}
+                    ></profile-list-item>
+                  </div>
                 </div>
+
+                <span style="flex: 1"></span>
+
+                ${this.producersStore.canIEdit(producer.value)
+                  ? html`<sl-button
+                      @click=${() =>
+                        this.routes.goto(
+                          `${encodeHashToBase64(producerHash)}/edit`,
+                        )}
+                      style="align-self: start"
+                    >
+                      <sl-icon
+                        slot="prefix"
+                        .src=${wrapPathInSvg(mdiPencil)}
+                      ></sl-icon>
+                      ${msg("Edit Producer")}</sl-button
+                    >`
+                  : html``}
               </div>
-            </div>
 
-            <div class="row" style="margin-top: 8px; align-items: center">
-              <span class="title" style="flex: 1">${msg("Products")}</span>
-              ${this.producersStore.canIEdit(producer.value)
-                ? html`<sl-button
-                    @click=${() =>
-                      this.routes.goto(
-                        `${encodeHashToBase64(producerHash)}/create-product`,
-                      )}
-                    >${msg("Create Product")}</sl-button
-                  >`
-                : html``}
-            </div>
+              <div class="row" style="margin-top: 8px; align-items: center">
+                <span class="title" style="flex: 1">${msg("Products")}</span>
+                ${this.producersStore.canIEdit(producer.value)
+                  ? html`<sl-button
+                      @click=${() =>
+                        this.routes.goto(
+                          `${encodeHashToBase64(producerHash)}/create-product`,
+                        )}
+                      >${msg("Create Product")}</sl-button
+                    >`
+                  : html``}
+              </div>
 
-            <products-for-producer
-              style="flex: 1"
-              .producerHash=${producerHash}
-              @edit-product-requested=${(e: CustomEvent) =>
-                this.routes.goto(
-                  `${encodeHashToBase64(producerHash)}/products/${encodeHashToBase64(e.detail.productHash)}/edit`,
-                )}
-            ></products-for-producer>
+              <products-for-producer
+                style="flex: 1"
+                .producerHash=${producerHash}
+                @edit-product-requested=${(e: CustomEvent) =>
+                  this.routes.goto(
+                    `${encodeHashToBase64(producerHash)}/products/${encodeHashToBase64(e.detail.productHash)}/edit`,
+                  )}
+              ></products-for-producer>
+            </div>
           </div>
         `;
     }
@@ -203,7 +250,11 @@ export class ProducersPage extends SignalWatcher(LitElement) {
     return html`
       <div class="column" style=" margin: 12px 0">
         <div class="row" style="align-items: center; height: 38px">
-          <routes-breadcrumbs .routes=${this.routes}></routes-breadcrumbs>
+          <span class="title">${msg("Producers")}</span>
+          <routes-breadcrumbs
+            style="margin-left: 24px"
+            .routes=${this.routes}
+          ></routes-breadcrumbs>
           <span style="flex: 1"></span>
           ${this.routes.currentRoute.get()?.name === msg("All Producers")
             ? html`

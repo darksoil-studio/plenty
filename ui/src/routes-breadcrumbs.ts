@@ -29,7 +29,6 @@ export class RoutesBreadcrumbs extends SignalWatcher(LitElement) {
     if (!currentRoute) return [];
 
     const split = currentPathname.split("/").filter((s) => !!s);
-    console.log(currentPathname, split);
 
     const possibleRoutes = this.routes.routes.filter(
       (route) => route.name || (route as RouteConfigWithSignalName).nameSignal,
@@ -39,7 +38,6 @@ export class RoutesBreadcrumbs extends SignalWatcher(LitElement) {
 
     for (let i = 0; i < split.length + 1; i++) {
       const pathname = split.slice(0, i).join("/");
-      console.log(pathname, i);
       const matchingRoute = possibleRoutes.find((route) => {
         const pattern =
           (route as PathRouteConfig).path !== undefined
@@ -57,7 +55,6 @@ export class RoutesBreadcrumbs extends SignalWatcher(LitElement) {
 
   render() {
     const routes = this.matchingRoutes();
-    console.log(routes);
     return html`<sl-breadcrumb>
       ${routes.map(
         ([route, matchingPathname]) => html`

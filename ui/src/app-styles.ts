@@ -6,8 +6,7 @@ export const appStyles = [
   css`
     .top-bar {
       align-items: center;
-      color: white;
-      background-color: var(--sl-color-primary-900);
+      background-color: var(--sl-color-primary-500);
       padding: 16px;
     }
   `,

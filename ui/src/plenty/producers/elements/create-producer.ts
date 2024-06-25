@@ -123,9 +123,7 @@ export class CreateProducer extends SignalWatcher(LitElement) {
                 ></upload-files>
               </div>
 
-              <div>
-                <sl-input name="name" .label=${msg("Name")} required></sl-input>
-              </div>
+              <sl-input name="name" .label=${msg("Name")} required></sl-input>
 
               <div>
                 <sl-input
@@ -161,22 +159,16 @@ export class CreateProducer extends SignalWatcher(LitElement) {
             </div>
             <div class="column" style="flex: 1; gap: 12px">
               <span class="title">${msg("Roles")}</span>
-              <div>
-                <sl-select name="editors" .label=${msg("Editors")} required>
-                  <sl-option value="Liason">${msg("Liason")}</sl-option>
-                  <sl-option value="AllMembers"
-                    >${msg("All Members")}</sl-option
-                  >
-                  <sl-option value="Members">${msg("Members")}</sl-option>
-                </sl-select>
-              </div>
+              <sl-select name="editors" .label=${msg("Editors")} required>
+                <sl-option value="Liason">${msg("Liason")}</sl-option>
+                <sl-option value="AllMembers">${msg("All Members")}</sl-option>
+                <sl-option value="Members">${msg("Members")}</sl-option>
+              </sl-select>
 
-              <div>
-                <sl-select name="sorters" .label=${msg("Sorters")} required>
-                  <sl-option value="Liason">${msg("Liason")}</sl-option>
-                  <sl-option value="Members">${msg("Members")}</sl-option>
-                </sl-select>
-              </div>
+              <sl-select name="sorters" .label=${msg("Sorters")} required>
+                <sl-option value="Liason">${msg("Liason")}</sl-option>
+                <sl-option value="Members">${msg("Members")}</sl-option>
+              </sl-select>
             </div>
           </div>
 

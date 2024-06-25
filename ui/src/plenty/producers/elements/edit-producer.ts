@@ -78,8 +78,8 @@ export class EditProducer extends SignalWatcher(LitElement) {
       location: fields.location!,
       producer_details: fields.producer_details!,
       liason: currentRecord.entry.liason!,
-      editors: fields.editors!,
-      sorters: fields.sorters!,
+      editors: { type: fields.editors as any },
+      sorters: { type: fields.sorters as any },
     };
 
     try {
@@ -111,94 +111,85 @@ export class EditProducer extends SignalWatcher(LitElement) {
 
   renderEditForm(currentRecord: EntryRecord<Producer>) {
     return html` <sl-card>
-      <span slot="header">${msg("Edit Producer")}</span>
-
       <form
         id="form"
         class="column"
         style="flex: 1; gap: 16px;"
         ${onSubmit((fields) => this.updateProducer(currentRecord, fields))}
       >
-        <div>
-          <sl-input
-            name="name"
-            .label=${msg("Name")}
-            required
-            .defaultValue=${currentRecord.entry.name}
-          ></sl-input>
-        </div>
+        <div class="row" style="gap: 20px; flex: 1">
+          <div class="column" style="gap: 12px; flex: 1">
+            <span class="title">${msg("Producer Details")}</span>
+            <div class="column" style="gap: 8px">
+              <span>${msg("Photo")}*</span>
 
-        <div>
-          <upload-files
-            name="photo"
-            one-file
-            accepted-files="image/jpeg,image/png,image/gif"
-            required
-            .defaultValue=${currentRecord.entry.photo}
-          ></upload-files>
-        </div>
+              <upload-files
+                name="photo"
+                one-file
+                accepted-files="image/jpeg,image/png,image/gif"
+                required
+                .defaultValue=${currentRecord.entry.photo}
+              ></upload-files>
+            </div>
+            <sl-input
+              name="name"
+              .label=${msg("Name")}
+              required
+              .defaultValue=${currentRecord.entry.name}
+            ></sl-input>
 
-        <div>
-          <sl-input
-            name="contact_email"
-            .label=${msg("Contact Email")}
-            required
-            .defaultValue=${currentRecord.entry.contact_email}
-          ></sl-input>
-        </div>
+            <sl-input
+              name="contact_email"
+              .label=${msg("Contact Email")}
+              required
+              .defaultValue=${currentRecord.entry.contact_email}
+            ></sl-input>
 
-        <div>
-          <sl-input
-            name="phone_number"
-            .label=${msg("Phone Number")}
-            required
-            .defaultValue=${currentRecord.entry.phone_number}
-          ></sl-input>
-        </div>
+            <sl-input
+              name="phone_number"
+              .label=${msg("Phone Number")}
+              required
+              .defaultValue=${currentRecord.entry.phone_number}
+            ></sl-input>
 
-        <div>
-          <sl-input
-            name="location"
-            .label=${msg("Location")}
-            required
-            .defaultValue=${currentRecord.entry.location}
-          ></sl-input>
-        </div>
+            <sl-input
+              name="location"
+              .label=${msg("Location")}
+              required
+              .defaultValue=${currentRecord.entry.location}
+            ></sl-input>
 
-        <div>
-          <sl-textarea
-            name="producer_details"
-            .label=${msg("Producer Details")}
-            required
-            .defaultValue=${currentRecord.entry.producer_details}
-          ></sl-textarea>
-        </div>
+            <sl-textarea
+              name="producer_details"
+              .label=${msg("Producer Details")}
+              required
+              .defaultValue=${currentRecord.entry.producer_details}
+            ></sl-textarea>
+          </div>
+          <div class="column" style="flex: 1; gap: 12px">
+            <span class="title">${msg("Roles")}</span>
+            <sl-select
+              name="editors"
+              .label=${msg("Editors")}
+              required
+              .defaultValue=${currentRecord.entry.editors.type}
+            >
+              <sl-option value="Liason">${msg("Liason")}</sl-option>
+              <sl-option value="AllMembers">${msg("All Members")}</sl-option>
+              <sl-option value="Members">${msg("Members")}</sl-option>
+            </sl-select>
 
-        <div>
-          <sl-select
-            name="editors"
-            .helpText=${msg("Editors")}
-            required
-            .defaultValue=${currentRecord.entry.editors}
-          >
-            <sl-option value="Liason">Liason</sl-option>
-            <sl-option value="AllMembers">All Members</sl-option>
-            <sl-option value="Members">Members</sl-option>
-          </sl-select>
+            <sl-select
+              name="sorters"
+              .label=${msg("Sorters")}
+              required
+              .defaultValue=${currentRecord.entry.sorters.type}
+            >
+              <sl-option value="Liason">${msg("Liason")}</sl-option>
+              <sl-option value="Members">${msg("Members")}</sl-option>
+            </sl-select>
+          </div>
         </div>
-
-        <div>
-          <sl-select
-            name="sorters"
-            .helpText=${msg("Sorters")}
-            required
-            .defaultValue=${currentRecord.entry.sorters}
-          >
-            <sl-option value="Liason">Liason</sl-option>
-            <sl-option value="Members">Members</sl-option>
-          </sl-select>
-        </div>
-
         <div class="row" style="gap: 8px;">
           <sl-button
             @click=${() =>

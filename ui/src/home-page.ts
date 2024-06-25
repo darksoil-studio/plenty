@@ -1,19 +1,28 @@
-import { Router, Routes, sharedStyles } from "@holochain-open-dev/elements";
+import {
+  Router,
+  Routes,
+  sharedStyles,
+  wrapPathInSvg,
+} from "@holochain-open-dev/elements";
 import { AsyncResult, SignalWatcher } from "@holochain-open-dev/signals";
 import { LitElement, css, html } from "lit";
 import { customElement } from "lit/decorators.js";
 import "@shoelace-style/shoelace/dist/components/tab-group/tab-group.js";
 import "@shoelace-style/shoelace/dist/components/tab-panel/tab-panel.js";
+import "@shoelace-style/shoelace/dist/components/tab/tab.js";
+import "@shoelace-style/shoelace/dist/components/icon/icon.js";
 import { EntryRecord } from "@holochain-open-dev/utils";
 import { consume } from "@lit/context";
 
 import "./producers-page.js";
+import "./plenty/households/elements/all-members.js";
 import { Household } from "./plenty/households/types.js";
 import { HouseholdsStore } from "./plenty/households/households-store.js";
 import { householdsStoreContext } from "./plenty/households/context.js";
 import { msg } from "@lit/localize";
 import { routerContext } from "./context.js";
 import { appStyles } from "./app-styles.js";
+import { mdiBasket, mdiCarrot, mdiHomeGroup } from "@mdi/js";
 
 @customElement("home-page")
 export class HomePage extends SignalWatcher(LitElement) {
@@ -44,7 +53,13 @@ export class HomePage extends SignalWatcher(LitElement) {
     },
     {
       path: "members/",
-      render: () => html` <all-members></all-members> `,
+      render: () => html`
+        <div class="column" style="margin: 16px 0">
+          <span class="title">${msg("Households")}</span>
+          <sl-divider></sl-divider>
+          <all-members></all-members>
+        </div>
+      `,
     },
   ]);
 
@@ -105,23 +120,44 @@ export class HomePage extends SignalWatcher(LitElement) {
             @click=${() => {
               this.routes.goto("orders/");
             }}
-            >${msg("Orders")}</sl-tab
           >
+            <div class="row" style="gap: 8px; align-items: center">
+              <sl-icon
+                .src=${wrapPathInSvg(mdiBasket)}
+                style="font-size: 24px"
+              ></sl-icon>
+              ${msg("Orders")}
+            </div>
+          </sl-tab>
           <sl-tab
             slot="nav"
             .active=${this.routes.currentPathname().startsWith("producers/")}
             @click=${() => {
               this.routes.goto("producers/");
             }}
-            >${msg("Producers")}</sl-tab
           >
+            <div class="row" style="gap: 8px; align-items: center">
+              <sl-icon
+                .src=${wrapPathInSvg(mdiCarrot)}
+                style="font-size: 24px"
+              ></sl-icon>
+              ${msg("Producers")}
+            </div>
+          </sl-tab>
           <sl-tab
             slot="nav"
             .active=${this.routes.currentPathname().startsWith("members/")}
             @click=${() => {
               this.routes.goto("members/");
             }}
-            >${msg("Members")}</sl-tab
+          >
+            <div class="row" style="gap: 8px; align-items: center">
+              <sl-icon
+                .src=${wrapPathInSvg(mdiHomeGroup)}
+                style="font-size: 24px"
+              ></sl-icon>
+              ${msg("Members")}
+            </div></sl-tab
           >
 
           <sl-tab-panel> ${this.routes.outlet()}</sl-tab-panel>
