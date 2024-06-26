@@ -82,6 +82,13 @@ export class ProducersStore {
   }));
 
   canIEdit(producer: EntryRecord<Producer>) {
+    return (
+      producer.entry.liason.toString() ===
+      this.client.client.myPubKey.toString()
+    );
+  }
+
+  canIEditProducts(producer: EntryRecord<Producer>) {
     const editors = producer.entry.editors;
     if (editors.type === "AllMembers") return true;
     if (editors.type === "Liason")

@@ -28,11 +28,6 @@ export type ProducerEditors =
     }
   | { type: "AllMembers" }
   | { type: "Members"; members: Array<AgentPubKey> };
-export type ProducerSorters =
-  | {
-      type: "Liason";
-    }
-  | { type: "Members"; members: Array<AgentPubKey> };
 
 export interface Producer {
   name: string;
@@ -50,8 +45,6 @@ export interface Producer {
   liason: AgentPubKey;
 
   editors: ProducerEditors;
-
-  sorters: ProducerSorters;
 }
 
 export function renderPackaging(packaging: Packaging) {

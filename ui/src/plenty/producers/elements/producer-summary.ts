@@ -14,7 +14,7 @@ import "@shoelace-style/shoelace/dist/components/card/card.js";
 import "@holochain-open-dev/elements/dist/elements/display-error.js";
 import { ProducersStore } from "../producers-store.js";
 import { producersStoreContext } from "../context.js";
-import { Producer, ProducerEditors, ProducerSorters } from "../types.js";
+import { Producer, ProducerEditors } from "../types.js";
 
 /**
  * @element producer-summary

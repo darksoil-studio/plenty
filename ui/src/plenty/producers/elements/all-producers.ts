@@ -33,12 +33,15 @@ export class AllProducers extends SignalWatcher(LitElement) {
 
   renderList(hashes: Array<ActionHash>) {
     if (hashes.length === 0)
-      return html` <div class="column center-content" style="gap: 16px;">
+      return html` <div
+        class="column center-content"
+        style="gap: 16px; margin: 24px"
+      >
         <sl-icon
           .src=${wrapPathInSvg(mdiInformationOutline)}
           style="color: grey; height: 64px; width: 64px;"
         ></sl-icon>
-        <span class="placeholder">${msg("No producers found")}</span>
+        <span class="placeholder">${msg("No producers found.")}</span>
       </div>`;
 
     return html`

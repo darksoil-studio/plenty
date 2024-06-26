@@ -221,7 +221,7 @@ export class ProducersPage extends SignalWatcher(LitElement) {
 
               <div class="row" style="margin-top: 8px; align-items: center">
                 <span class="title" style="flex: 1">${msg("Products")}</span>
-                ${this.producersStore.canIEdit(producer.value)
+                ${this.producersStore.canIEditProducts(producer.value)
                   ? html`<sl-button
                       @click=${() =>
                         this.routes.goto(

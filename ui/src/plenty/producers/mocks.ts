@@ -331,7 +331,6 @@ export async function sampleProducer(
       producer_details: "Lorem ipsum 2",
       liason: client.client.myPubKey,
       editors: { type: "Liason" },
-      sorters: { type: "Liason" },
     },
     ...partialProducer,
   };

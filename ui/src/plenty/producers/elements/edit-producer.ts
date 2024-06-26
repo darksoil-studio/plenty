@@ -30,7 +30,7 @@ import "@shoelace-style/shoelace/dist/components/select/select.js";
 import "@shoelace-style/shoelace/dist/components/icon/icon.js";
 import { ProducersStore } from "../producers-store.js";
 import { producersStoreContext } from "../context.js";
-import { Producer, ProducerEditors, ProducerSorters } from "../types.js";
+import { Producer, ProducerEditors } from "../types.js";
 
 /**
  * @element edit-producer
@@ -79,7 +79,6 @@ export class EditProducer extends SignalWatcher(LitElement) {
       producer_details: fields.producer_details!,
       liason: currentRecord.entry.liason!,
       editors: { type: fields.editors as any },
-      sorters: { type: fields.sorters as any },
     };
 
     try {
@@ -170,22 +169,12 @@ export class EditProducer extends SignalWatcher(LitElement) {
             <span class="title">${msg("Roles")}</span>
             <sl-select
               name="editors"
-              .label=${msg("Editors")}
+              .label=${msg("Product Editors")}
               required
               .defaultValue=${currentRecord.entry.editors.type}
             >
               <sl-option value="Liason">${msg("Liason")}</sl-option>
               <sl-option value="AllMembers">${msg("All Members")}</sl-option>
-              <sl-option value="Members">${msg("Members")}</sl-option>
-            </sl-select>
-
-            <sl-select
-              name="sorters"
-              .label=${msg("Sorters")}
-              required
-              .defaultValue=${currentRecord.entry.sorters.type}
-            >
-              <sl-option value="Liason">${msg("Liason")}</sl-option>
               <sl-option value="Members">${msg("Members")}</sl-option>
             </sl-select>
           </div>

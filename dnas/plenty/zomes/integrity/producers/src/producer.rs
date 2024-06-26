@@ -8,13 +8,6 @@ pub enum ProducerEditors {
     Members(Vec<AgentPubKey>),
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-#[serde(tag = "type")]
-pub enum ProducerSorters {
-    Liason,
-    Members(Vec<AgentPubKey>),
-}
-
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
 pub struct Producer {
@@ -26,7 +19,6 @@ pub struct Producer {
     pub producer_details: String,
     pub liason: AgentPubKey,
     pub editors: ProducerEditors,
-    pub sorters: ProducerSorters,
 }
 
 pub fn validate_create_producer(

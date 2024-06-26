@@ -113,7 +113,7 @@ export class ProductsForProducer extends SignalWatcher(LitElement) {
           .header=${msg("VAT")}
           path="vat_percentage"
         ></vaadin-grid-column>
-        ${this.producersStore.canIEdit(producer)
+        ${this.producersStore.canIEditProducts(producer)
           ? html` <vaadin-grid-column
               .header=${msg("Edit")}
               .renderer=${(root: any, _: any, model: any) => {

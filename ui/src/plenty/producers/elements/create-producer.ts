@@ -37,7 +37,7 @@ import "@holochain-open-dev/elements/dist/elements/display-error.js";
 
 import { ProducersStore } from "../producers-store.js";
 import { producersStoreContext } from "../context.js";
-import { Producer, ProducerEditors, ProducerSorters } from "../types.js";
+import { Producer, ProducerEditors } from "../types.js";
 import { appStyles } from "../../../app-styles.js";
 
 /**
@@ -75,7 +75,6 @@ export class CreateProducer extends SignalWatcher(LitElement) {
       producer_details: fields.producer_details!,
       liason: this.producersStore.client.client.myPubKey!,
       editors: { type: fields.editors as any },
-      sorters: { type: fields.sorters as any },
     };
 
     try {
@@ -125,48 +124,39 @@ export class CreateProducer extends SignalWatcher(LitElement) {
 
               <sl-input name="name" .label=${msg("Name")} required></sl-input>
 
-              <div>
-                <sl-input
-                  name="contact_email"
-                  .label=${msg("Contact Email")}
-                  required
-                ></sl-input>
-              </div>
+              <sl-input
+                name="contact_email"
+                .label=${msg("Contact Email")}
+                required
+              ></sl-input>
 
-              <div>
-                <sl-input
-                  name="phone_number"
-                  .label=${msg("Phone Number")}
-                  required
-                ></sl-input>
-              </div>
+              <sl-input
+                name="phone_number"
+                .label=${msg("Phone Number")}
+                required
+              ></sl-input>
 
-              <div>
-                <sl-input
-                  name="location"
-                  .label=${msg("Location")}
-                  required
-                ></sl-input>
-              </div>
+              <sl-input
+                name="location"
+                .label=${msg("Location")}
+                required
+              ></sl-input>
 
-              <div>
-                <sl-textarea
-                  name="producer_details"
-                  .label=${msg("Producer Details")}
-                  required
-                ></sl-textarea>
-              </div>
+              <sl-textarea
+                name="producer_details"
+                .label=${msg("Producer Details")}
+                required
+              ></sl-textarea>
             </div>
             <div class="column" style="flex: 1; gap: 12px">
               <span class="title">${msg("Roles")}</span>
-              <sl-select name="editors" .label=${msg("Editors")} required>
+              <sl-select
+                name="editors"
+                .label=${msg("Product Editors")}
+                required
+              >
                 <sl-option value="Liason">${msg("Liason")}</sl-option>
                 <sl-option value="AllMembers">${msg("All Members")}</sl-option>
-                <sl-option value="Members">${msg("Members")}</sl-option>
-              </sl-select>
-
-              <sl-select name="sorters" .label=${msg("Sorters")} required>
-                <sl-option value="Liason">${msg("Liason")}</sl-option>
                 <sl-option value="Members">${msg("Members")}</sl-option>
               </sl-select>
             </div>

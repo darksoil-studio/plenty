@@ -13,7 +13,6 @@ pub async fn sample_producer_1(conductor: &SweetConductor, zome: &SweetZome) -> 
         producer_details: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.".to_string(),
         liason: zome.cell_id().agent_pubkey().clone(),
         editors: ProducerEditors::Liason,
-        sorters: ProducerSorters::Liason,
     }
 }
 
@@ -27,7 +26,6 @@ pub async fn sample_producer_2(conductor: &SweetConductor, zome: &SweetZome) -> 
         producer_details: "Lorem ipsum 2".to_string(),
         liason: zome.cell_id().agent_pubkey().clone(),
         editors: ProducerEditors::AllMembers,
-        sorters: ProducerSorters::Liason,
     }
 }
 
