@@ -1,4 +1,5 @@
 packages:
   - 'ui'
+  - 'lobby'
   - 'tests'
   - 'site'

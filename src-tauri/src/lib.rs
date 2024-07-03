@@ -1,4 +1,4 @@
-use holochain_types::prelude::*;
+use holochain_types::web_app::WebAppBundle;
 use lair_keystore::dependencies::sodoken::{BufRead, BufWrite};
 use std::{collections::HashMap, path::PathBuf};
 use tauri::Manager;
@@ -7,9 +7,9 @@ use url2::Url2;
 
 const APP_ID: &'static str = "plenty";
 
-pub fn happ_bundle() -> AppBundle {
-    let bytes = include_bytes!("../../workdir/plenty.happ");
-    AppBundle::decode(bytes).expect("Failed to decode plenty happ")
+pub fn web_happ_bundle() -> WebAppBundle {
+    let bytes = include_bytes!("../../workdir/plenty.webhapp");
+    WebAppBundle::decode(bytes).expect("Failed to decode plenty happ")
 }
 
 pub fn vec_to_locked(mut pass_tmp: Vec<u8>) -> std::io::Result<BufRead> {
@@ -110,7 +110,12 @@ pub fn run() {
                 if installed_apps.len() == 0 {
                     handle
                         .holochain()?
-                        .install_app(String::from(APP_ID), happ_bundle(), HashMap::new(), None)
+                        .install_web_app(
+                            String::from(APP_ID),
+                            web_happ_bundle(),
+                            HashMap::new(),
+                            None,
+                        )
                         .await
                         .map(|_| ())?;
                 }

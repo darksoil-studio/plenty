@@ -1,7 +1,3 @@
-import { producersStoreContext } from "./plenty/producers/context.js";
-import { ProducersClient } from "./plenty/producers/producers-client.js";
-import { ProducersStore } from "./plenty/producers/producers-store.js";
-
 import {
   Router,
   Routes,
@@ -44,17 +40,26 @@ import {
 } from "@darksoil-studio/notifications";
 import "@darksoil-studio/notifications/dist/elements/my-notifications-icon-button.js";
 import { mdiArrowLeft } from "@mdi/js";
+import {
+  RolesStore,
+  RolesClient,
+  rolesStoreContext,
+} from "@darksoil-studio/roles";
 
 import "./home-page.js";
 import { householdsStoreContext } from "./plenty/households/context.js";
 import "./plenty/households/elements/household-prompt.js";
 import "./plenty/households/elements/my-household.js";
+import { producersStoreContext } from "./plenty/producers/context.js";
+import { ProducersClient } from "./plenty/producers/producers-client.js";
+import { ProducersStore } from "./plenty/producers/producers-store.js";
 import "./plenty/producers/elements/create-producer.js";
 import "./plenty/producers/elements/create-product.js";
 import { HouseholdsClient } from "./plenty/households/households-client.js";
 import { HouseholdsStore } from "./plenty/households/households-store.js";
 import { routerContext } from "./context.js";
 import { appStyles } from "./app-styles.js";
+import { bookkeeperRoleConfig, orderManagerRoleConfig } from "./roles.js";
 
 @localized()
 @customElement("holochain-app")
@@ -82,6 +87,10 @@ export class HolochainApp extends SignalWatcher(LitElement) {
   @provide({ context: fileStorageClientContext })
   @property()
   _fileStorageClient!: FileStorageClient;
+
+  @provide({ context: rolesStoreContext })
+  @property()
+  _rolesStore!: RolesStore;
 
   _client!: AppClient;
 
@@ -147,6 +156,9 @@ export class HolochainApp extends SignalWatcher(LitElement) {
     this._producersStore = new ProducersStore(
       new ProducersClient(appClient, "plenty"),
     );
+    this._rolesStore = new RolesStore(new RolesClient(appClient, "plenty"), {
+      roles_config: [orderManagerRoleConfig, bookkeeperRoleConfig],
+    });
   }
 
   renderMyHousehold() {

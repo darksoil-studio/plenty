@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta name="Description" content="Put your description here." />
+    <base href="/" />
+
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: sans-serif;
+        background-color: var(--background-color);
+        height: 100%;
+        width: 100%;
+        --sl-z-index-toast: 1002; /* 1 more than overlay-page */
+      }
+
+      body {
+        display: flex;
+      }
+
+      body,
+      :root {
+        /* Changes the primary theme color to purple using primitives */
+        --background-color: #ededed;
+        --sl-color-primary-50: var(--sl-color-lime-50);
+        --sl-color-primary-100: var(--sl-color-green-100);
+        --sl-color-primary-200: var(--sl-color-green-200);
+        --sl-color-primary-300: var(--sl-color-green-300);
+        --sl-color-primary-400: var(--sl-color-green-400);
+        --sl-color-primary-500: var(--sl-color-green-500);
+        --sl-color-primary-600: var(--sl-color-green-600);
+        --sl-color-primary-700: var(--sl-color-green-700);
+        --sl-color-primary-800: var(--sl-color-green-800);
+        --sl-color-primary-900: var(--sl-color-green-900);
+        --sl-color-primary-950: var(--sl-color-green-950);
+      }
+    </style>
+    <title>Plenty</title>
+  </head>
+
+  <body>
+    <lobby-app></lobby-app>
+
+    <script type="module">
+      import "urlpattern-polyfill";
+      import { setBasePath } from "@shoelace-style/shoelace/dist/utilities/base-path";
+      import { LobbyApp } from "./src/lobby-app.ts";
+
+      setBasePath("shoelace");
+    </script>
+  </body>
+</html>

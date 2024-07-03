@@ -15,11 +15,13 @@ import "@shoelace-style/shoelace/dist/components/divider/divider.js";
 import "@holochain-open-dev/elements/dist/elements/display-error.js";
 import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
 import "@holochain-open-dev/profiles/dist/elements/profile-list-item.js";
+import "@darksoil-studio/roles/dist/elements/roles-for-agent.js";
 
 import { Household } from "../types.js";
 import { appStyles } from "../../../app-styles.js";
 import { householdsStoreContext } from "../context.js";
 import { HouseholdsStore } from "../households-store.js";
+import { Routes } from "../../../router.js";
 
 @customElement("all-members")
 export class AllMembers extends SignalWatcher(LitElement) {
@@ -50,12 +52,15 @@ export class AllMembers extends SignalWatcher(LitElement) {
           ></show-image
         ></span>
         <span slot="header">${household.entry.name}</span>
-        <div class="column" style="flex: 1; gap: 12px">
+        <div class="column" style="flex: 1; gap: 16px">
           ${members.map(
             (member) =>
-              html`<profile-list-item
-                .agentPubKey=${member}
-              ></profile-list-item>`,
+              html` <div class="row" style="align-items: center">
+                <profile-list-item .agentPubKey=${member}></profile-list-item>
+                <span style="flex: 1"></span>
+
+                <roles-for-agent .agent=${member}></roles-for-agent>
+              </div>`,
           )}
         </div>
       </sl-card>

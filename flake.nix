@@ -5,6 +5,7 @@
     notifications.url = "github:darksoil-studio/notifications";
     file-storage.url = "github:holochain-open-dev/file-storage/nixify";
     profiles.url = "github:holochain-open-dev/profiles/nixify";
+    roles.url = "github:darksoil-studio/roles";
 
     versions.url = "github:holochain/holochain?dir=versions/0_3";
     holochain.url = "github:holochain/holochain";
@@ -34,7 +35,15 @@
       imports = [ ./happ.nix ];
 
       systems = builtins.attrNames inputs.holochain.devShells;
-      perSystem = { inputs', config, pkgs, system, ... }: {
+      perSystem = { inputs', self', config, pkgs, system, ... }: {
+
+        packages.network =
+          (pkgs.callPackage inputs.roles.lib.progenitor-network { }) {
+            happ = self'.packages.plenty_happ;
+            roles_to_modify = "plenty";
+            ui_port = 8888;
+          };
+
         devShells.default = pkgs.mkShell {
           inputsFrom = [
             inputs'.hc-infra.devShells.synchronized-pnpm

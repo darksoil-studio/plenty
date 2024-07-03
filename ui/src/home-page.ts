@@ -13,16 +13,17 @@ import "@shoelace-style/shoelace/dist/components/tab/tab.js";
 import "@shoelace-style/shoelace/dist/components/icon/icon.js";
 import { EntryRecord } from "@holochain-open-dev/utils";
 import { consume } from "@lit/context";
+import { msg } from "@lit/localize";
+import { mdiBasket, mdiCarrot, mdiHomeGroup } from "@mdi/js";
 
 import "./producers-page.js";
+import "./members-page.js";
 import "./plenty/households/elements/all-members.js";
 import { Household } from "./plenty/households/types.js";
 import { HouseholdsStore } from "./plenty/households/households-store.js";
 import { householdsStoreContext } from "./plenty/households/context.js";
-import { msg } from "@lit/localize";
 import { routerContext } from "./context.js";
 import { appStyles } from "./app-styles.js";
-import { mdiBasket, mdiCarrot, mdiHomeGroup } from "@mdi/js";
 
 @customElement("home-page")
 export class HomePage extends SignalWatcher(LitElement) {
@@ -52,14 +53,8 @@ export class HomePage extends SignalWatcher(LitElement) {
       render: () => html` <producers-page></producers-page> `,
     },
     {
-      path: "members/",
-      render: () => html`
-        <div class="column" style="margin: 16px 0">
-          <span class="title">${msg("Households")}</span>
-          <sl-divider></sl-divider>
-          <all-members></all-members>
-        </div>
-      `,
+      path: "members/*",
+      render: () => html`<members-page></members-page>`,
     },
   ]);
 

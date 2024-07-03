@@ -5,7 +5,7 @@
   "build": {
     "beforeBuildCommand": "pnpm -F ui build && pnpm happ:build-debug",
     "devUrl": "http://localhost:1420",
-    "frontendDist": "../ui/dist"
+    "frontendDist": "../lobby/dist"
   },
   "app": {
     "withGlobalTauri": false,
