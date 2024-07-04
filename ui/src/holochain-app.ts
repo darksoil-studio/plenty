@@ -145,20 +145,20 @@ export class HolochainApp extends SignalWatcher(LitElement) {
     this._householdStore = new HouseholdsStore(
       new HouseholdsClient(this._notificationsStore, appClient, "plenty"),
       this._profilesStore,
+      this._notificationsStore,
+      () => this.router.goto("/my-household"),
     );
-    this._notificationsStore.notificationsConfig.types = {
-      ...this._notificationsStore.notificationsConfig.types,
-      ...this._householdStore.notificationsTypes(() => {
-        this.router.goto("/my-household");
-      }),
-    };
     this._fileStorageClient = new FileStorageClient(appClient, "plenty");
     this._producersStore = new ProducersStore(
       new ProducersClient(appClient, "plenty"),
     );
-    this._rolesStore = new RolesStore(new RolesClient(appClient, "plenty"), {
-      roles_config: [orderManagerRoleConfig, bookkeeperRoleConfig],
-    });
+    this._rolesStore = new RolesStore(
+      new RolesClient(appClient, "plenty"),
+      {
+        roles_config: [orderManagerRoleConfig, bookkeeperRoleConfig],
+      },
+      this._notificationsStore,
+    );
   }
 
   renderMyHousehold() {

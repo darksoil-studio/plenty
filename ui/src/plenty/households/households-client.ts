@@ -201,11 +201,11 @@ export class HouseholdsClient extends ZomeClient<HouseholdsSignal> {
 
     const readNotificationsForThisRequestor = pickBy(
       read,
-      (n) => n.action.author === requestor,
+      (n) => n.action.author.toString() === requestor.toString(),
     );
     const unreadNotificationsForThisRequestor = pickBy(
       unread,
-      (n) => n.action.author === requestor,
+      (n) => n.action.author.toString() === requestor.toString(),
     );
 
     await this.notificationsStore.client.dismissNotifications([
@@ -239,11 +239,11 @@ export class HouseholdsClient extends ZomeClient<HouseholdsSignal> {
 
     const readNotificationsForThisRequestor = pickBy(
       read,
-      (n) => n.action.author === requestor,
+      (n) => n.action.author.toString() === requestor.toString(),
     );
     const unreadNotificationsForThisRequestor = pickBy(
       unread,
-      (n) => n.action.author === requestor,
+      (n) => n.action.author.toString() === requestor.toString(),
     );
 
     await this.notificationsStore.client.dismissNotifications([

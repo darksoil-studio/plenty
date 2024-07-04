@@ -22,7 +22,10 @@ import { ProfilesStore } from "@holochain-open-dev/profiles";
 import { wrapPathInSvg } from "@holochain-open-dev/elements/dist/icon.js";
 import { mdiAccountCancel, mdiAccountCheck, mdiAccountPlus } from "@mdi/js";
 import { msg, str } from "@lit/localize";
-import { NotificationType } from "@darksoil-studio/notifications";
+import {
+  NotificationType,
+  NotificationsStore,
+} from "@darksoil-studio/notifications";
 
 import {
   NOTIFICATIONS_TYPES,
@@ -35,7 +38,15 @@ export class HouseholdsStore {
   constructor(
     public client: HouseholdsClient,
     private profilesStore: ProfilesStore,
-  ) {}
+    private notificationsStore: NotificationsStore,
+    private goToMyHousehold: () => void,
+  ) {
+    this.notificationsStore.addTypes({
+      ...this.notificationsTypes(() => {
+        this.goToMyHousehold();
+      }),
+    });
+  }
 
   /** Household */
 
