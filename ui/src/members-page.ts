@@ -79,9 +79,7 @@ export class MembersPage extends SignalWatcher(LitElement) {
   ]);
 
   renderManageRoles() {
-    const myRoles = this.rolesStore.rolesForAgent
-      .get(this.rolesStore.client.client.myPubKey)
-      .get();
+    const myRoles = this.rolesStore.myRoles.get();
     if (myRoles.status !== "completed") return html``;
     const iAmAdmin = myRoles.value.includes(adminRoleConfig.role);
 
