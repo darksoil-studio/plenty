@@ -3778,6 +3778,15 @@ name = "households_integrity"
 version = "0.0.1"
 dependencies = [
  "hdi",
+ "households_types",
+ "serde",
+]
+
+[[package]]
+name = "households_types"
+version = "0.1.0"
+dependencies = [
+ "hdi",
  "serde",
 ]
 
@@ -5867,6 +5876,8 @@ name = "orders_integrity"
 version = "0.0.1"
 dependencies = [
  "hdi",
+ "households_types",
+ "producers_types",
  "serde",
 ]
 
@@ -6491,6 +6502,15 @@ dependencies = [
 [[package]]
 name = "producers_integrity"
 version = "0.0.1"
+dependencies = [
+ "hdi",
+ "producers_types",
+ "serde",
+]
+
+[[package]]
+name = "producers_types"
+version = "0.1.0"
 dependencies = [
  "hdi",
  "serde",

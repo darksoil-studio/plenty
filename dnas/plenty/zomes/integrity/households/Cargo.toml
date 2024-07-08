@@ -11,3 +11,5 @@ name = "households_integrity"
 hdi = { workspace = true }
 
 serde = { workspace = true }
+
+households_types = { path = "../../../../../crates/households_types" }

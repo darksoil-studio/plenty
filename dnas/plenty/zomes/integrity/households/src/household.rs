@@ -1,4 +1,5 @@
 use hdi::prelude::*;
+pub use households_types::*;
 
 use crate::{HouseholdMembershipClaim, UnitEntryTypes};
 
@@ -42,12 +43,6 @@ pub fn was_member_of_household(
     Ok(false)
 }
 
-#[hdk_entry_helper]
-#[derive(Clone, PartialEq)]
-pub struct Household {
-    pub name: String,
-    pub avatar: EntryHash,
-}
 pub fn validate_create_household(
     _action: EntryCreationAction,
     _household: Household,

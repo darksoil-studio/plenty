@@ -11,3 +11,5 @@ name = "producers_integrity"
 hdi = { workspace = true }
 
 serde = { workspace = true }
+
+producers_types = { path = "../../../../../crates/producers_types" }

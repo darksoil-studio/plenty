@@ -184,11 +184,11 @@ importers:
         specifier: github:holochain-open-dev/profiles#748bb4879e247eff44a4a23a8d2aaa02a585578a&path:ui
         version: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/748bb4879e247eff44a4a23a8d2aaa02a585578a#path:ui(@types/react@18.3.3)
       '@holochain-open-dev/signals':
-        specifier: ^0.300.0
-        version: 0.300.0(@types/react@18.3.3)
+        specifier: ^0.300.3
+        version: 0.300.4(@types/react@18.3.3)
       '@holochain-open-dev/utils':
-        specifier: ^0.300.0
-        version: 0.300.0
+        specifier: ^0.300.1
+        version: 0.300.1
       '@holochain/client':
         specifier: ^0.17.0
         version: 0.17.0

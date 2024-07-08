@@ -1,9 +1,11 @@
 use hdi::prelude::*;
+use producers_types::*;
 
 #[derive(Clone, PartialEq)]
 #[hdk_entry_helper]
 pub struct ProducerDelivery {
     pub order_hash: ActionHash,
+    pub producer_hash: ActionHash,
     pub products: Vec<ActionHash>,
 }
 
@@ -16,11 +18,17 @@ pub fn validate_create_producer_delivery(
         .entry()
         .to_app_option()
         .map_err(|e| wasm_error!(e))?
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest(String::from("Dependant action must be accompanied by an entry"))
-            ),
-        )?;
+        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
+            "Dependant action must be accompanied by an entry"
+        ))))?;
+    let record = must_get_valid_record(producer_delivery.producer_hash.clone())?;
+    let _producer: Producer = record
+        .entry()
+        .to_app_option()
+        .map_err(|e| wasm_error!(e))?
+        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
+            "Dependant action must be accompanied by an entry"
+        ))))?;
     Ok(ValidateCallbackResult::Valid)
 }
 
@@ -50,41 +58,32 @@ pub fn validate_create_link_order_to_producer_deliveries(
     // Check the entry type for the given action hash
     let action_hash = base_address
         .into_action_hash()
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest("No action hash associated with link".to_string())
-            ),
-        )?;
+        .ok_or(wasm_error!(WasmErrorInner::Guest(
+            "No action hash associated with link".to_string()
+        )))?;
     let record = must_get_valid_record(action_hash)?;
     let _order: crate::Order = record
         .entry()
         .to_app_option()
         .map_err(|e| wasm_error!(e))?
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest("Linked action must reference an entry"
-                .to_string())
-            ),
-        )?;
+        .ok_or(wasm_error!(WasmErrorInner::Guest(
+            "Linked action must reference an entry".to_string()
+        )))?;
     // Check the entry type for the given action hash
-    let action_hash = target_address
-        .into_action_hash()
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest("No action hash associated with link".to_string())
-            ),
-        )?;
+    let action_hash =
+        target_address
+            .into_action_hash()
+            .ok_or(wasm_error!(WasmErrorInner::Guest(
+                "No action hash associated with link".to_string()
+            )))?;
     let record = must_get_valid_record(action_hash)?;
     let _producer_delivery: crate::ProducerDelivery = record
         .entry()
         .to_app_option()
         .map_err(|e| wasm_error!(e))?
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest("Linked action must reference an entry"
-                .to_string())
-            ),
-        )?;
+        .ok_or(wasm_error!(WasmErrorInner::Guest(
+            "Linked action must reference an entry".to_string()
+        )))?;
     // TODO: add the appropriate validation rules
     Ok(ValidateCallbackResult::Valid)
 }

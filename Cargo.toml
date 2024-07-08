@@ -5,7 +5,7 @@ opt-level = "z"
 opt-level = "z"
 
 [workspace]
-members = ["src-tauri", "dnas/*/zomes/coordinator/*", "dnas/*/zomes/integrity/*"]
+members = ["src-tauri", "dnas/*/zomes/coordinator/*", "dnas/*/zomes/integrity/*", "crates/producers_types", "crates/*"]
 resolver = "2"
 
 [workspace.dependencies]

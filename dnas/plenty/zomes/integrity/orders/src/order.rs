@@ -4,10 +4,20 @@ use hdi::prelude::*;
 #[serde(tag = "type")]
 pub enum OrderStatus {
     Preparing,
-    Open,
-    Closed,
-    Processed,
-    Finished,
+    Open {
+        deadline: Timestamp,
+        available_producers: Vec<ActionHash>,
+    },
+    Closed {
+        household_orders: Vec<ActionHash>,
+    },
+    Processed {
+        producers_deliveries: Vec<ActionHash>,
+    },
+    Finished {
+        household_payments: Vec<ActionHash>,
+        producers_invoices: Vec<ActionHash>,
+    },
 }
 
 #[derive(Clone, PartialEq)]
@@ -49,40 +59,31 @@ pub fn validate_create_link_order_updates(
 ) -> ExternResult<ValidateCallbackResult> {
     let action_hash = base_address
         .into_action_hash()
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest("No action hash associated with link".to_string())
-            ),
-        )?;
+        .ok_or(wasm_error!(WasmErrorInner::Guest(
+            "No action hash associated with link".to_string()
+        )))?;
     let record = must_get_valid_record(action_hash)?;
     let _order: crate::Order = record
         .entry()
         .to_app_option()
         .map_err(|e| wasm_error!(e))?
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest("Linked action must reference an entry"
-                .to_string())
-            ),
-        )?;
-    let action_hash = target_address
-        .into_action_hash()
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest("No action hash associated with link".to_string())
-            ),
-        )?;
+        .ok_or(wasm_error!(WasmErrorInner::Guest(
+            "Linked action must reference an entry".to_string()
+        )))?;
+    let action_hash =
+        target_address
+            .into_action_hash()
+            .ok_or(wasm_error!(WasmErrorInner::Guest(
+                "No action hash associated with link".to_string()
+            )))?;
     let record = must_get_valid_record(action_hash)?;
     let _order: crate::Order = record
         .entry()
         .to_app_option()
         .map_err(|e| wasm_error!(e))?
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest("Linked action must reference an entry"
-                .to_string())
-            ),
-        )?;
+        .ok_or(wasm_error!(WasmErrorInner::Guest(
+            "Linked action must reference an entry".to_string()
+        )))?;
     Ok(ValidateCallbackResult::Valid)
 }
 
@@ -93,11 +94,9 @@ pub fn validate_delete_link_order_updates(
     _target: AnyLinkableHash,
     _tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
-    Ok(
-        ValidateCallbackResult::Invalid(
-            String::from("OrderUpdates links cannot be deleted"),
-        ),
-    )
+    Ok(ValidateCallbackResult::Invalid(String::from(
+        "OrderUpdates links cannot be deleted",
+    )))
 }
 
 pub fn validate_create_link_all_orders(
@@ -107,24 +106,20 @@ pub fn validate_create_link_all_orders(
     _tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
     // Check the entry type for the given action hash
-    let action_hash = target_address
-        .into_action_hash()
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest("No action hash associated with link".to_string())
-            ),
-        )?;
+    let action_hash =
+        target_address
+            .into_action_hash()
+            .ok_or(wasm_error!(WasmErrorInner::Guest(
+                "No action hash associated with link".to_string()
+            )))?;
     let record = must_get_valid_record(action_hash)?;
     let _order: crate::Order = record
         .entry()
         .to_app_option()
         .map_err(|e| wasm_error!(e))?
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest("Linked action must reference an entry"
-                .to_string())
-            ),
-        )?;
+        .ok_or(wasm_error!(WasmErrorInner::Guest(
+            "Linked action must reference an entry".to_string()
+        )))?;
     // TODO: add the appropriate validation rules
     Ok(ValidateCallbackResult::Valid)
 }

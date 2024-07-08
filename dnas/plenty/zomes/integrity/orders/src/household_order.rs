@@ -1,9 +1,11 @@
 use hdi::prelude::*;
+use households_types::*;
 
 #[derive(Clone, PartialEq)]
 #[hdk_entry_helper]
 pub struct HouseholdOrder {
     pub order_hash: ActionHash,
+    pub household_hash: ActionHash,
     pub products: Vec<ActionHash>,
 }
 
@@ -16,11 +18,17 @@ pub fn validate_create_household_order(
         .entry()
         .to_app_option()
         .map_err(|e| wasm_error!(e))?
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest(String::from("Dependant action must be accompanied by an entry"))
-            ),
-        )?;
+        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
+            "Dependant action must be accompanied by an entry"
+        ))))?;
+    let record = must_get_valid_record(household_order.household_hash.clone())?;
+    let _household: Household = record
+        .entry()
+        .to_app_option()
+        .map_err(|e| wasm_error!(e))?
+        .ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
+            "Dependant action must be accompanied by an entry"
+        ))))?;
     Ok(ValidateCallbackResult::Valid)
 }
 
@@ -49,40 +57,31 @@ pub fn validate_create_link_order_to_household_orders(
 ) -> ExternResult<ValidateCallbackResult> {
     let action_hash = base_address
         .into_action_hash()
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest("No action hash associated with link".to_string())
-            ),
-        )?;
+        .ok_or(wasm_error!(WasmErrorInner::Guest(
+            "No action hash associated with link".to_string()
+        )))?;
     let record = must_get_valid_record(action_hash)?;
     let _order: crate::Order = record
         .entry()
         .to_app_option()
         .map_err(|e| wasm_error!(e))?
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest("Linked action must reference an entry"
-                .to_string())
-            ),
-        )?;
-    let action_hash = target_address
-        .into_action_hash()
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest("No action hash associated with link".to_string())
-            ),
-        )?;
+        .ok_or(wasm_error!(WasmErrorInner::Guest(
+            "Linked action must reference an entry".to_string()
+        )))?;
+    let action_hash =
+        target_address
+            .into_action_hash()
+            .ok_or(wasm_error!(WasmErrorInner::Guest(
+                "No action hash associated with link".to_string()
+            )))?;
     let record = must_get_valid_record(action_hash)?;
     let _household_order: crate::HouseholdOrder = record
         .entry()
         .to_app_option()
         .map_err(|e| wasm_error!(e))?
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest("Linked action must reference an entry"
-                .to_string())
-            ),
-        )?;
+        .ok_or(wasm_error!(WasmErrorInner::Guest(
+            "Linked action must reference an entry".to_string()
+        )))?;
     Ok(ValidateCallbackResult::Valid)
 }
 
@@ -105,41 +104,32 @@ pub fn validate_create_link_household_order_updates(
     // Check the entry type for the given action hash
     let action_hash = base_address
         .into_action_hash()
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest("No action hash associated with link".to_string())
-            ),
-        )?;
+        .ok_or(wasm_error!(WasmErrorInner::Guest(
+            "No action hash associated with link".to_string()
+        )))?;
     let record = must_get_valid_record(action_hash)?;
     let _household_order: crate::HouseholdOrder = record
         .entry()
         .to_app_option()
         .map_err(|e| wasm_error!(e))?
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest("Linked action must reference an entry"
-                .to_string())
-            ),
-        )?;
+        .ok_or(wasm_error!(WasmErrorInner::Guest(
+            "Linked action must reference an entry".to_string()
+        )))?;
     // Check the entry type for the given action hash
-    let action_hash = target_address
-        .into_action_hash()
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest("No action hash associated with link".to_string())
-            ),
-        )?;
+    let action_hash =
+        target_address
+            .into_action_hash()
+            .ok_or(wasm_error!(WasmErrorInner::Guest(
+                "No action hash associated with link".to_string()
+            )))?;
     let record = must_get_valid_record(action_hash)?;
     let _household_order: crate::HouseholdOrder = record
         .entry()
         .to_app_option()
         .map_err(|e| wasm_error!(e))?
-        .ok_or(
-            wasm_error!(
-                WasmErrorInner::Guest("Linked action must reference an entry"
-                .to_string())
-            ),
-        )?;
+        .ok_or(wasm_error!(WasmErrorInner::Guest(
+            "Linked action must reference an entry".to_string()
+        )))?;
     // TODO: add the appropriate validation rules
     Ok(ValidateCallbackResult::Valid)
 }
@@ -151,9 +141,7 @@ pub fn validate_delete_link_household_order_updates(
     _target: AnyLinkableHash,
     _tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
-    Ok(
-        ValidateCallbackResult::Invalid(
-            String::from("HouseholdOrderUpdates links cannot be deleted"),
-        ),
-    )
+    Ok(ValidateCallbackResult::Invalid(String::from(
+        "HouseholdOrderUpdates links cannot be deleted",
+    )))
 }
