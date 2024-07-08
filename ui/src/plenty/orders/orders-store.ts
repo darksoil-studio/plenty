@@ -1,3 +1,5 @@
+import { Order } from './types.js';
+
 import { 
   collectionSignal, 
   liveLinksSignal, 
@@ -16,6 +18,16 @@ import { OrdersClient } from './orders-client.js';
 
 export class OrdersStore {
 
+
   constructor(public client: OrdersClient) {}
   
+  /** Order */
+
+  orders = new LazyHoloHashMap((orderHash: ActionHash) => ({
+    latestVersion: latestVersionOfEntrySignal(this.client, () => this.client.getLatestOrder(orderHash)),
+    original: immutableEntrySignal(() => this.client.getOriginalOrder(orderHash)),
+    allRevisions: allRevisionsOfEntrySignal(this.client, () => this.client.getAllRevisionsForOrder(orderHash)),
+    deletes: deletesForEntrySignal(this.client, orderHash, () => this.client.getAllDeletesForOrder(orderHash)),
+  }));
+
 }
