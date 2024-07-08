@@ -217,4 +217,10 @@ export class OrdersClient extends ZomeClient<OrdersSignal> {
     return this.callZome('get_deleted_producer_invoices_for_order', orderHash);
   }
 
+  /** All Orders */
+
+  async getAllOrders(): Promise<Array<Link>> {
+    return this.callZome('get_all_orders', undefined);
+  }
+
 }

@@ -47,7 +47,6 @@ pub fn validate_create_link_order_updates(
     target_address: AnyLinkableHash,
     _tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
-    // Check the entry type for the given action hash
     let action_hash = base_address
         .into_action_hash()
         .ok_or(
@@ -66,6 +65,47 @@ pub fn validate_create_link_order_updates(
                 .to_string())
             ),
         )?;
+    let action_hash = target_address
+        .into_action_hash()
+        .ok_or(
+            wasm_error!(
+                WasmErrorInner::Guest("No action hash associated with link".to_string())
+            ),
+        )?;
+    let record = must_get_valid_record(action_hash)?;
+    let _order: crate::Order = record
+        .entry()
+        .to_app_option()
+        .map_err(|e| wasm_error!(e))?
+        .ok_or(
+            wasm_error!(
+                WasmErrorInner::Guest("Linked action must reference an entry"
+                .to_string())
+            ),
+        )?;
+    Ok(ValidateCallbackResult::Valid)
+}
+
+pub fn validate_delete_link_order_updates(
+    _action: DeleteLink,
+    _original_action: CreateLink,
+    _base: AnyLinkableHash,
+    _target: AnyLinkableHash,
+    _tag: LinkTag,
+) -> ExternResult<ValidateCallbackResult> {
+    Ok(
+        ValidateCallbackResult::Invalid(
+            String::from("OrderUpdates links cannot be deleted"),
+        ),
+    )
+}
+
+pub fn validate_create_link_all_orders(
+    _action: CreateLink,
+    _base_address: AnyLinkableHash,
+    target_address: AnyLinkableHash,
+    _tag: LinkTag,
+) -> ExternResult<ValidateCallbackResult> {
     // Check the entry type for the given action hash
     let action_hash = target_address
         .into_action_hash()
@@ -89,16 +129,13 @@ pub fn validate_create_link_order_updates(
     Ok(ValidateCallbackResult::Valid)
 }
 
-pub fn validate_delete_link_order_updates(
+pub fn validate_delete_link_all_orders(
     _action: DeleteLink,
     _original_action: CreateLink,
     _base: AnyLinkableHash,
     _target: AnyLinkableHash,
     _tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
-    Ok(
-        ValidateCallbackResult::Invalid(
-            String::from("OrderUpdates links cannot be deleted"),
-        ),
-    )
+    // TODO: add the appropriate validation rules
+    Ok(ValidateCallbackResult::Valid)
 }

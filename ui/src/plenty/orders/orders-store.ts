@@ -23,11 +23,6 @@ import { NewEntryAction, Record, ActionHash, EntryHash, AgentPubKey } from '@hol
 import { OrdersClient } from './orders-client.js';
 
 export class OrdersStore {
-
-
-
-
-
   constructor(public client: OrdersClient) {}
   
   /** Order */
@@ -122,5 +117,15 @@ export class OrdersStore {
     allRevisions: allRevisionsOfEntrySignal(this.client, () => this.client.getAllRevisionsForProducerInvoice(producerInvoiceHash)),
     deletes: deletesForEntrySignal(this.client, producerInvoiceHash, () => this.client.getAllDeletesForProducerInvoice(producerInvoiceHash)),
   }));
+  
+  /** All Orders */
 
+  allOrders = pipe(
+    collectionSignal(
+      this.client, 
+      () => this.client.getAllOrders(),
+      'AllOrders'
+    ),
+    allOrders => slice(this.orders, allOrders.map(l => l.target))
+  );
 }

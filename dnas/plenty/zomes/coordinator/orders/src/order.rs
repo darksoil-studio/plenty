@@ -11,6 +11,8 @@ pub fn create_order(order: Order) -> ExternResult<Record> {
                 .to_string())
             ),
         )?;
+    let path = Path::from("all_orders");
+    create_link(path.path_entry_hash()?, order_hash.clone(), LinkTypes::AllOrders, ())?;
     Ok(record)
 }
 
@@ -133,6 +135,18 @@ pub fn update_order(input: UpdateOrderInput) -> ExternResult<Record> {
 
 #[hdk_extern]
 pub fn delete_order(original_order_hash: ActionHash) -> ExternResult<ActionHash> {
+    let path = Path::from("all_orders");
+    let links = get_links(
+        GetLinksInputBuilder::try_new(path.path_entry_hash()?, LinkTypes::AllOrders)?
+            .build(),
+    )?;
+    for link in links {
+        if let Some(hash) = link.target.into_action_hash() {
+            if hash == original_order_hash {
+                delete_link(link.create_link_hash)?;
+            }
+        }
+    }
     delete_entry(original_order_hash)
 }
 

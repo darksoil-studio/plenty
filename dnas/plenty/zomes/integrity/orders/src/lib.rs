@@ -27,6 +27,7 @@ pub enum LinkTypes {
     HouseholdOrderUpdates,
     OrderToProducerDeliveries,
     OrderToProducerInvoices,
+    AllOrders,
 }
 
 #[hdk_extern]
@@ -360,6 +361,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         tag,
                     )
                 }
+                LinkTypes::AllOrders => {
+                    validate_create_link_all_orders(
+                        action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
             }
         }
         FlatOp::RegisterDeleteLink {
@@ -409,6 +418,15 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 }
                 LinkTypes::OrderToProducerInvoices => {
                     validate_delete_link_order_to_producer_invoices(
+                        action,
+                        original_action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
+                LinkTypes::AllOrders => {
+                    validate_delete_link_all_orders(
                         action,
                         original_action,
                         base_address,
@@ -721,6 +739,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 tag,
                             )
                         }
+                        LinkTypes::AllOrders => {
+                            validate_create_link_all_orders(
+                                action,
+                                base_address,
+                                target_address,
+                                tag,
+                            )
+                        }
                     }
                 }
                 OpRecord::DeleteLink { original_action_hash, base_address, action } => {
@@ -784,6 +810,15 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         }
                         LinkTypes::OrderToProducerInvoices => {
                             validate_delete_link_order_to_producer_invoices(
+                                action,
+                                create_link.clone(),
+                                base_address,
+                                create_link.target_address,
+                                create_link.tag,
+                            )
+                        }
+                        LinkTypes::AllOrders => {
+                            validate_delete_link_all_orders(
                                 action,
                                 create_link.clone(),
                                 base_address,
