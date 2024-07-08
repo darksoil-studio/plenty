@@ -1,3 +1,4 @@
+pub mod producer_delivery;
 pub mod household_order;
 pub mod order;
 use hdk::prelude::*;

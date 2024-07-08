@@ -1,3 +1,5 @@
+import { ProducerDelivery } from './types.js';
+
 import { HouseholdOrder } from './types.js';
 
 import { Order } from './types.js';
@@ -189,6 +191,96 @@ export class OrdersZomeMock extends ZomeMock implements AppClient {
   async get_household_orders_for_order(orderHash: ActionHash): Promise<Array<Link>> {
     return this.householdOrdersForOrder.get(orderHash) || [];
   }
+  /** Producer Delivery */
+  producerDeliveries = new HoloHashMap<ActionHash, {
+    deletes: Array<SignedActionHashed<Delete>>;
+    revisions: Array<Record>;
+  }>();
+  producerDeliveriesForOrder = new HoloHashMap<ActionHash, Link[]>();
+
+  async create_producer_delivery(producerDelivery: ProducerDelivery): Promise<Record> {
+    const entryHash = hash(producerDelivery, HashType.ENTRY);
+    const record = await fakeRecord(await fakeCreateAction(entryHash), fakeEntry(producerDelivery));
+    
+    this.producerDeliveries.set(record.signed_action.hashed.hash, {
+      deletes: [],
+      revisions: [record]
+    });
+  
+    const existingOrderHash = this.producerDeliveriesForOrder.get(producerDelivery.order_hash) || [];
+    this.producerDeliveriesForOrder.set(producerDelivery.order_hash, [...existingOrderHash, { 
+      target: record.signed_action.hashed.hash, 
+      author: this.myPubKey,
+      timestamp: Date.now() * 1000,
+      zome_index: 0,
+      link_type: 0,
+      tag: new Uint8Array(),
+      create_link_hash: await fakeActionHash()
+    }]);
+
+    return record;
+  }
+  
+  async get_latest_producer_delivery(producerDeliveryHash: ActionHash): Promise<Record | undefined> {
+    const producerDelivery = this.producerDeliveries.get(producerDeliveryHash);
+    return producerDelivery ? producerDelivery.revisions[producerDelivery.revisions.length - 1] : undefined;
+  }
+  
+  async get_all_revisions_for_producer_delivery(producerDeliveryHash: ActionHash): Promise<Record[] | undefined> {
+    const producerDelivery = this.producerDeliveries.get(producerDeliveryHash);
+    return producerDelivery ? producerDelivery.revisions : undefined;
+  }
+  
+  async get_original_producer_delivery(producerDeliveryHash: ActionHash): Promise<Record | undefined> {
+    const producerDelivery = this.producerDeliveries.get(producerDeliveryHash);
+    return producerDelivery ? producerDelivery.revisions[0] : undefined;
+  }
+  
+  async get_all_deletes_for_producer_delivery(producerDeliveryHash: ActionHash): Promise<Array<SignedActionHashed<Delete>> | undefined> {
+    const producerDelivery = this.producerDeliveries.get(producerDeliveryHash);
+    return producerDelivery ? producerDelivery.deletes : undefined;
+  }
+
+  async get_oldest_delete_for_producer_delivery(producerDeliveryHash: ActionHash): Promise<SignedActionHashed<Delete> | undefined> {
+    const producerDelivery = this.producerDeliveries.get(producerDeliveryHash);
+    return producerDelivery ? producerDelivery.deletes[0] : undefined;
+  }
+  async delete_producer_delivery(original_producer_delivery_hash: ActionHash): Promise<ActionHash> {
+    const record = await fakeRecord(await fakeDeleteEntry(original_producer_delivery_hash));
+    
+    this.producerDeliveries.get(original_producer_delivery_hash).deletes.push(record.signed_action as SignedActionHashed<Delete>);
+    
+    return record.signed_action.hashed.hash;
+  }
+
+  async update_producer_delivery(input: { previous_producer_delivery_hash: ActionHash; updated_producer_delivery: ProducerDelivery; }): Promise<Record> {
+    const record = await fakeRecord(await fakeUpdateEntry(input.previous_producer_delivery_hash, undefined, undefined, fakeEntry(input.updated_producer_delivery)), fakeEntry(input.updated_producer_delivery));
+
+    for (const [originalHash, producerDelivery] of Array.from(this.producerDeliveries.entries())) {
+      if (producerDelivery.revisions.find(r => r.signed_action.hashed.hash.toString() === input.previous_producer_delivery_hash.toString())) {
+        producerDelivery.revisions.push(record);
+      }
+    }
+     
+    const producerDelivery = input.updated_producer_delivery;
+    
+    const existingOrderHash = this.producerDeliveriesForOrder.get(producerDelivery.order_hash) || [];
+    this.producerDeliveriesForOrder.set(producerDelivery.order_hash, [...existingOrderHash, {
+      target: record.signed_action.hashed.hash, 
+      author: record.signed_action.hashed.content.author,
+      timestamp: record.signed_action.hashed.content.timestamp,
+      zome_index: 0,
+      link_type: 0,
+      tag: new Uint8Array(),
+      create_link_hash: await fakeActionHash()
+    }]);
+    
+    return record;
+  }
+  
+  async get_producer_deliveries_for_order(orderHash: ActionHash): Promise<Array<Link>> {
+    return this.producerDeliveriesForOrder.get(orderHash) || [];
+  }
 
 
 }
@@ -210,5 +302,15 @@ export async function sampleHouseholdOrder(client: OrdersClient, partialHousehol
           products: [(await fakeActionHash())],
         },
         ...partialHouseholdOrder
+    };
+}
+
+export async function sampleProducerDelivery(client: OrdersClient, partialProducerDelivery: Partial<ProducerDelivery> = {}): Promise<ProducerDelivery> {
+    return {
+        ...{
+          order_hash: partialProducerDelivery.order_hash || (await client.createOrder(await sampleOrder(client))).actionHash,
+          products: [(await fakeActionHash())],
+        },
+        ...partialProducerDelivery
     };
 }

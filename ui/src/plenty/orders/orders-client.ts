@@ -1,3 +1,5 @@
+import { ProducerDelivery } from './types.js';
+
 import { HouseholdOrder } from './types.js';
 
 import { Order } from './types.js';
@@ -113,6 +115,55 @@ export class OrdersClient extends ZomeClient<OrdersSignal> {
 
   async getDeletedHouseholdOrdersForOrder(orderHash: ActionHash): Promise<Array<[SignedActionHashed<CreateLink>, SignedActionHashed<DeleteLink>[]]>> {
     return this.callZome('get_deleted_household_orders_for_order', orderHash);
+  }
+  /** Producer Delivery */
+
+  async createProducerDelivery(producerDelivery: ProducerDelivery): Promise<EntryRecord<ProducerDelivery>> {
+    const record: Record = await this.callZome('create_producer_delivery', producerDelivery);
+    return new EntryRecord(record);
+  }
+  
+  async getLatestProducerDelivery(producerDeliveryHash: ActionHash): Promise<EntryRecord<ProducerDelivery> | undefined> {
+    const record: Record = await this.callZome('get_latest_producer_delivery', producerDeliveryHash);
+    return record ? new EntryRecord(record) : undefined;
+  }
+
+  async getOriginalProducerDelivery(producerDeliveryHash: ActionHash): Promise<EntryRecord<ProducerDelivery> | undefined> {
+    const record: Record = await this.callZome('get_original_producer_delivery', producerDeliveryHash);
+    return record ? new EntryRecord(record) : undefined;
+  }
+
+  async getAllRevisionsForProducerDelivery(producerDeliveryHash: ActionHash): Promise<Array<EntryRecord<ProducerDelivery>>> {
+    const records: Record[] = await this.callZome('get_all_revisions_for_producer_delivery', producerDeliveryHash);
+    return records.map(r => new EntryRecord(r));
+  }
+
+  async updateProducerDelivery(previousProducerDeliveryHash: ActionHash, updatedProducerDelivery: ProducerDelivery): Promise<EntryRecord<ProducerDelivery>> {
+    const record: Record = await this.callZome('update_producer_delivery', {
+      previous_producer_delivery_hash: previousProducerDeliveryHash,
+      updated_producer_delivery: updatedProducerDelivery
+    });
+    return new EntryRecord(record);
+  }
+
+  deleteProducerDelivery(originalProducerDeliveryHash: ActionHash): Promise<ActionHash> {
+    return this.callZome('delete_producer_delivery', originalProducerDeliveryHash);
+  }
+
+  getAllDeletesForProducerDelivery(originalProducerDeliveryHash: ActionHash): Promise<Array<SignedActionHashed<Delete>> | undefined> {
+    return this.callZome('get_all_deletes_for_producer_delivery', originalProducerDeliveryHash);
+  }
+
+  getOldestDeleteForProducerDelivery(originalProducerDeliveryHash: ActionHash): Promise<SignedActionHashed<Delete> | undefined> {
+    return this.callZome('get_oldest_delete_for_producer_delivery', originalProducerDeliveryHash);
+  }
+  
+  async getProducerDeliveriesForOrder(orderHash: ActionHash): Promise<Array<Link>> {
+    return this.callZome('get_producer_deliveries_for_order', orderHash);
+  }
+
+  async getDeletedProducerDeliveriesForOrder(orderHash: ActionHash): Promise<Array<[SignedActionHashed<CreateLink>, SignedActionHashed<DeleteLink>[]]>> {
+    return this.callZome('get_deleted_producer_deliveries_for_order', orderHash);
   }
 
 }

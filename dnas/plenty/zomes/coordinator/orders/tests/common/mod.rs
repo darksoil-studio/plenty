@@ -50,3 +50,26 @@ pub async fn create_household_order(conductor: &SweetConductor, zome: &SweetZome
     record
 }
 
+
+
+pub async fn sample_producer_delivery_1(conductor: &SweetConductor, zome: &SweetZome) -> ProducerDelivery {
+    ProducerDelivery {
+          order_hash: create_order(conductor, zome, sample_order_1(conductor, zome).await).await.signed_action.hashed.hash,
+	  products: vec![::fixt::fixt!(ActionHash)],
+    }
+}
+
+pub async fn sample_producer_delivery_2(conductor: &SweetConductor, zome: &SweetZome) -> ProducerDelivery {
+    ProducerDelivery {
+          order_hash: create_order(conductor, zome, sample_order_2(conductor, zome).await).await.signed_action.hashed.hash,
+	  products: vec![::fixt::fixt!(ActionHash)],
+    }
+}
+
+pub async fn create_producer_delivery(conductor: &SweetConductor, zome: &SweetZome, producer_delivery: ProducerDelivery) -> Record {
+    let record: Record = conductor
+        .call(zome, "create_producer_delivery", producer_delivery)
+        .await;
+    record
+}
+

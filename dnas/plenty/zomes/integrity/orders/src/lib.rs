@@ -1,3 +1,5 @@
+pub mod producer_delivery;
+pub use producer_delivery::*;
 pub mod household_order;
 pub use household_order::*;
 pub mod order;
@@ -11,6 +13,7 @@ use hdi::prelude::*;
 pub enum EntryTypes {
     Order(Order),
     HouseholdOrder(HouseholdOrder),
+    ProducerDelivery(ProducerDelivery),
 }
 
 #[derive(Serialize, Deserialize)]
@@ -19,6 +22,7 @@ pub enum LinkTypes {
     OrderUpdates,
     OrderToHouseholdOrders,
     HouseholdOrderUpdates,
+    OrderToProducerDeliveries,
 }
 
 #[hdk_extern]
@@ -54,6 +58,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 household_order,
                             )
                         }
+                        EntryTypes::ProducerDelivery(producer_delivery) => {
+                            validate_create_producer_delivery(
+                                EntryCreationAction::Create(action),
+                                producer_delivery,
+                            )
+                        }
                     }
                 }
                 OpEntry::UpdateEntry { app_entry, action, .. } => {
@@ -68,6 +78,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                             validate_create_household_order(
                                 EntryCreationAction::Update(action),
                                 household_order,
+                            )
+                        }
+                        EntryTypes::ProducerDelivery(producer_delivery) => {
+                            validate_create_producer_delivery(
+                                EntryCreationAction::Update(action),
+                                producer_delivery,
                             )
                         }
                     }
@@ -98,6 +114,31 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         }
                     };
                     match app_entry {
+                        EntryTypes::ProducerDelivery(producer_delivery) => {
+                            let original_app_entry = must_get_valid_record(
+                                action.clone().original_action_address,
+                            )?;
+                            let original_producer_delivery = match ProducerDelivery::try_from(
+                                original_app_entry,
+                            ) {
+                                Ok(entry) => entry,
+                                Err(e) => {
+                                    return Ok(
+                                        ValidateCallbackResult::Invalid(
+                                            format!(
+                                                "Expected to get ProducerDelivery from Record: {e:?}"
+                                            ),
+                                        ),
+                                    );
+                                }
+                            };
+                            validate_update_producer_delivery(
+                                action,
+                                producer_delivery,
+                                original_create_action,
+                                original_producer_delivery,
+                            )
+                        }
                         EntryTypes::HouseholdOrder(household_order) => {
                             let original_app_entry = must_get_valid_record(
                                 action.clone().original_action_address,
@@ -200,6 +241,13 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 }
             };
             match original_app_entry {
+                EntryTypes::ProducerDelivery(original_producer_delivery) => {
+                    validate_delete_producer_delivery(
+                        delete_entry.clone().action,
+                        original_action,
+                        original_producer_delivery,
+                    )
+                }
                 EntryTypes::HouseholdOrder(original_household_order) => {
                     validate_delete_household_order(
                         delete_entry.clone().action,
@@ -248,6 +296,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         tag,
                     )
                 }
+                LinkTypes::OrderToProducerDeliveries => {
+                    validate_create_link_order_to_producer_deliveries(
+                        action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
             }
         }
         FlatOp::RegisterDeleteLink {
@@ -286,6 +342,15 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         tag,
                     )
                 }
+                LinkTypes::OrderToProducerDeliveries => {
+                    validate_delete_link_order_to_producer_deliveries(
+                        action,
+                        original_action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
             }
         }
         FlatOp::StoreRecord(store_record) => {
@@ -302,6 +367,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                             validate_create_household_order(
                                 EntryCreationAction::Create(action),
                                 household_order,
+                            )
+                        }
+                        EntryTypes::ProducerDelivery(producer_delivery) => {
+                            validate_create_producer_delivery(
+                                EntryCreationAction::Create(action),
+                                producer_delivery,
                             )
                         }
                     }
@@ -389,6 +460,37 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 Ok(result)
                             }
                         }
+                        EntryTypes::ProducerDelivery(producer_delivery) => {
+                            let result = validate_create_producer_delivery(
+                                EntryCreationAction::Update(action.clone()),
+                                producer_delivery.clone(),
+                            )?;
+                            if let ValidateCallbackResult::Valid = result {
+                                let original_producer_delivery: Option<ProducerDelivery> = original_record
+                                    .entry()
+                                    .to_app_option()
+                                    .map_err(|e| wasm_error!(e))?;
+                                let original_producer_delivery = match original_producer_delivery {
+                                    Some(producer_delivery) => producer_delivery,
+                                    None => {
+                                        return Ok(
+                                            ValidateCallbackResult::Invalid(
+                                                "The updated entry type must be the same as the original entry type"
+                                                    .to_string(),
+                                            ),
+                                        );
+                                    }
+                                };
+                                validate_update_producer_delivery(
+                                    action,
+                                    producer_delivery,
+                                    original_action,
+                                    original_producer_delivery,
+                                )
+                            } else {
+                                Ok(result)
+                            }
+                        }
                     }
                 }
                 OpRecord::DeleteEntry { original_action_hash, action, .. } => {
@@ -453,6 +555,13 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 original_household_order,
                             )
                         }
+                        EntryTypes::ProducerDelivery(original_producer_delivery) => {
+                            validate_delete_producer_delivery(
+                                action,
+                                original_action,
+                                original_producer_delivery,
+                            )
+                        }
                     }
                 }
                 OpRecord::CreateLink {
@@ -481,6 +590,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         }
                         LinkTypes::HouseholdOrderUpdates => {
                             validate_create_link_household_order_updates(
+                                action,
+                                base_address,
+                                target_address,
+                                tag,
+                            )
+                        }
+                        LinkTypes::OrderToProducerDeliveries => {
+                            validate_create_link_order_to_producer_deliveries(
                                 action,
                                 base_address,
                                 target_address,
@@ -532,6 +649,15 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         }
                         LinkTypes::HouseholdOrderUpdates => {
                             validate_delete_link_household_order_updates(
+                                action,
+                                create_link.clone(),
+                                base_address,
+                                create_link.target_address,
+                                create_link.tag,
+                            )
+                        }
+                        LinkTypes::OrderToProducerDeliveries => {
+                            validate_delete_link_order_to_producer_deliveries(
                                 action,
                                 create_link.clone(),
                                 base_address,

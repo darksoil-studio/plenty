@@ -1,3 +1,5 @@
+import { ProducerDelivery } from './types.js';
+
 import { HouseholdOrder } from './types.js';
 
 import { Order } from './types.js';
@@ -19,6 +21,7 @@ import { NewEntryAction, Record, ActionHash, EntryHash, AgentPubKey } from '@hol
 import { OrdersClient } from './orders-client.js';
 
 export class OrdersStore {
+
 
 
 
@@ -50,6 +53,25 @@ export class OrdersStore {
         ), links => slice(this.householdOrders, links.map(l => l[0].hashed.content.target_address))
       ),
     },
+    producerDeliveries: {
+      live: pipe(
+        liveLinksSignal(
+          this.client,
+          orderHash,
+          () => this.client.getProducerDeliveriesForOrder(orderHash),
+          'OrderToProducerDeliveries'
+        ), 
+        links => slice(this.producerDeliveries, links.map(l => l.target))
+      ),
+      deleted: pipe(
+        deletedLinksSignal(
+          this.client,
+          orderHash,
+          () => this.client.getDeletedProducerDeliveriesForOrder(orderHash),
+          'OrderToProducerDeliveries'
+        ), links => slice(this.producerDeliveries, links.map(l => l[0].hashed.content.target_address))
+      ),
+    },
   }));
 
   /** Household Order */
@@ -59,6 +81,15 @@ export class OrdersStore {
     original: immutableEntrySignal(() => this.client.getOriginalHouseholdOrder(householdOrderHash)),
     allRevisions: allRevisionsOfEntrySignal(this.client, () => this.client.getAllRevisionsForHouseholdOrder(householdOrderHash)),
     deletes: deletesForEntrySignal(this.client, householdOrderHash, () => this.client.getAllDeletesForHouseholdOrder(householdOrderHash)),
+  }));
+
+  /** Producer Delivery */
+
+  producerDeliveries = new LazyHoloHashMap((producerDeliveryHash: ActionHash) => ({
+    latestVersion: latestVersionOfEntrySignal(this.client, () => this.client.getLatestProducerDelivery(producerDeliveryHash)),
+    original: immutableEntrySignal(() => this.client.getOriginalProducerDelivery(producerDeliveryHash)),
+    allRevisions: allRevisionsOfEntrySignal(this.client, () => this.client.getAllRevisionsForProducerDelivery(producerDeliveryHash)),
+    deletes: deletesForEntrySignal(this.client, producerDeliveryHash, () => this.client.getAllDeletesForProducerDelivery(producerDeliveryHash)),
   }));
 
 }
