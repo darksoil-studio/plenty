@@ -1,3 +1,4 @@
+pub mod household_order;
 pub mod order;
 use hdk::prelude::*;
 use orders_integrity::*;

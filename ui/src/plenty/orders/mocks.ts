@@ -1,3 +1,5 @@
+import { HouseholdOrder } from './types.js';
+
 import { Order } from './types.js';
 
 import {
@@ -101,7 +103,93 @@ export class OrdersZomeMock extends ZomeMock implements AppClient {
     
     return record;
   }
+  /** Household Order */
+  householdOrders = new HoloHashMap<ActionHash, {
+    deletes: Array<SignedActionHashed<Delete>>;
+    revisions: Array<Record>;
+  }>();
+  householdOrdersForOrder = new HoloHashMap<ActionHash, Link[]>();
+
+  async create_household_order(householdOrder: HouseholdOrder): Promise<Record> {
+    const entryHash = hash(householdOrder, HashType.ENTRY);
+    const record = await fakeRecord(await fakeCreateAction(entryHash), fakeEntry(householdOrder));
+    
+    this.householdOrders.set(record.signed_action.hashed.hash, {
+      deletes: [],
+      revisions: [record]
+    });
   
+    const existingOrderHash = this.householdOrdersForOrder.get(householdOrder.order_hash) || [];
+    this.householdOrdersForOrder.set(householdOrder.order_hash, [...existingOrderHash, { 
+      target: record.signed_action.hashed.hash, 
+      author: this.myPubKey,
+      timestamp: Date.now() * 1000,
+      zome_index: 0,
+      link_type: 0,
+      tag: new Uint8Array(),
+      create_link_hash: await fakeActionHash()
+    }]);
+
+    return record;
+  }
+  
+  async get_latest_household_order(householdOrderHash: ActionHash): Promise<Record | undefined> {
+    const householdOrder = this.householdOrders.get(householdOrderHash);
+    return householdOrder ? householdOrder.revisions[householdOrder.revisions.length - 1] : undefined;
+  }
+  
+  async get_all_revisions_for_household_order(householdOrderHash: ActionHash): Promise<Record[] | undefined> {
+    const householdOrder = this.householdOrders.get(householdOrderHash);
+    return householdOrder ? householdOrder.revisions : undefined;
+  }
+  
+  async get_original_household_order(householdOrderHash: ActionHash): Promise<Record | undefined> {
+    const householdOrder = this.householdOrders.get(householdOrderHash);
+    return householdOrder ? householdOrder.revisions[0] : undefined;
+  }
+  
+  async get_all_deletes_for_household_order(householdOrderHash: ActionHash): Promise<Array<SignedActionHashed<Delete>> | undefined> {
+    const householdOrder = this.householdOrders.get(householdOrderHash);
+    return householdOrder ? householdOrder.deletes : undefined;
+  }
+
+  async get_oldest_delete_for_household_order(householdOrderHash: ActionHash): Promise<SignedActionHashed<Delete> | undefined> {
+    const householdOrder = this.householdOrders.get(householdOrderHash);
+    return householdOrder ? householdOrder.deletes[0] : undefined;
+  }
+  async delete_household_order(original_household_order_hash: ActionHash): Promise<ActionHash> {
+    const record = await fakeRecord(await fakeDeleteEntry(original_household_order_hash));
+    
+    this.householdOrders.get(original_household_order_hash).deletes.push(record.signed_action as SignedActionHashed<Delete>);
+    
+    return record.signed_action.hashed.hash;
+  }
+
+  async update_household_order(input: { original_household_order_hash: ActionHash; previous_household_order_hash: ActionHash; updated_household_order: HouseholdOrder; }): Promise<Record> {
+    const record = await fakeRecord(await fakeUpdateEntry(input.previous_household_order_hash, undefined, undefined, fakeEntry(input.updated_household_order)), fakeEntry(input.updated_household_order));
+
+  this.householdOrders.get(input.original_household_order_hash).revisions.push(record);
+     
+    const householdOrder = input.updated_household_order;
+    
+    const existingOrderHash = this.householdOrdersForOrder.get(householdOrder.order_hash) || [];
+    this.householdOrdersForOrder.set(householdOrder.order_hash, [...existingOrderHash, {
+      target: record.signed_action.hashed.hash, 
+      author: record.signed_action.hashed.content.author,
+      timestamp: record.signed_action.hashed.content.timestamp,
+      zome_index: 0,
+      link_type: 0,
+      tag: new Uint8Array(),
+      create_link_hash: await fakeActionHash()
+    }]);
+    
+    return record;
+  }
+  
+  async get_household_orders_for_order(orderHash: ActionHash): Promise<Array<Link>> {
+    return this.householdOrdersForOrder.get(orderHash) || [];
+  }
+
 
 }
 
@@ -112,5 +200,15 @@ export async function sampleOrder(client: OrdersClient, partialOrder: Partial<Or
           status: { type: 'Preparing' },
         },
         ...partialOrder
+    };
+}
+
+export async function sampleHouseholdOrder(client: OrdersClient, partialHouseholdOrder: Partial<HouseholdOrder> = {}): Promise<HouseholdOrder> {
+    return {
+        ...{
+          order_hash: partialHouseholdOrder.order_hash || (await client.createOrder(await sampleOrder(client))).actionHash,
+          products: [(await fakeActionHash())],
+        },
+        ...partialHouseholdOrder
     };
 }

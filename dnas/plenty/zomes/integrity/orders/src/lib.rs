@@ -1,3 +1,5 @@
+pub mod household_order;
+pub use household_order::*;
 pub mod order;
 pub use order::*;
 use hdi::prelude::*;
@@ -8,12 +10,15 @@ use hdi::prelude::*;
 #[unit_enum(UnitEntryTypes)]
 pub enum EntryTypes {
     Order(Order),
+    HouseholdOrder(HouseholdOrder),
 }
 
 #[derive(Serialize, Deserialize)]
 #[hdk_link_types]
 pub enum LinkTypes {
     OrderUpdates,
+    OrderToHouseholdOrders,
+    HouseholdOrderUpdates,
 }
 
 #[hdk_extern]
@@ -43,6 +48,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 order,
                             )
                         }
+                        EntryTypes::HouseholdOrder(household_order) => {
+                            validate_create_household_order(
+                                EntryCreationAction::Create(action),
+                                household_order,
+                            )
+                        }
                     }
                 }
                 OpEntry::UpdateEntry { app_entry, action, .. } => {
@@ -51,6 +62,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                             validate_create_order(
                                 EntryCreationAction::Update(action),
                                 order,
+                            )
+                        }
+                        EntryTypes::HouseholdOrder(household_order) => {
+                            validate_create_household_order(
+                                EntryCreationAction::Update(action),
+                                household_order,
                             )
                         }
                     }
@@ -81,6 +98,29 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         }
                     };
                     match app_entry {
+                        EntryTypes::HouseholdOrder(household_order) => {
+                            let original_app_entry = must_get_valid_record(
+                                action.clone().original_action_address,
+                            )?;
+                            let original_household_order = match HouseholdOrder::try_from(
+                                original_app_entry,
+                            ) {
+                                Ok(entry) => entry,
+                                Err(e) => {
+                                    return Ok(
+                                        ValidateCallbackResult::Invalid(
+                                            format!("Expected to get HouseholdOrder from Record: {e:?}"),
+                                        ),
+                                    );
+                                }
+                            };
+                            validate_update_household_order(
+                                action,
+                                household_order,
+                                original_create_action,
+                                original_household_order,
+                            )
+                        }
                         EntryTypes::Order(order) => {
                             let original_app_entry = must_get_valid_record(
                                 action.clone().original_action_address,
@@ -160,6 +200,13 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 }
             };
             match original_app_entry {
+                EntryTypes::HouseholdOrder(original_household_order) => {
+                    validate_delete_household_order(
+                        delete_entry.clone().action,
+                        original_action,
+                        original_household_order,
+                    )
+                }
                 EntryTypes::Order(original_order) => {
                     validate_delete_order(
                         delete_entry.clone().action,
@@ -179,6 +226,22 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
             match link_type {
                 LinkTypes::OrderUpdates => {
                     validate_create_link_order_updates(
+                        action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
+                LinkTypes::OrderToHouseholdOrders => {
+                    validate_create_link_order_to_household_orders(
+                        action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
+                LinkTypes::HouseholdOrderUpdates => {
+                    validate_create_link_household_order_updates(
                         action,
                         base_address,
                         target_address,
@@ -205,6 +268,24 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         tag,
                     )
                 }
+                LinkTypes::OrderToHouseholdOrders => {
+                    validate_delete_link_order_to_household_orders(
+                        action,
+                        original_action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
+                LinkTypes::HouseholdOrderUpdates => {
+                    validate_delete_link_household_order_updates(
+                        action,
+                        original_action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
             }
         }
         FlatOp::StoreRecord(store_record) => {
@@ -215,6 +296,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                             validate_create_order(
                                 EntryCreationAction::Create(action),
                                 order,
+                            )
+                        }
+                        EntryTypes::HouseholdOrder(household_order) => {
+                            validate_create_household_order(
+                                EntryCreationAction::Create(action),
+                                household_order,
                             )
                         }
                     }
@@ -266,6 +353,37 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                     order,
                                     original_action,
                                     original_order,
+                                )
+                            } else {
+                                Ok(result)
+                            }
+                        }
+                        EntryTypes::HouseholdOrder(household_order) => {
+                            let result = validate_create_household_order(
+                                EntryCreationAction::Update(action.clone()),
+                                household_order.clone(),
+                            )?;
+                            if let ValidateCallbackResult::Valid = result {
+                                let original_household_order: Option<HouseholdOrder> = original_record
+                                    .entry()
+                                    .to_app_option()
+                                    .map_err(|e| wasm_error!(e))?;
+                                let original_household_order = match original_household_order {
+                                    Some(household_order) => household_order,
+                                    None => {
+                                        return Ok(
+                                            ValidateCallbackResult::Invalid(
+                                                "The updated entry type must be the same as the original entry type"
+                                                    .to_string(),
+                                            ),
+                                        );
+                                    }
+                                };
+                                validate_update_household_order(
+                                    action,
+                                    household_order,
+                                    original_action,
+                                    original_household_order,
                                 )
                             } else {
                                 Ok(result)
@@ -328,6 +446,13 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 original_order,
                             )
                         }
+                        EntryTypes::HouseholdOrder(original_household_order) => {
+                            validate_delete_household_order(
+                                action,
+                                original_action,
+                                original_household_order,
+                            )
+                        }
                     }
                 }
                 OpRecord::CreateLink {
@@ -340,6 +465,22 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                     match link_type {
                         LinkTypes::OrderUpdates => {
                             validate_create_link_order_updates(
+                                action,
+                                base_address,
+                                target_address,
+                                tag,
+                            )
+                        }
+                        LinkTypes::OrderToHouseholdOrders => {
+                            validate_create_link_order_to_household_orders(
+                                action,
+                                base_address,
+                                target_address,
+                                tag,
+                            )
+                        }
+                        LinkTypes::HouseholdOrderUpdates => {
+                            validate_create_link_household_order_updates(
                                 action,
                                 base_address,
                                 target_address,
@@ -373,6 +514,24 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                     match link_type {
                         LinkTypes::OrderUpdates => {
                             validate_delete_link_order_updates(
+                                action,
+                                create_link.clone(),
+                                base_address,
+                                create_link.target_address,
+                                create_link.tag,
+                            )
+                        }
+                        LinkTypes::OrderToHouseholdOrders => {
+                            validate_delete_link_order_to_household_orders(
+                                action,
+                                create_link.clone(),
+                                base_address,
+                                create_link.target_address,
+                                create_link.tag,
+                            )
+                        }
+                        LinkTypes::HouseholdOrderUpdates => {
+                            validate_delete_link_household_order_updates(
                                 action,
                                 create_link.clone(),
                                 base_address,
