@@ -17355,11 +17355,11 @@
         "versions": "versions_41"
       },
       "locked": {
-        "lastModified": 1720438732,
-        "narHash": "sha256-2c3Af9okDb2g2G3qtCayKMNtUWpQeJCJviXzMH6P/2g=",
+        "lastModified": 1720445889,
+        "narHash": "sha256-ZYuiYpX+7cNE9nGl9rvQzsMTvKfj2yNRrJPao2RDMcY=",
         "owner": "darksoil-studio",
         "repo": "tasks",
-        "rev": "0f2f77938353804965b1efb5649de2a67f40d5a7",
+        "rev": "175f5812f15cb38bba5259bfa8f5975cbb7cb112",
         "type": "github"
       },
       "original": {

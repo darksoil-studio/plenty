@@ -28,7 +28,7 @@
     "@vaadin/grid": "^24.4.0",
     "lit": "^3.0.0",
     "urlpattern-polyfill": "^10.0.0",
-    "tasks": "github:darksoil-studio/tasks#0f2f77938353804965b1efb5649de2a67f40d5a7&path:ui"
+    "tasks": "github:darksoil-studio/tasks#175f5812f15cb38bba5259bfa8f5975cbb7cb112&path:ui"
   },
   "devDependencies": {
     "@lit/localize-tools": "^0.6.3",

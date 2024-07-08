@@ -214,8 +214,8 @@ importers:
         specifier: ^3.0.0
         version: 3.1.4
       tasks:
-        specifier: github:darksoil-studio/tasks#0f2f77938353804965b1efb5649de2a67f40d5a7&path:ui
-        version: '@darksoil-studio/tasks@https://codeload.github.com/darksoil-studio/tasks/tar.gz/0f2f77938353804965b1efb5649de2a67f40d5a7#path:ui(@types/react@18.3.3)'
+        specifier: github:darksoil-studio/tasks#175f5812f15cb38bba5259bfa8f5975cbb7cb112&path:ui
+        version: '@darksoil-studio/tasks@https://codeload.github.com/darksoil-studio/tasks/tar.gz/175f5812f15cb38bba5259bfa8f5975cbb7cb112#path:ui(@types/react@18.3.3)'
       urlpattern-polyfill:
         specifier: ^10.0.0
         version: 10.0.0
@@ -337,8 +337,8 @@ packages:
     resolution: {path: ui, tarball: https://codeload.github.com/darksoil-studio/roles/tar.gz/7c63a81ed3ad3872ea6c28f2a72d1bceeb532b5e}
     version: 0.1.0
 
-  '@darksoil-studio/tasks@https://codeload.github.com/darksoil-studio/tasks/tar.gz/0f2f77938353804965b1efb5649de2a67f40d5a7#path:ui':
-    resolution: {path: ui, tarball: https://codeload.github.com/darksoil-studio/tasks/tar.gz/0f2f77938353804965b1efb5649de2a67f40d5a7}
+  '@darksoil-studio/tasks@https://codeload.github.com/darksoil-studio/tasks/tar.gz/175f5812f15cb38bba5259bfa8f5975cbb7cb112#path:ui':
+    resolution: {path: ui, tarball: https://codeload.github.com/darksoil-studio/tasks/tar.gz/175f5812f15cb38bba5259bfa8f5975cbb7cb112}
     version: 0.1.0
 
   '@esbuild/aix-ppc64@0.20.2':
@@ -2990,7 +2990,7 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@darksoil-studio/tasks@https://codeload.github.com/darksoil-studio/tasks/tar.gz/0f2f77938353804965b1efb5649de2a67f40d5a7#path:ui(@types/react@18.3.3)':
+  '@darksoil-studio/tasks@https://codeload.github.com/darksoil-studio/tasks/tar.gz/175f5812f15cb38bba5259bfa8f5975cbb7cb112#path:ui(@types/react@18.3.3)':
     dependencies:
       '@darksoil-studio/notifications': https://codeload.github.com/darksoil-studio/notifications/tar.gz/f121b9b526bc997c5cef72640b7fe29a4d77598e#path:ui(@types/react@18.3.3)
       '@holochain-open-dev/elements': 0.300.0(@types/react@18.3.3)
