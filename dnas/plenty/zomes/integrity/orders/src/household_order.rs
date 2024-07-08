@@ -198,7 +198,7 @@ pub fn validate_create_link_household_to_household_orders(
         .ok_or(wasm_error!(WasmErrorInner::Guest(
             "No action hash associated with link".to_string()
         )))?;
-    let record = must_get_valid_record(base_hash)?;
+    let record = must_get_valid_record(base_hash.clone())?;
     let _household: Household = record
         .entry()
         .to_app_option()
