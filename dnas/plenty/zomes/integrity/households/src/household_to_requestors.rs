@@ -1,6 +1,5 @@
 use hdi::prelude::*;
-
-use crate::was_member_of_household;
+use households_types::validate_agent_was_member_of_household_at_the_time;
 
 pub fn validate_create_link_household_to_requestors(
     _action: CreateLink,
@@ -48,11 +47,15 @@ pub fn validate_delete_link_household_to_requestors(
         return Ok(ValidateCallbackResult::Valid);
     }
 
-    if !was_member_of_household(action.author, action_hash, household_hash)? {
-        return Ok(ValidateCallbackResult::Invalid(String::from(
-            "Only members of households can remove join household requests",
-        )));
-    }
+    let member_of_household = validate_agent_was_member_of_household_at_the_time(
+        action.author,
+        action_hash,
+        household_hash,
+    )?;
+
+    let ValidateCallbackResult::Valid = member_of_household else {
+        return Ok(member_of_household);
+    };
     Ok(ValidateCallbackResult::Valid)
 }
 
@@ -116,10 +119,14 @@ pub fn validate_delete_link_requestor_to_households(
         return Ok(ValidateCallbackResult::Valid);
     }
 
-    if !was_member_of_household(action.author, action_hash, household_hash)? {
-        return Ok(ValidateCallbackResult::Invalid(String::from(
-            "Only members of households can remove join household requests",
-        )));
-    }
+    let member_of_household = validate_agent_was_member_of_household_at_the_time(
+        action.author,
+        action_hash,
+        household_hash,
+    )?;
+
+    let ValidateCallbackResult::Valid = member_of_household else {
+        return Ok(member_of_household);
+    };
     Ok(ValidateCallbackResult::Valid)
 }

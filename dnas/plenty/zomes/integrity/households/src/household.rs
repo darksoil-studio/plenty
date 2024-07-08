@@ -1,48 +1,6 @@
 use hdi::prelude::*;
 pub use households_types::*;
 
-use crate::{HouseholdMembershipClaim, UnitEntryTypes};
-
-pub fn was_member_of_household(
-    agent_pub_key: AgentPubKey,
-    chain_top: ActionHash,
-    household_hash: ActionHash,
-) -> ExternResult<bool> {
-    let agent_activity = must_get_agent_activity(
-        agent_pub_key,
-        ChainFilter {
-            chain_top,
-            filters: ChainFilters::ToGenesis,
-            include_cached_entries: true,
-        },
-    )?;
-    let mut deleted_actions: HashSet<ActionHash> = HashSet::new();
-    for activity in agent_activity.iter() {
-        if let Action::Delete(delete) = &activity.action.hashed.content {
-            deleted_actions.insert(delete.deletes_address.clone());
-        }
-    }
-    let household_membership_claim_entry_type: AppEntryDef =
-        UnitEntryTypes::HouseholdMembershipClaim.try_into()?;
-    for activity in agent_activity {
-        if activity.action.hashed.hash.eq(&household_hash) {
-            return Ok(true);
-        }
-        if let Some(EntryType::App(app)) = activity.action.hashed.content.entry_type() {
-            if app.eq(&household_membership_claim_entry_type) {
-                let claim_record = must_get_valid_record(activity.action.hashed.hash.clone())?;
-                let claim = HouseholdMembershipClaim::try_from(claim_record)?;
-                if claim.household_hash.eq(&household_hash) {
-                    if !deleted_actions.contains(&activity.action.hashed.hash) {
-                        return Ok(true);
-                    }
-                }
-            }
-        }
-    }
-    Ok(false)
-}
-
 pub fn validate_create_household(
     _action: EntryCreationAction,
     _household: Household,
@@ -54,7 +12,15 @@ pub fn validate_update_household(
     household: Household,
 ) -> ExternResult<ValidateCallbackResult> {
     // TODO: Add adequate validation
-    // was_member_of_household(action.author, action_hash, household_hash)
+    // let member_of_household = validate_agent_was_member_of_household_at_the_time(
+    //     action.author,
+    //     action_hash,
+    //     household_hash,
+    // )?;
+
+    // let ValidateCallbackResult::Valid = member_of_household else {
+    //     return Ok(member_of_household);
+    // };
 
     Ok(ValidateCallbackResult::Valid)
 }

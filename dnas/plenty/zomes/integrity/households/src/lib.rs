@@ -19,6 +19,7 @@ pub enum EntryTypes {
     Household(Household),
     HouseholdMembershipClaim(HouseholdMembershipClaim),
 }
+
 #[derive(Serialize, Deserialize)]
 #[hdk_link_types]
 pub enum LinkTypes {
@@ -31,6 +32,12 @@ pub enum LinkTypes {
 }
 #[hdk_extern]
 pub fn genesis_self_check(_data: GenesisSelfCheckData) -> ExternResult<ValidateCallbackResult> {
+    let app_entry_def: AppEntryDef = UnitEntryTypes::HouseholdMembershipClaim.try_into()?;
+    // See crates/households_types/lib.rs
+    assert_eq!(
+        HOUSEHOLD_MEMBERSHIP_CLAIM_ENTRY_TYPE_INDEX,
+        app_entry_def.entry_index.0
+    );
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_agent_joining(

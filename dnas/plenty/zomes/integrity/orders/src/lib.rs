@@ -46,6 +46,18 @@ pub fn validate_agent_joining(
     Ok(ValidateCallbackResult::Valid)
 }
 
+pub fn action_hash(op: &Op) -> &ActionHash {
+    match op {
+        Op::StoreRecord(StoreRecord { record }) => record.action_address(),
+        Op::StoreEntry(StoreEntry { action, .. }) => &action.hashed.hash,
+        Op::RegisterUpdate(RegisterUpdate { update, .. }) => &update.hashed.hash,
+        Op::RegisterDelete(RegisterDelete { delete, .. }) => &delete.hashed.hash,
+        Op::RegisterAgentActivity(RegisterAgentActivity { action, .. }) => &action.hashed.hash,
+        Op::RegisterCreateLink(RegisterCreateLink { create_link }) => &create_link.hashed.hash,
+        Op::RegisterDeleteLink(RegisterDeleteLink { delete_link, .. }) => &delete_link.hashed.hash,
+    }
+}
+
 #[hdk_extern]
 pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
     match op.flattened::<EntryTypes, LinkTypes>()? {
@@ -55,6 +67,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                     validate_create_order(EntryCreationAction::Create(action), order)
                 }
                 EntryTypes::HouseholdOrder(household_order) => validate_create_household_order(
+                    action_hash(&op).clone(),
                     EntryCreationAction::Create(action),
                     household_order,
                 ),
@@ -65,6 +78,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                     )
                 }
                 EntryTypes::ProducerInvoice(producer_invoice) => validate_create_producer_invoice(
+                    action_hash(&op).clone(),
                     EntryCreationAction::Create(action),
                     producer_invoice,
                 ),
@@ -76,6 +90,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                     validate_create_order(EntryCreationAction::Update(action), order)
                 }
                 EntryTypes::HouseholdOrder(household_order) => validate_create_household_order(
+                    action_hash(&op).clone(),
                     EntryCreationAction::Update(action),
                     household_order,
                 ),
@@ -86,6 +101,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                     )
                 }
                 EntryTypes::ProducerInvoice(producer_invoice) => validate_create_producer_invoice(
+                    action_hash(&op).clone(),
                     EntryCreationAction::Update(action),
                     producer_invoice,
                 ),
@@ -119,6 +135,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 }
                             };
                         validate_update_producer_invoice(
+                            action_hash(&op).clone(),
                             action,
                             producer_invoice,
                             original_create_action,
@@ -157,6 +174,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 }
                             };
                         validate_update_household_order(
+                            action_hash(&op).clone(),
                             action,
                             household_order,
                             original_create_action,
@@ -222,6 +240,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
             match original_app_entry {
                 EntryTypes::ProducerInvoice(original_producer_invoice) => {
                     validate_delete_producer_invoice(
+                        action_hash(&op).clone(),
                         delete_entry.clone().action,
                         original_action,
                         original_producer_invoice,
@@ -236,6 +255,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 }
                 EntryTypes::HouseholdOrder(original_household_order) => {
                     validate_delete_household_order(
+                        action_hash(&op).clone(),
                         delete_entry.clone().action,
                         original_action,
                         original_household_order,
@@ -260,6 +280,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
             }
             LinkTypes::HouseholdToHouseholdOrders => {
                 validate_create_link_household_to_household_orders(
+                    action_hash(&op).clone(),
                     action,
                     base_address,
                     target_address,
@@ -267,12 +288,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 )
             }
             LinkTypes::OrderToHouseholdOrders => validate_create_link_order_to_household_orders(
+                action_hash(&op).clone(),
                 action,
                 base_address,
                 target_address,
                 tag,
             ),
             LinkTypes::HouseholdOrderUpdates => validate_create_link_household_order_updates(
+                action_hash(&op).clone(),
                 action,
                 base_address,
                 target_address,
@@ -295,6 +318,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 )
             }
             LinkTypes::OrderToProducerInvoices => validate_create_link_order_to_producer_invoices(
+                action_hash(&op).clone(),
                 action,
                 base_address,
                 target_address,
@@ -302,6 +326,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
             ),
             LinkTypes::ProducerToProducerInvoices => {
                 validate_create_link_producer_to_producer_invoices(
+                    action_hash(&op).clone(),
                     action,
                     base_address,
                     target_address,
@@ -329,6 +354,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
             ),
             LinkTypes::HouseholdToHouseholdOrders => {
                 validate_delete_link_household_to_household_orders(
+                    action_hash(&op).clone(),
                     action,
                     original_action,
                     base_address,
@@ -337,6 +363,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 )
             }
             LinkTypes::OrderToHouseholdOrders => validate_delete_link_order_to_household_orders(
+                action_hash(&op).clone(),
                 action,
                 original_action,
                 base_address,
@@ -360,6 +387,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 )
             }
             LinkTypes::OrderToProducerInvoices => validate_delete_link_order_to_producer_invoices(
+                action_hash(&op).clone(),
                 action,
                 original_action,
                 base_address,
@@ -377,6 +405,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
             }
             LinkTypes::ProducerToProducerInvoices => {
                 validate_delete_link_producer_to_producer_invoices(
+                    action_hash(&op).clone(),
                     action,
                     original_action,
                     base_address,
@@ -398,6 +427,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                     validate_create_order(EntryCreationAction::Create(action), order)
                 }
                 EntryTypes::HouseholdOrder(household_order) => validate_create_household_order(
+                    action_hash(&op).clone(),
                     EntryCreationAction::Create(action),
                     household_order,
                 ),
@@ -408,6 +438,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                     )
                 }
                 EntryTypes::ProducerInvoice(producer_invoice) => validate_create_producer_invoice(
+                    action_hash(&op).clone(),
                     EntryCreationAction::Create(action),
                     producer_invoice,
                 ),
@@ -459,6 +490,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                     }
                     EntryTypes::HouseholdOrder(household_order) => {
                         let result = validate_create_household_order(
+                            action_hash(&op).clone(),
                             EntryCreationAction::Update(action.clone()),
                             household_order.clone(),
                         )?;
@@ -479,6 +511,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 }
                             };
                             validate_update_household_order(
+                                action_hash(&op).clone(),
                                 action,
                                 household_order,
                                 original_action,
@@ -522,6 +555,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                     }
                     EntryTypes::ProducerInvoice(producer_invoice) => {
                         let result = validate_create_producer_invoice(
+                            action_hash(&op).clone(),
                             EntryCreationAction::Update(action.clone()),
                             producer_invoice.clone(),
                         )?;
@@ -543,6 +577,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 }
                             };
                             validate_update_producer_invoice(
+                                action_hash(&op).clone(),
                                 action,
                                 producer_invoice,
                                 original_action,
@@ -606,6 +641,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                     }
                     EntryTypes::HouseholdOrder(original_household_order) => {
                         validate_delete_household_order(
+                            action_hash(&op).clone(),
                             action,
                             original_action,
                             original_household_order,
@@ -620,6 +656,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                     }
                     EntryTypes::ProducerInvoice(original_producer_invoice) => {
                         validate_delete_producer_invoice(
+                            action_hash(&op).clone(),
                             action,
                             original_action,
                             original_producer_invoice,
@@ -639,6 +676,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 }
                 LinkTypes::OrderToHouseholdOrders => {
                     validate_create_link_order_to_household_orders(
+                        action_hash(&op).clone(),
                         action,
                         base_address,
                         target_address,
@@ -647,6 +685,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 }
                 LinkTypes::HouseholdToHouseholdOrders => {
                     validate_create_link_household_to_household_orders(
+                        action_hash(&op).clone(),
                         action,
                         base_address,
                         target_address,
@@ -654,6 +693,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                     )
                 }
                 LinkTypes::HouseholdOrderUpdates => validate_create_link_household_order_updates(
+                    action_hash(&op).clone(),
                     action,
                     base_address,
                     target_address,
@@ -669,6 +709,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 }
                 LinkTypes::OrderToProducerInvoices => {
                     validate_create_link_order_to_producer_invoices(
+                        action_hash(&op).clone(),
                         action,
                         base_address,
                         target_address,
@@ -685,6 +726,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 }
                 LinkTypes::ProducerToProducerInvoices => {
                     validate_create_link_producer_to_producer_invoices(
+                        action_hash(&op).clone(),
                         action,
                         base_address,
                         target_address,
@@ -726,6 +768,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                     ),
                     LinkTypes::OrderToHouseholdOrders => {
                         validate_delete_link_order_to_household_orders(
+                            action_hash(&op).clone(),
                             action,
                             create_link.clone(),
                             base_address,
@@ -735,6 +778,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                     }
                     LinkTypes::HouseholdToHouseholdOrders => {
                         validate_delete_link_household_to_household_orders(
+                            action_hash(&op).clone(),
                             action,
                             create_link.clone(),
                             base_address,
@@ -762,6 +806,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                     }
                     LinkTypes::OrderToProducerInvoices => {
                         validate_delete_link_order_to_producer_invoices(
+                            action_hash(&op).clone(),
                             action,
                             create_link.clone(),
                             base_address,
@@ -780,6 +825,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                     }
                     LinkTypes::ProducerToProducerInvoices => {
                         validate_delete_link_producer_to_producer_invoices(
+                            action_hash(&op).clone(),
                             action,
                             create_link.clone(),
                             base_address,

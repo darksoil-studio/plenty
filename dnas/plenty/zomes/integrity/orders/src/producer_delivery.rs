@@ -68,10 +68,27 @@ pub fn validate_create_producer_delivery(
 
 pub fn validate_update_producer_delivery(
     _action: Update,
-    _producer_delivery: ProducerDelivery,
+    producer_delivery: ProducerDelivery,
     _original_action: EntryCreationAction,
-    _original_producer_delivery: ProducerDelivery,
+    original_producer_delivery: ProducerDelivery,
 ) -> ExternResult<ValidateCallbackResult> {
+    if producer_delivery
+        .order_hash
+        .ne(&original_producer_delivery.order_hash)
+    {
+        return Ok(ValidateCallbackResult::Invalid(String::from(
+            "Can't change the order_hash for a ProducerDelivery",
+        )));
+    }
+
+    if producer_delivery
+        .producer_hash
+        .ne(&original_producer_delivery.producer_hash)
+    {
+        return Ok(ValidateCallbackResult::Invalid(String::from(
+            "Can't change the producer_hash for a ProducerDelivery",
+        )));
+    }
     Ok(ValidateCallbackResult::Valid)
 }
 

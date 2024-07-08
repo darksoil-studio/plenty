@@ -1,11 +1,7 @@
 use crate::LinkTypes;
 use hdi::prelude::*;
-#[hdk_entry_helper]
-#[derive(Clone, PartialEq)]
-pub struct HouseholdMembershipClaim {
-    pub member_create_link_hash: ActionHash,
-    pub household_hash: ActionHash,
-}
+
+pub use households_types::HouseholdMembershipClaim;
 
 pub fn validate_create_household_membership_claim(
     action: EntryCreationAction,

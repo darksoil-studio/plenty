@@ -1,6 +1,6 @@
 use hdi::prelude::*;
 
-use crate::was_member_of_household;
+use households_types::validate_agent_was_member_of_household_at_the_time;
 
 pub fn validate_create_link_member_to_households(
     action_hash: ActionHash,
@@ -25,9 +25,15 @@ pub fn validate_create_link_member_to_households(
             "Linked action must reference an entry"
         ))))?;
 
-    if !was_member_of_household(action.author, action_hash, household_hash)? {
-        return Ok(ValidateCallbackResult::Invalid(String::from("")));
-    }
+    let member_of_household = validate_agent_was_member_of_household_at_the_time(
+        action.author,
+        action_hash,
+        household_hash,
+    )?;
+
+    let ValidateCallbackResult::Valid = member_of_household else {
+        return Ok(member_of_household);
+    };
 
     Ok(ValidateCallbackResult::Valid)
 }
@@ -46,9 +52,16 @@ pub fn validate_delete_link_member_to_households(
         .ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
             "No action hash associated with link"
         ))))?;
-    if !was_member_of_household(action.author, action_hash, household_hash)? {
-        return Ok(ValidateCallbackResult::Invalid(String::from("")));
-    }
+
+    let member_of_household = validate_agent_was_member_of_household_at_the_time(
+        action.author,
+        action_hash,
+        household_hash,
+    )?;
+
+    let ValidateCallbackResult::Valid = member_of_household else {
+        return Ok(member_of_household);
+    };
 
     Ok(ValidateCallbackResult::Valid)
 }

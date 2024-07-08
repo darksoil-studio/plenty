@@ -1,5 +1,9 @@
 use hdi::prelude::*;
 use producers_types::*;
+use roles_types::*;
+
+pub const BOOKKEEPER_ROLE: &str = "bookkeeper";
+pub const ROLES_INTEGRITY_ZOME_NAME: &str = "roles_integrity";
 
 #[derive(Clone, PartialEq)]
 #[hdk_entry_helper]
@@ -10,7 +14,8 @@ pub struct ProducerInvoice {
 }
 
 pub fn validate_create_producer_invoice(
-    _action: EntryCreationAction,
+    action_hash: ActionHash,
+    action: EntryCreationAction,
     producer_invoice: ProducerInvoice,
 ) -> ExternResult<ValidateCallbackResult> {
     let record = must_get_valid_record(producer_invoice.order_hash.clone())?;
@@ -29,39 +34,91 @@ pub fn validate_create_producer_invoice(
         .ok_or(wasm_error!(WasmErrorInner::Guest(String::from(
             "Dependant action must be accompanied by an entry"
         ))))?;
+
+    let was_bookkeeper = validate_agent_had_undeleted_role_claim_at_the_time(
+        action.author(),
+        &action_hash,
+        &String::from(BOOKKEEPER_ROLE),
+        &ZomeName::from(ROLES_INTEGRITY_ZOME_NAME),
+    )?;
+
+    let ValidateCallbackResult::Valid = was_bookkeeper else {
+        return Ok(was_bookkeeper);
+    };
+
     Ok(ValidateCallbackResult::Valid)
 }
 
 pub fn validate_update_producer_invoice(
-    _action: Update,
-    _producer_invoice: ProducerInvoice,
+    action_hash: ActionHash,
+    action: Update,
+    producer_invoice: ProducerInvoice,
     _original_action: EntryCreationAction,
-    _original_producer_invoice: ProducerInvoice,
+    original_producer_invoice: ProducerInvoice,
 ) -> ExternResult<ValidateCallbackResult> {
+    if producer_invoice
+        .order_hash
+        .ne(&original_producer_invoice.order_hash)
+    {
+        return Ok(ValidateCallbackResult::Invalid(String::from(
+            "Can't change the order_hash for a ProducerInvoice",
+        )));
+    }
+
+    if producer_invoice
+        .producer_hash
+        .ne(&original_producer_invoice.producer_hash)
+    {
+        return Ok(ValidateCallbackResult::Invalid(String::from(
+            "Can't change the producer_hash for a ProducerInvoice",
+        )));
+    }
+    let was_bookkeeper = validate_agent_had_undeleted_role_claim_at_the_time(
+        &action.author,
+        &action_hash,
+        &String::from(BOOKKEEPER_ROLE),
+        &ZomeName::from(ROLES_INTEGRITY_ZOME_NAME),
+    )?;
+
+    let ValidateCallbackResult::Valid = was_bookkeeper else {
+        return Ok(was_bookkeeper);
+    };
     Ok(ValidateCallbackResult::Valid)
 }
 
 pub fn validate_delete_producer_invoice(
-    _action: Delete,
+    action_hash: ActionHash,
+    action: Delete,
     _original_action: EntryCreationAction,
     _original_producer_invoice: ProducerInvoice,
 ) -> ExternResult<ValidateCallbackResult> {
+    let was_bookkeeper = validate_agent_had_undeleted_role_claim_at_the_time(
+        &action.author,
+        &action_hash,
+        &String::from(BOOKKEEPER_ROLE),
+        &ZomeName::from(ROLES_INTEGRITY_ZOME_NAME),
+    )?;
+
+    let ValidateCallbackResult::Valid = was_bookkeeper else {
+        return Ok(was_bookkeeper);
+    };
     Ok(ValidateCallbackResult::Valid)
 }
 
 pub fn validate_create_link_order_to_producer_invoices(
-    _action: CreateLink,
+    action_hash: ActionHash,
+    action: CreateLink,
     base_address: AnyLinkableHash,
     target_address: AnyLinkableHash,
     _tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
     // Check the entry type for the given action hash
-    let action_hash = base_address
+    let base_hash = base_address
         .into_action_hash()
         .ok_or(wasm_error!(WasmErrorInner::Guest(
             "No action hash associated with link".to_string()
         )))?;
-    let record = must_get_valid_record(action_hash)?;
+    let record = must_get_valid_record(base_hash)?;
     let _order: crate::Order = record
         .entry()
         .to_app_option()
@@ -70,13 +127,13 @@ pub fn validate_create_link_order_to_producer_invoices(
             "Linked action must reference an entry".to_string()
         )))?;
     // Check the entry type for the given action hash
-    let action_hash =
+    let target_hash =
         target_address
             .into_action_hash()
             .ok_or(wasm_error!(WasmErrorInner::Guest(
                 "No action hash associated with link".to_string()
             )))?;
-    let record = must_get_valid_record(action_hash)?;
+    let record = must_get_valid_record(target_hash)?;
     let _producer_invoice: crate::ProducerInvoice = record
         .entry()
         .to_app_option()
@@ -85,33 +142,54 @@ pub fn validate_create_link_order_to_producer_invoices(
             "Linked action must reference an entry".to_string()
         )))?;
     // TODO: add the appropriate validation rules
+    let was_bookkeeper = validate_agent_had_undeleted_role_claim_at_the_time(
+        &action.author,
+        &action_hash,
+        &String::from(BOOKKEEPER_ROLE),
+        &ZomeName::from(ROLES_INTEGRITY_ZOME_NAME),
+    )?;
+
+    let ValidateCallbackResult::Valid = was_bookkeeper else {
+        return Ok(was_bookkeeper);
+    };
     Ok(ValidateCallbackResult::Valid)
 }
 
 pub fn validate_delete_link_order_to_producer_invoices(
-    _action: DeleteLink,
+    action_hash: ActionHash,
+    action: DeleteLink,
     _original_action: CreateLink,
     _base: AnyLinkableHash,
     _target: AnyLinkableHash,
     _tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
-    // TODO: add the appropriate validation rules
+    let was_bookkeeper = validate_agent_had_undeleted_role_claim_at_the_time(
+        &action.author,
+        &action_hash,
+        &String::from(BOOKKEEPER_ROLE),
+        &ZomeName::from(ROLES_INTEGRITY_ZOME_NAME),
+    )?;
+
+    let ValidateCallbackResult::Valid = was_bookkeeper else {
+        return Ok(was_bookkeeper);
+    };
     Ok(ValidateCallbackResult::Valid)
 }
 
 pub fn validate_create_link_producer_to_producer_invoices(
-    _action: CreateLink,
+    action_hash: ActionHash,
+    action: CreateLink,
     base_address: AnyLinkableHash,
     target_address: AnyLinkableHash,
     _tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
     // Check the entry type for the given action hash
-    let action_hash = base_address
+    let base_hash = base_address
         .into_action_hash()
         .ok_or(wasm_error!(WasmErrorInner::Guest(
             "No action hash associated with link".to_string()
         )))?;
-    let record = must_get_valid_record(action_hash)?;
+    let record = must_get_valid_record(base_hash)?;
     let _producer: Producer = record
         .entry()
         .to_app_option()
@@ -120,13 +198,13 @@ pub fn validate_create_link_producer_to_producer_invoices(
             "Linked action must reference an entry".to_string()
         )))?;
     // Check the entry type for the given action hash
-    let action_hash =
+    let target_hash =
         target_address
             .into_action_hash()
             .ok_or(wasm_error!(WasmErrorInner::Guest(
                 "No action hash associated with link".to_string()
             )))?;
-    let record = must_get_valid_record(action_hash)?;
+    let record = must_get_valid_record(target_hash)?;
     let _producer_invoice: crate::ProducerInvoice = record
         .entry()
         .to_app_option()
@@ -135,16 +213,37 @@ pub fn validate_create_link_producer_to_producer_invoices(
             "Linked action must reference an entry".to_string()
         )))?;
     // TODO: add the appropriate validation rules
+    let was_bookkeeper = validate_agent_had_undeleted_role_claim_at_the_time(
+        &action.author,
+        &action_hash,
+        &String::from(BOOKKEEPER_ROLE),
+        &ZomeName::from(ROLES_INTEGRITY_ZOME_NAME),
+    )?;
+
+    let ValidateCallbackResult::Valid = was_bookkeeper else {
+        return Ok(was_bookkeeper);
+    };
     Ok(ValidateCallbackResult::Valid)
 }
 
 pub fn validate_delete_link_producer_to_producer_invoices(
-    _action: DeleteLink,
+    action_hash: ActionHash,
+    action: DeleteLink,
     _original_action: CreateLink,
     _base: AnyLinkableHash,
     _target: AnyLinkableHash,
     _tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
     // TODO: add the appropriate validation rules
+    let was_bookkeeper = validate_agent_had_undeleted_role_claim_at_the_time(
+        &action.author,
+        &action_hash,
+        &String::from(BOOKKEEPER_ROLE),
+        &ZomeName::from(ROLES_INTEGRITY_ZOME_NAME),
+    )?;
+
+    let ValidateCallbackResult::Valid = was_bookkeeper else {
+        return Ok(was_bookkeeper);
+    };
     Ok(ValidateCallbackResult::Valid)
 }

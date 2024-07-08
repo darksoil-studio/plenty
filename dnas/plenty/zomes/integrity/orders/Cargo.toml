@@ -13,3 +13,4 @@ hdi = { workspace = true }
 serde = { workspace = true }
 households_types = { path = "../../../../../crates/households_types" }
 producers_types = { path = "../../../../../crates/producers_types" }
+roles_types = {git = "https://github.com/darksoil-studio/roles", branch = "main" }
