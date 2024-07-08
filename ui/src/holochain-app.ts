@@ -1,3 +1,7 @@
+import { ordersStoreContext } from './plenty/orders/context.js';
+import { OrdersClient } from './plenty/orders/orders-client.js';
+import { OrdersStore } from './plenty/orders/orders-store.js';
+
 import {
   Router,
   Routes,
@@ -64,7 +68,11 @@ import { bookkeeperRoleConfig, orderManagerRoleConfig } from "./roles.js";
 @localized()
 @customElement("holochain-app")
 export class HolochainApp extends SignalWatcher(LitElement) {
-  @provide({ context: producersStoreContext })
+  @provide({ context: ordersStoreContext })
+  @property()
+  _ordersStore!: OrdersStore;
+
+@provide({ context: producersStoreContext })
   @property()
   _producersStore!: ProducersStore;
 
@@ -159,6 +167,7 @@ export class HolochainApp extends SignalWatcher(LitElement) {
       },
       this._notificationsStore,
     );
+    this._ordersStore = new OrdersStore(new OrdersClient(appClient, 'plenty'));
   }
 
   renderMyHousehold() {
@@ -219,5 +228,4 @@ export class HolochainApp extends SignalWatcher(LitElement) {
       }
     `,
     ...appStyles,
-  ];
-}
+  ];}

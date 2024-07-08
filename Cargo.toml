@@ -24,6 +24,12 @@ path = "dnas/plenty/zomes/coordinator/households"
 [workspace.dependencies.households_integrity]
 path = "dnas/plenty/zomes/integrity/households"
 
+[workspace.dependencies.orders]
+path = "dnas/plenty/zomes/coordinator/orders"
+
+[workspace.dependencies.orders_integrity]
+path = "dnas/plenty/zomes/integrity/orders"
+
 [workspace.dependencies.producers]
 path = "dnas/plenty/zomes/coordinator/producers"
 
