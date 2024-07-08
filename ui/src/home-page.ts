@@ -17,6 +17,7 @@ import { msg } from "@lit/localize";
 import { mdiBasket, mdiCarrot, mdiHomeGroup } from "@mdi/js";
 
 import "./producers-page.js";
+import "./orders-page.js";
 import "./members-page.js";
 import "./plenty/households/elements/all-members.js";
 import { Household } from "./plenty/households/types.js";
@@ -46,7 +47,7 @@ export class HomePage extends SignalWatcher(LitElement) {
     },
     {
       path: "orders/*",
-      render: () => html` <all-orders></all-orders> `,
+      render: () => html` <orders-page></orders-page> `,
     },
     {
       path: "producers/*",

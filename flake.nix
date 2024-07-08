@@ -2,6 +2,7 @@
   description = "Template for Holochain app development";
 
   inputs = {
+    tasks.url = "github:darksoil-studio/tasks/main";
     notifications.url = "github:darksoil-studio/notifications";
     file-storage.url = "github:holochain-open-dev/file-storage/nixify";
     profiles.url = "github:holochain-open-dev/profiles/nixify";

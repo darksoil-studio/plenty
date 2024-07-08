@@ -11,6 +11,8 @@
       dnaManifest = ./workdir/dna.yaml;
       holochain = inputs'.holochain;
       zomes = {
+          tasks_integrity = inputs'.tasks.packages.tasks_integrity;
+          tasks = inputs'.tasks.packages.tasks;
         notifications_integrity =
           inputs'.notifications.packages.notifications_integrity;
         notifications = inputs'.notifications.packages.notifications;
