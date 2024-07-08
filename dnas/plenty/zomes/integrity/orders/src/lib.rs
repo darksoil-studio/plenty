@@ -1,3 +1,5 @@
+pub mod producer_invoice;
+pub use producer_invoice::*;
 pub mod producer_delivery;
 pub use producer_delivery::*;
 pub mod household_order;
@@ -14,6 +16,7 @@ pub enum EntryTypes {
     Order(Order),
     HouseholdOrder(HouseholdOrder),
     ProducerDelivery(ProducerDelivery),
+    ProducerInvoice(ProducerInvoice),
 }
 
 #[derive(Serialize, Deserialize)]
@@ -23,6 +26,7 @@ pub enum LinkTypes {
     OrderToHouseholdOrders,
     HouseholdOrderUpdates,
     OrderToProducerDeliveries,
+    OrderToProducerInvoices,
 }
 
 #[hdk_extern]
@@ -64,6 +68,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 producer_delivery,
                             )
                         }
+                        EntryTypes::ProducerInvoice(producer_invoice) => {
+                            validate_create_producer_invoice(
+                                EntryCreationAction::Create(action),
+                                producer_invoice,
+                            )
+                        }
                     }
                 }
                 OpEntry::UpdateEntry { app_entry, action, .. } => {
@@ -84,6 +94,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                             validate_create_producer_delivery(
                                 EntryCreationAction::Update(action),
                                 producer_delivery,
+                            )
+                        }
+                        EntryTypes::ProducerInvoice(producer_invoice) => {
+                            validate_create_producer_invoice(
+                                EntryCreationAction::Update(action),
+                                producer_invoice,
                             )
                         }
                     }
@@ -114,6 +130,31 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         }
                     };
                     match app_entry {
+                        EntryTypes::ProducerInvoice(producer_invoice) => {
+                            let original_app_entry = must_get_valid_record(
+                                action.clone().original_action_address,
+                            )?;
+                            let original_producer_invoice = match ProducerInvoice::try_from(
+                                original_app_entry,
+                            ) {
+                                Ok(entry) => entry,
+                                Err(e) => {
+                                    return Ok(
+                                        ValidateCallbackResult::Invalid(
+                                            format!(
+                                                "Expected to get ProducerInvoice from Record: {e:?}"
+                                            ),
+                                        ),
+                                    );
+                                }
+                            };
+                            validate_update_producer_invoice(
+                                action,
+                                producer_invoice,
+                                original_create_action,
+                                original_producer_invoice,
+                            )
+                        }
                         EntryTypes::ProducerDelivery(producer_delivery) => {
                             let original_app_entry = must_get_valid_record(
                                 action.clone().original_action_address,
@@ -241,6 +282,13 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 }
             };
             match original_app_entry {
+                EntryTypes::ProducerInvoice(original_producer_invoice) => {
+                    validate_delete_producer_invoice(
+                        delete_entry.clone().action,
+                        original_action,
+                        original_producer_invoice,
+                    )
+                }
                 EntryTypes::ProducerDelivery(original_producer_delivery) => {
                     validate_delete_producer_delivery(
                         delete_entry.clone().action,
@@ -304,6 +352,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         tag,
                     )
                 }
+                LinkTypes::OrderToProducerInvoices => {
+                    validate_create_link_order_to_producer_invoices(
+                        action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
             }
         }
         FlatOp::RegisterDeleteLink {
@@ -351,6 +407,15 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         tag,
                     )
                 }
+                LinkTypes::OrderToProducerInvoices => {
+                    validate_delete_link_order_to_producer_invoices(
+                        action,
+                        original_action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
             }
         }
         FlatOp::StoreRecord(store_record) => {
@@ -373,6 +438,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                             validate_create_producer_delivery(
                                 EntryCreationAction::Create(action),
                                 producer_delivery,
+                            )
+                        }
+                        EntryTypes::ProducerInvoice(producer_invoice) => {
+                            validate_create_producer_invoice(
+                                EntryCreationAction::Create(action),
+                                producer_invoice,
                             )
                         }
                     }
@@ -491,6 +562,37 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 Ok(result)
                             }
                         }
+                        EntryTypes::ProducerInvoice(producer_invoice) => {
+                            let result = validate_create_producer_invoice(
+                                EntryCreationAction::Update(action.clone()),
+                                producer_invoice.clone(),
+                            )?;
+                            if let ValidateCallbackResult::Valid = result {
+                                let original_producer_invoice: Option<ProducerInvoice> = original_record
+                                    .entry()
+                                    .to_app_option()
+                                    .map_err(|e| wasm_error!(e))?;
+                                let original_producer_invoice = match original_producer_invoice {
+                                    Some(producer_invoice) => producer_invoice,
+                                    None => {
+                                        return Ok(
+                                            ValidateCallbackResult::Invalid(
+                                                "The updated entry type must be the same as the original entry type"
+                                                    .to_string(),
+                                            ),
+                                        );
+                                    }
+                                };
+                                validate_update_producer_invoice(
+                                    action,
+                                    producer_invoice,
+                                    original_action,
+                                    original_producer_invoice,
+                                )
+                            } else {
+                                Ok(result)
+                            }
+                        }
                     }
                 }
                 OpRecord::DeleteEntry { original_action_hash, action, .. } => {
@@ -562,6 +664,13 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 original_producer_delivery,
                             )
                         }
+                        EntryTypes::ProducerInvoice(original_producer_invoice) => {
+                            validate_delete_producer_invoice(
+                                action,
+                                original_action,
+                                original_producer_invoice,
+                            )
+                        }
                     }
                 }
                 OpRecord::CreateLink {
@@ -598,6 +707,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         }
                         LinkTypes::OrderToProducerDeliveries => {
                             validate_create_link_order_to_producer_deliveries(
+                                action,
+                                base_address,
+                                target_address,
+                                tag,
+                            )
+                        }
+                        LinkTypes::OrderToProducerInvoices => {
+                            validate_create_link_order_to_producer_invoices(
                                 action,
                                 base_address,
                                 target_address,
@@ -658,6 +775,15 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         }
                         LinkTypes::OrderToProducerDeliveries => {
                             validate_delete_link_order_to_producer_deliveries(
+                                action,
+                                create_link.clone(),
+                                base_address,
+                                create_link.target_address,
+                                create_link.tag,
+                            )
+                        }
+                        LinkTypes::OrderToProducerInvoices => {
+                            validate_delete_link_order_to_producer_invoices(
                                 action,
                                 create_link.clone(),
                                 base_address,

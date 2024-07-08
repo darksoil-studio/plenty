@@ -16,6 +16,7 @@ import { ActionCommittedSignal } from '@holochain-open-dev/utils';
 export type OrdersSignal = ActionCommittedSignal<EntryTypes, LinkTypes>;
 
 export type EntryTypes =
+ | ({ type: 'ProducerInvoice'; } & ProducerInvoice)
  | ({ type: 'ProducerDelivery'; } & ProducerDelivery)
  | ({ type: 'HouseholdOrder'; } & HouseholdOrder)
  | ({  type: 'Order'; } & Order);
@@ -55,5 +56,14 @@ export interface ProducerDelivery {
   order_hash: ActionHash;
 
   products: Array<ActionHash>;
+}
+
+
+
+
+export interface ProducerInvoice { 
+  order_hash: ActionHash;
+
+  invoice: EntryHash;
 }
 

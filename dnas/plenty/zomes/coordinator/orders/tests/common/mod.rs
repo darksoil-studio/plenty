@@ -73,3 +73,26 @@ pub async fn create_producer_delivery(conductor: &SweetConductor, zome: &SweetZo
     record
 }
 
+
+
+pub async fn sample_producer_invoice_1(conductor: &SweetConductor, zome: &SweetZome) -> ProducerInvoice {
+    ProducerInvoice {
+          order_hash: create_order(conductor, zome, sample_order_1(conductor, zome).await).await.signed_action.hashed.hash,
+	  invoice: ::fixt::fixt!(EntryHash),
+    }
+}
+
+pub async fn sample_producer_invoice_2(conductor: &SweetConductor, zome: &SweetZome) -> ProducerInvoice {
+    ProducerInvoice {
+          order_hash: create_order(conductor, zome, sample_order_2(conductor, zome).await).await.signed_action.hashed.hash,
+	  invoice: ::fixt::fixt!(EntryHash),
+    }
+}
+
+pub async fn create_producer_invoice(conductor: &SweetConductor, zome: &SweetZome, producer_invoice: ProducerInvoice) -> Record {
+    let record: Record = conductor
+        .call(zome, "create_producer_invoice", producer_invoice)
+        .await;
+    record
+}
+

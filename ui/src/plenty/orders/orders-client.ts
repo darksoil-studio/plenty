@@ -1,3 +1,5 @@
+import { ProducerInvoice } from './types.js';
+
 import { ProducerDelivery } from './types.js';
 
 import { HouseholdOrder } from './types.js';
@@ -164,6 +166,55 @@ export class OrdersClient extends ZomeClient<OrdersSignal> {
 
   async getDeletedProducerDeliveriesForOrder(orderHash: ActionHash): Promise<Array<[SignedActionHashed<CreateLink>, SignedActionHashed<DeleteLink>[]]>> {
     return this.callZome('get_deleted_producer_deliveries_for_order', orderHash);
+  }
+  /** Producer Invoice */
+
+  async createProducerInvoice(producerInvoice: ProducerInvoice): Promise<EntryRecord<ProducerInvoice>> {
+    const record: Record = await this.callZome('create_producer_invoice', producerInvoice);
+    return new EntryRecord(record);
+  }
+  
+  async getLatestProducerInvoice(producerInvoiceHash: ActionHash): Promise<EntryRecord<ProducerInvoice> | undefined> {
+    const record: Record = await this.callZome('get_latest_producer_invoice', producerInvoiceHash);
+    return record ? new EntryRecord(record) : undefined;
+  }
+
+  async getOriginalProducerInvoice(producerInvoiceHash: ActionHash): Promise<EntryRecord<ProducerInvoice> | undefined> {
+    const record: Record = await this.callZome('get_original_producer_invoice', producerInvoiceHash);
+    return record ? new EntryRecord(record) : undefined;
+  }
+
+  async getAllRevisionsForProducerInvoice(producerInvoiceHash: ActionHash): Promise<Array<EntryRecord<ProducerInvoice>>> {
+    const records: Record[] = await this.callZome('get_all_revisions_for_producer_invoice', producerInvoiceHash);
+    return records.map(r => new EntryRecord(r));
+  }
+
+  async updateProducerInvoice(previousProducerInvoiceHash: ActionHash, updatedProducerInvoice: ProducerInvoice): Promise<EntryRecord<ProducerInvoice>> {
+    const record: Record = await this.callZome('update_producer_invoice', {
+      previous_producer_invoice_hash: previousProducerInvoiceHash,
+      updated_producer_invoice: updatedProducerInvoice
+    });
+    return new EntryRecord(record);
+  }
+
+  deleteProducerInvoice(originalProducerInvoiceHash: ActionHash): Promise<ActionHash> {
+    return this.callZome('delete_producer_invoice', originalProducerInvoiceHash);
+  }
+
+  getAllDeletesForProducerInvoice(originalProducerInvoiceHash: ActionHash): Promise<Array<SignedActionHashed<Delete>> | undefined> {
+    return this.callZome('get_all_deletes_for_producer_invoice', originalProducerInvoiceHash);
+  }
+
+  getOldestDeleteForProducerInvoice(originalProducerInvoiceHash: ActionHash): Promise<SignedActionHashed<Delete> | undefined> {
+    return this.callZome('get_oldest_delete_for_producer_invoice', originalProducerInvoiceHash);
+  }
+  
+  async getProducerInvoicesForOrder(orderHash: ActionHash): Promise<Array<Link>> {
+    return this.callZome('get_producer_invoices_for_order', orderHash);
+  }
+
+  async getDeletedProducerInvoicesForOrder(orderHash: ActionHash): Promise<Array<[SignedActionHashed<CreateLink>, SignedActionHashed<DeleteLink>[]]>> {
+    return this.callZome('get_deleted_producer_invoices_for_order', orderHash);
   }
 
 }

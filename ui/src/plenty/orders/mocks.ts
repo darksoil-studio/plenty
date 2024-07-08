@@ -1,3 +1,5 @@
+import { ProducerInvoice } from './types.js';
+
 import { ProducerDelivery } from './types.js';
 
 import { HouseholdOrder } from './types.js';
@@ -281,6 +283,96 @@ export class OrdersZomeMock extends ZomeMock implements AppClient {
   async get_producer_deliveries_for_order(orderHash: ActionHash): Promise<Array<Link>> {
     return this.producerDeliveriesForOrder.get(orderHash) || [];
   }
+  /** Producer Invoice */
+  producerInvoices = new HoloHashMap<ActionHash, {
+    deletes: Array<SignedActionHashed<Delete>>;
+    revisions: Array<Record>;
+  }>();
+  producerInvoicesForOrder = new HoloHashMap<ActionHash, Link[]>();
+
+  async create_producer_invoice(producerInvoice: ProducerInvoice): Promise<Record> {
+    const entryHash = hash(producerInvoice, HashType.ENTRY);
+    const record = await fakeRecord(await fakeCreateAction(entryHash), fakeEntry(producerInvoice));
+    
+    this.producerInvoices.set(record.signed_action.hashed.hash, {
+      deletes: [],
+      revisions: [record]
+    });
+  
+    const existingOrderHash = this.producerInvoicesForOrder.get(producerInvoice.order_hash) || [];
+    this.producerInvoicesForOrder.set(producerInvoice.order_hash, [...existingOrderHash, { 
+      target: record.signed_action.hashed.hash, 
+      author: this.myPubKey,
+      timestamp: Date.now() * 1000,
+      zome_index: 0,
+      link_type: 0,
+      tag: new Uint8Array(),
+      create_link_hash: await fakeActionHash()
+    }]);
+
+    return record;
+  }
+  
+  async get_latest_producer_invoice(producerInvoiceHash: ActionHash): Promise<Record | undefined> {
+    const producerInvoice = this.producerInvoices.get(producerInvoiceHash);
+    return producerInvoice ? producerInvoice.revisions[producerInvoice.revisions.length - 1] : undefined;
+  }
+  
+  async get_all_revisions_for_producer_invoice(producerInvoiceHash: ActionHash): Promise<Record[] | undefined> {
+    const producerInvoice = this.producerInvoices.get(producerInvoiceHash);
+    return producerInvoice ? producerInvoice.revisions : undefined;
+  }
+  
+  async get_original_producer_invoice(producerInvoiceHash: ActionHash): Promise<Record | undefined> {
+    const producerInvoice = this.producerInvoices.get(producerInvoiceHash);
+    return producerInvoice ? producerInvoice.revisions[0] : undefined;
+  }
+  
+  async get_all_deletes_for_producer_invoice(producerInvoiceHash: ActionHash): Promise<Array<SignedActionHashed<Delete>> | undefined> {
+    const producerInvoice = this.producerInvoices.get(producerInvoiceHash);
+    return producerInvoice ? producerInvoice.deletes : undefined;
+  }
+
+  async get_oldest_delete_for_producer_invoice(producerInvoiceHash: ActionHash): Promise<SignedActionHashed<Delete> | undefined> {
+    const producerInvoice = this.producerInvoices.get(producerInvoiceHash);
+    return producerInvoice ? producerInvoice.deletes[0] : undefined;
+  }
+  async delete_producer_invoice(original_producer_invoice_hash: ActionHash): Promise<ActionHash> {
+    const record = await fakeRecord(await fakeDeleteEntry(original_producer_invoice_hash));
+    
+    this.producerInvoices.get(original_producer_invoice_hash).deletes.push(record.signed_action as SignedActionHashed<Delete>);
+    
+    return record.signed_action.hashed.hash;
+  }
+
+  async update_producer_invoice(input: { previous_producer_invoice_hash: ActionHash; updated_producer_invoice: ProducerInvoice; }): Promise<Record> {
+    const record = await fakeRecord(await fakeUpdateEntry(input.previous_producer_invoice_hash, undefined, undefined, fakeEntry(input.updated_producer_invoice)), fakeEntry(input.updated_producer_invoice));
+
+    for (const [originalHash, producerInvoice] of Array.from(this.producerInvoices.entries())) {
+      if (producerInvoice.revisions.find(r => r.signed_action.hashed.hash.toString() === input.previous_producer_invoice_hash.toString())) {
+        producerInvoice.revisions.push(record);
+      }
+    }
+     
+    const producerInvoice = input.updated_producer_invoice;
+    
+    const existingOrderHash = this.producerInvoicesForOrder.get(producerInvoice.order_hash) || [];
+    this.producerInvoicesForOrder.set(producerInvoice.order_hash, [...existingOrderHash, {
+      target: record.signed_action.hashed.hash, 
+      author: record.signed_action.hashed.content.author,
+      timestamp: record.signed_action.hashed.content.timestamp,
+      zome_index: 0,
+      link_type: 0,
+      tag: new Uint8Array(),
+      create_link_hash: await fakeActionHash()
+    }]);
+    
+    return record;
+  }
+  
+  async get_producer_invoices_for_order(orderHash: ActionHash): Promise<Array<Link>> {
+    return this.producerInvoicesForOrder.get(orderHash) || [];
+  }
 
 
 }
@@ -312,5 +404,15 @@ export async function sampleProducerDelivery(client: OrdersClient, partialProduc
           products: [(await fakeActionHash())],
         },
         ...partialProducerDelivery
+    };
+}
+
+export async function sampleProducerInvoice(client: OrdersClient, partialProducerInvoice: Partial<ProducerInvoice> = {}): Promise<ProducerInvoice> {
+    return {
+        ...{
+          order_hash: partialProducerInvoice.order_hash || (await client.createOrder(await sampleOrder(client))).actionHash,
+          invoice: (await fakeEntryHash()),
+        },
+        ...partialProducerInvoice
     };
 }
