@@ -1,12 +1,19 @@
 use hdi::prelude::*;
 use households_types::*;
 
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
+pub struct ProductOrder {
+    pub original_product_hash: ActionHash,
+    pub orderded_product_hash: ActionHash,
+    pub amount: u32,
+}
+
 #[derive(Clone, PartialEq)]
 #[hdk_entry_helper]
 pub struct HouseholdOrder {
     pub order_hash: ActionHash,
     pub household_hash: ActionHash,
-    pub products: Vec<ActionHash>,
+    pub products: Vec<ProductOrder>,
 }
 
 pub fn validate_create_household_order(
@@ -86,6 +93,52 @@ pub fn validate_create_link_order_to_household_orders(
 }
 
 pub fn validate_delete_link_order_to_household_orders(
+    _action: DeleteLink,
+    _original_action: CreateLink,
+    _base: AnyLinkableHash,
+    _target: AnyLinkableHash,
+    _tag: LinkTag,
+) -> ExternResult<ValidateCallbackResult> {
+    Ok(ValidateCallbackResult::Valid)
+}
+
+pub fn validate_create_link_household_to_household_orders(
+    _action: CreateLink,
+    base_address: AnyLinkableHash,
+    target_address: AnyLinkableHash,
+    _tag: LinkTag,
+) -> ExternResult<ValidateCallbackResult> {
+    let action_hash = base_address
+        .into_action_hash()
+        .ok_or(wasm_error!(WasmErrorInner::Guest(
+            "No action hash associated with link".to_string()
+        )))?;
+    let record = must_get_valid_record(action_hash)?;
+    let _household: Household = record
+        .entry()
+        .to_app_option()
+        .map_err(|e| wasm_error!(e))?
+        .ok_or(wasm_error!(WasmErrorInner::Guest(
+            "Linked action must reference an entry".to_string()
+        )))?;
+    let action_hash =
+        target_address
+            .into_action_hash()
+            .ok_or(wasm_error!(WasmErrorInner::Guest(
+                "No action hash associated with link".to_string()
+            )))?;
+    let record = must_get_valid_record(action_hash)?;
+    let _household_order: crate::HouseholdOrder = record
+        .entry()
+        .to_app_option()
+        .map_err(|e| wasm_error!(e))?
+        .ok_or(wasm_error!(WasmErrorInner::Guest(
+            "Linked action must reference an entry".to_string()
+        )))?;
+    Ok(ValidateCallbackResult::Valid)
+}
+
+pub fn validate_delete_link_household_to_household_orders(
     _action: DeleteLink,
     _original_action: CreateLink,
     _base: AnyLinkableHash,

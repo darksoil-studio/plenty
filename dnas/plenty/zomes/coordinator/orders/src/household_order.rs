@@ -14,7 +14,7 @@ pub fn create_household_order(household_order: HouseholdOrder) -> ExternResult<R
         household_order.household_hash.clone(),
         household_order_hash.clone(),
         LinkTypes::HouseholdToHouseholdOrders,
-        household_order.order_hash,
+        household_order.order_hash.into_inner(),
     )?;
     let record = get(household_order_hash.clone(), GetOptions::default())?.ok_or(wasm_error!(
         WasmErrorInner::Guest("Could not find the newly created HouseholdOrder".to_string())

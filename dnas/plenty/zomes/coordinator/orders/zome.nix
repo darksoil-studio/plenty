@@ -1,7 +1,7 @@
 { inputs, ... }:
 
 {
-  perSystem = { inputs', self', system, ... }: {
+  perSystem = { inputs', self', system, pkgs, lib, ... }: {
     packages.orders = inputs.hc-infra.outputs.lib.rustZome {
       workspacePath = inputs.self.outPath;
       holochain = inputs'.holochain;
@@ -40,8 +40,17 @@
         holochain = inputs'.holochain;
       });
       crateCargoToml = ./Cargo.toml;
-      cargoArtifacts =
-        inputs.hc-infra.outputs.lib.holochainCargoArtifacts { inherit system; };
+
+      buildInputs = inputs.p2p-shipyard.outputs.lib.tauriHappDeps.buildInputs {
+        inherit pkgs lib;
+      };
+      nativeBuildInputs =
+        inputs.p2p-shipyard.outputs.lib.tauriHappDeps.nativeBuildInputs {
+          inherit pkgs lib;
+        };
+      cargoArtifacts = inputs.p2p-shipyard.outputs.lib.tauriHappCargoArtifacts {
+        inherit pkgs lib;
+      };
     };
 
   };

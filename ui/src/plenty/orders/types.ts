@@ -11,7 +11,7 @@ import {
   CreateLink,
   DeleteLink,
 } from "@holochain/client";
-import { ActionCommittedSignal } from "@holochain-open-dev/utils";
+import { ActionCommittedSignal, HoloHashMap } from "@holochain-open-dev/utils";
 
 export type OrdersSignal = ActionCommittedSignal<EntryTypes, LinkTypes>;
 
@@ -51,16 +51,57 @@ export interface Order {
   status: OrderStatus;
 }
 
+export interface ProductOrder {
+  original_product_hash: ActionHash;
+  ordered_product_hash: ActionHash;
+  amount: number;
+}
+
 export interface HouseholdOrder {
   order_hash: ActionHash;
   household_hash: ActionHash;
-  products: Array<ActionHash>;
+  products: Array<ProductOrder>;
 }
+
+export interface FixedProductDeliveryForHouseholds {
+  amount: number;
+  households_hashes: Array<ActionHash>;
+}
+
+export interface FixedProductDeliveryForHouseholds {
+  products: Array<number>;
+  households_hashes: Array<ActionHash>;
+}
+
+export type DeliveredAmount =
+  | {
+      type: "FixedAmountProduct";
+      delivered_products: Array<FixedProductDeliveryForHouseholds>;
+      price_per_unit_changed: number | undefined;
+    }
+  | {
+      type: "EstimatedAmountProduct";
+      delivered_products: Array<FixedProductDeliveryForHouseholds>;
+      price_per_unit_changed: number | undefined;
+    };
+
+export type ProductDelivery =
+  | {
+      type: "NotAvailable";
+    }
+  | {
+      type: "Missing";
+      reason: string;
+    }
+  | {
+      type: "Delivered";
+      delivered_amount: DeliveredAmount;
+    };
 
 export interface ProducerDelivery {
   order_hash: ActionHash;
   producer_hash: ActionHash;
-  products: Array<ActionHash>;
+  products: HoloHashMap<ActionHash, ProducerDelivery>;
 }
 
 export interface ProducerInvoice {

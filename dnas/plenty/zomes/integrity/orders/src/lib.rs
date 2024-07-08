@@ -258,6 +258,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
             LinkTypes::OrderUpdates => {
                 validate_create_link_order_updates(action, base_address, target_address, tag)
             }
+            LinkTypes::HouseholdToHouseholdOrders => {
+                validate_create_link_household_to_household_orders(
+                    action,
+                    base_address,
+                    target_address,
+                    tag,
+                )
+            }
             LinkTypes::OrderToHouseholdOrders => validate_create_link_order_to_household_orders(
                 action,
                 base_address,
@@ -278,12 +286,28 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                     tag,
                 )
             }
+            LinkTypes::ProducerToProducerDeliveries => {
+                validate_create_link_producer_to_producer_deliveries(
+                    action,
+                    base_address,
+                    target_address,
+                    tag,
+                )
+            }
             LinkTypes::OrderToProducerInvoices => validate_create_link_order_to_producer_invoices(
                 action,
                 base_address,
                 target_address,
                 tag,
             ),
+            LinkTypes::ProducerToProducerInvoices => {
+                validate_create_link_producer_to_producer_invoices(
+                    action,
+                    base_address,
+                    target_address,
+                    tag,
+                )
+            }
             LinkTypes::AllOrders => {
                 validate_create_link_all_orders(action, base_address, target_address, tag)
             }
@@ -303,6 +327,15 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 target_address,
                 tag,
             ),
+            LinkTypes::HouseholdToHouseholdOrders => {
+                validate_delete_link_household_to_household_orders(
+                    action,
+                    original_action,
+                    base_address,
+                    target_address,
+                    tag,
+                )
+            }
             LinkTypes::OrderToHouseholdOrders => validate_delete_link_order_to_household_orders(
                 action,
                 original_action,
@@ -333,6 +366,24 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 target_address,
                 tag,
             ),
+            LinkTypes::ProducerToProducerDeliveries => {
+                validate_delete_link_producer_to_producer_deliveries(
+                    action,
+                    original_action,
+                    base_address,
+                    target_address,
+                    tag,
+                )
+            }
+            LinkTypes::ProducerToProducerInvoices => {
+                validate_delete_link_producer_to_producer_invoices(
+                    action,
+                    original_action,
+                    base_address,
+                    target_address,
+                    tag,
+                )
+            }
             LinkTypes::AllOrders => validate_delete_link_all_orders(
                 action,
                 original_action,
@@ -594,6 +645,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         tag,
                     )
                 }
+                LinkTypes::HouseholdToHouseholdOrders => {
+                    validate_create_link_household_to_household_orders(
+                        action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
                 LinkTypes::HouseholdOrderUpdates => validate_create_link_household_order_updates(
                     action,
                     base_address,
@@ -610,6 +669,22 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 }
                 LinkTypes::OrderToProducerInvoices => {
                     validate_create_link_order_to_producer_invoices(
+                        action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
+                LinkTypes::ProducerToProducerDeliveries => {
+                    validate_create_link_producer_to_producer_deliveries(
+                        action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
+                LinkTypes::ProducerToProducerInvoices => {
+                    validate_create_link_producer_to_producer_invoices(
                         action,
                         base_address,
                         target_address,
@@ -658,6 +733,15 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                             create_link.tag,
                         )
                     }
+                    LinkTypes::HouseholdToHouseholdOrders => {
+                        validate_delete_link_household_to_household_orders(
+                            action,
+                            create_link.clone(),
+                            base_address,
+                            create_link.target_address,
+                            create_link.tag,
+                        )
+                    }
                     LinkTypes::HouseholdOrderUpdates => {
                         validate_delete_link_household_order_updates(
                             action,
@@ -678,6 +762,24 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                     }
                     LinkTypes::OrderToProducerInvoices => {
                         validate_delete_link_order_to_producer_invoices(
+                            action,
+                            create_link.clone(),
+                            base_address,
+                            create_link.target_address,
+                            create_link.tag,
+                        )
+                    }
+                    LinkTypes::ProducerToProducerDeliveries => {
+                        validate_delete_link_producer_to_producer_deliveries(
+                            action,
+                            create_link.clone(),
+                            base_address,
+                            create_link.target_address,
+                            create_link.tag,
+                        )
+                    }
+                    LinkTypes::ProducerToProducerInvoices => {
+                        validate_delete_link_producer_to_producer_invoices(
                             action,
                             create_link.clone(),
                             base_address,
