@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@darksoil-studio/notifications": "github:darksoil-studio/notifications#f121b9b526bc997c5cef72640b7fe29a4d77598e&path:ui",
-    "@darksoil-studio/roles": "github:darksoil-studio/roles#7c63a81ed3ad3872ea6c28f2a72d1bceeb532b5e&path:ui",
+    "@darksoil-studio/roles": "github:darksoil-studio/roles#a2e5ee2d3decb9cbc013090abff65d4982c3814f&path:ui",
     "@holochain-open-dev/elements": "^0.300.0",
     "@holochain-open-dev/file-storage": "github:holochain-open-dev/file-storage#bd25db205ecf2b493045adcdcfdfc7fc1d93758e&path:ui",
     "@holochain-open-dev/profiles": "github:holochain-open-dev/profiles#748bb4879e247eff44a4a23a8d2aaa02a585578a&path:ui",
@@ -28,7 +28,7 @@
     "@vaadin/grid": "^24.4.0",
     "lit": "^3.0.0",
     "urlpattern-polyfill": "^10.0.0",
-    "tasks": "github:darksoil-studio/tasks#175f5812f15cb38bba5259bfa8f5975cbb7cb112&path:ui"
+    "tasks": "github:darksoil-studio/tasks#b148cacff5ba10055e8796755c0394b6b03191ec&path:ui"
   },
   "devDependencies": {
     "@lit/localize-tools": "^0.6.3",

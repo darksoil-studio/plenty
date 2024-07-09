@@ -48,7 +48,7 @@ export class MembersPage extends SignalWatcher(LitElement) {
       path: "manage-roles",
       name: msg("Manage Roles"),
       render: () => html`
-        <div class="column" style="margin: 16px 0">
+        <div class="column" style="margin: 12px 0">
           <div class="row" style="align-items: center">
             <span class="title">${msg("Members")}</span>
             <routes-breadcrumbs

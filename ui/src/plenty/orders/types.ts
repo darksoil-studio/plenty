@@ -12,6 +12,8 @@ import {
   DeleteLink,
 } from "@holochain/client";
 import { ActionCommittedSignal, HoloHashMap } from "@holochain-open-dev/utils";
+import { msg } from "@lit/localize";
+import { TemplateResult, html } from "lit";
 
 export type OrdersSignal = ActionCommittedSignal<EntryTypes, LinkTypes>;
 
@@ -45,6 +47,33 @@ export type OrderStatus =
       household_payments: ActionHash[];
       producers_invoices: ActionHash[];
     };
+
+export function renderStatus(status: OrderStatus): TemplateResult {
+  let variant = "primary";
+  switch (status.type) {
+    case "Preparing":
+    case "Open":
+    case "Closed":
+    case "Processed":
+    case "Finished":
+  }
+  return html`<sl-tag .variant=${variant}>${statusMsg(status)}</sl-tag>`;
+}
+
+export function statusMsg(status: OrderStatus): string {
+  switch (status.type) {
+    case "Preparing":
+      return msg("Preparing");
+    case "Open":
+      return msg("Open");
+    case "Closed":
+      return msg("Closed");
+    case "Processed":
+      return msg("Processed");
+    case "Finished":
+      return msg("Finished");
+  }
+}
 
 export interface Order {
   name: string;
@@ -101,7 +130,7 @@ export type ProductDelivery =
 export interface ProducerDelivery {
   order_hash: ActionHash;
   producer_hash: ActionHash;
-  products: HoloHashMap<ActionHash, ProducerDelivery>;
+  products: HoloHashMap<ActionHash, ProductDelivery>;
 }
 
 export interface ProducerInvoice {

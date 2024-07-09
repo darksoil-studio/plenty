@@ -248,7 +248,7 @@ export class ProducersPage extends SignalWatcher(LitElement) {
 
   render() {
     return html`
-      <div class="column" style=" margin: 12px 0">
+      <div class="column" style="margin: 12px 0">
         <div class="row" style="align-items: center; height: 38px">
           <span class="title">${msg("Producers")}</span>
           <routes-breadcrumbs

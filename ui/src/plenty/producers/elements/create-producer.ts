@@ -111,7 +111,9 @@ export class CreateProducer extends SignalWatcher(LitElement) {
         >
           <div class="row" style="gap: 20px; flex: 1">
             <div class="column" style="gap: 12px; flex: 1">
-              <span class="title">${msg("Producer Details")}</span>
+              <span class="title" style="margin-bottom: 12px"
+                >${msg("Producer Details")}</span
+              >
               <div class="column" style="gap: 8px">
                 <span>${msg("Photo")}*</span>
                 <upload-files
@@ -149,7 +151,9 @@ export class CreateProducer extends SignalWatcher(LitElement) {
               ></sl-textarea>
             </div>
             <div class="column" style="flex: 1; gap: 12px">
-              <span class="title">${msg("Roles")}</span>
+              <span class="title" style="margin-bottom: 12px"
+                >${msg("Roles")}</span
+              >
               <sl-select
                 name="editors"
                 .label=${msg("Product Editors")}
