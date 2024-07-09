@@ -96,3 +96,26 @@ pub async fn create_producer_invoice(conductor: &SweetConductor, zome: &SweetZom
     record
 }
 
+
+
+pub async fn sample_available_products_1(conductor: &SweetConductor, zome: &SweetZome) -> AvailableProducts {
+    AvailableProducts {
+          order_hash: create_order(conductor, zome, sample_order_1(conductor, zome).await).await.signed_action.hashed.hash,
+	  products: vec![::fixt::fixt!(ActionHash)],
+    }
+}
+
+pub async fn sample_available_products_2(conductor: &SweetConductor, zome: &SweetZome) -> AvailableProducts {
+    AvailableProducts {
+          order_hash: create_order(conductor, zome, sample_order_2(conductor, zome).await).await.signed_action.hashed.hash,
+	  products: vec![::fixt::fixt!(ActionHash)],
+    }
+}
+
+pub async fn create_available_products(conductor: &SweetConductor, zome: &SweetZome, available_products: AvailableProducts) -> Record {
+    let record: Record = conductor
+        .call(zome, "create_available_products", available_products)
+        .await;
+    record
+}
+

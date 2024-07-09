@@ -18,6 +18,7 @@ import { TemplateResult, html } from "lit";
 export type OrdersSignal = ActionCommittedSignal<EntryTypes, LinkTypes>;
 
 export type EntryTypes =
+ | ({ type: 'AvailableProducts'; } & AvailableProducts)
   | ({ type: "ProducerInvoice" } & ProducerInvoice)
   | ({ type: "ProducerDelivery" } & ProducerDelivery)
   | ({ type: "HouseholdOrder" } & HouseholdOrder)
@@ -138,3 +139,12 @@ export interface ProducerInvoice {
   producer_hash: ActionHash;
   invoice: EntryHash;
 }
+
+
+
+export interface AvailableProducts { 
+  order_hash: ActionHash;
+
+  products: Array<ActionHash>;
+}
+

@@ -1,3 +1,5 @@
+import { AvailableProducts } from './types.js';
+
 import {
   collectionSignal,
   liveLinksSignal,
@@ -28,6 +30,7 @@ import {
 import { OrdersClient } from "./orders-client.js";
 
 export class OrdersStore {
+
   constructor(public client: OrdersClient) {}
 
   /** Order */
@@ -129,6 +132,25 @@ export class OrdersStore {
           ),
       ),
     },
+    availableProducts: {
+      live: pipe(
+        liveLinksSignal(
+          this.client,
+          orderHash,
+          () => this.client.getAvailableProductsForOrder(orderHash),
+          'OrderToAvailableProducts'
+        ), 
+        links => slice(this.availableProducts, links.map(l => l.target))
+      ),
+      deleted: pipe(
+        deletedLinksSignal(
+          this.client,
+          orderHash,
+          () => this.client.getDeletedAvailableProductsForOrder(orderHash),
+          'OrderToAvailableProducts'
+        ), links => slice(this.availableProducts, links.map(l => l[0].hashed.content.target_address))
+      ),
+    },
   }));
 
   /** Household Order */
@@ -214,4 +236,13 @@ export class OrdersStore {
         allOrders.map((l) => l.target),
       ),
   );
+  /** Available Products */
+
+  availableProducts = new LazyHoloHashMap((availableProductsHash: ActionHash) => ({
+    latestVersion: latestVersionOfEntrySignal(this.client, () => this.client.getLatestAvailableProducts(availableProductsHash)),
+    original: immutableEntrySignal(() => this.client.getOriginalAvailableProducts(availableProductsHash)),
+    allRevisions: allRevisionsOfEntrySignal(this.client, () => this.client.getAllRevisionsForAvailableProducts(availableProductsHash)),
+    deletes: deletesForEntrySignal(this.client, availableProductsHash, () => this.client.getAllDeletesForAvailableProducts(availableProductsHash)),
+  }));
+
 }

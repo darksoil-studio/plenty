@@ -1,3 +1,4 @@
+pub mod available_products;
 pub mod all_orders;
 pub mod producer_invoice;
 pub mod producer_delivery;

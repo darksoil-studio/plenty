@@ -1,3 +1,5 @@
+import { AvailableProducts } from './types.js';
+
 import { ProducerInvoice, ProductDelivery } from "./types.js";
 
 import { ProducerDelivery } from "./types.js";
@@ -572,6 +574,94 @@ export class OrdersZomeMock extends ZomeMock implements AppClient {
       })),
     );
   }
+  /** Available Products */
+  availableProducts = new HoloHashMap<ActionHash, {
+    deletes: Array<SignedActionHashed<Delete>>;
+    revisions: Array<Record>;
+  }>();
+  availableProductsForOrder = new HoloHashMap<ActionHash, Link[]>();
+
+  async create_available_products(availableProducts: AvailableProducts): Promise<Record> {
+    const entryHash = hash(availableProducts, HashType.ENTRY);
+    const record = await fakeRecord(await fakeCreateAction(entryHash), fakeEntry(availableProducts));
+    
+    this.availableProducts.set(record.signed_action.hashed.hash, {
+      deletes: [],
+      revisions: [record]
+    });
+  
+    const existingOrderHash = this.availableProductsForOrder.get(availableProducts.order_hash) || [];
+    this.availableProductsForOrder.set(availableProducts.order_hash, [...existingOrderHash, { 
+      target: record.signed_action.hashed.hash, 
+      author: this.myPubKey,
+      timestamp: Date.now() * 1000,
+      zome_index: 0,
+      link_type: 0,
+      tag: new Uint8Array(),
+      create_link_hash: await fakeActionHash()
+    }]);
+
+    return record;
+  }
+  
+  async get_latest_available_products(availableProductsHash: ActionHash): Promise<Record | undefined> {
+    const availableProducts = this.availableProducts.get(availableProductsHash);
+    return availableProducts ? availableProducts.revisions[availableProducts.revisions.length - 1] : undefined;
+  }
+  
+  async get_all_revisions_for_available_products(availableProductsHash: ActionHash): Promise<Record[] | undefined> {
+    const availableProducts = this.availableProducts.get(availableProductsHash);
+    return availableProducts ? availableProducts.revisions : undefined;
+  }
+  
+  async get_original_available_products(availableProductsHash: ActionHash): Promise<Record | undefined> {
+    const availableProducts = this.availableProducts.get(availableProductsHash);
+    return availableProducts ? availableProducts.revisions[0] : undefined;
+  }
+  
+  async get_all_deletes_for_available_products(availableProductsHash: ActionHash): Promise<Array<SignedActionHashed<Delete>> | undefined> {
+    const availableProducts = this.availableProducts.get(availableProductsHash);
+    return availableProducts ? availableProducts.deletes : undefined;
+  }
+
+  async get_oldest_delete_for_available_products(availableProductsHash: ActionHash): Promise<SignedActionHashed<Delete> | undefined> {
+    const availableProducts = this.availableProducts.get(availableProductsHash);
+    return availableProducts ? availableProducts.deletes[0] : undefined;
+  }
+  async delete_available_products(original_available_products_hash: ActionHash): Promise<ActionHash> {
+    const record = await fakeRecord(await fakeDeleteEntry(original_available_products_hash));
+    
+    this.availableProducts.get(original_available_products_hash).deletes.push(record.signed_action as SignedActionHashed<Delete>);
+    
+    return record.signed_action.hashed.hash;
+  }
+
+  async update_available_products(input: { original_available_products_hash: ActionHash; previous_available_products_hash: ActionHash; updated_available_products: AvailableProducts; }): Promise<Record> {
+    const record = await fakeRecord(await fakeUpdateEntry(input.previous_available_products_hash, undefined, undefined, fakeEntry(input.updated_available_products)), fakeEntry(input.updated_available_products));
+
+  this.availableProducts.get(input.original_available_products_hash).revisions.push(record);
+     
+    const availableProducts = input.updated_available_products;
+    
+    const existingOrderHash = this.availableProductsForOrder.get(availableProducts.order_hash) || [];
+    this.availableProductsForOrder.set(availableProducts.order_hash, [...existingOrderHash, {
+      target: record.signed_action.hashed.hash, 
+      author: record.signed_action.hashed.content.author,
+      timestamp: record.signed_action.hashed.content.timestamp,
+      zome_index: 0,
+      link_type: 0,
+      tag: new Uint8Array(),
+      create_link_hash: await fakeActionHash()
+    }]);
+    
+    return record;
+  }
+  
+  async get_available_products_for_order(orderHash: ActionHash): Promise<Array<Link>> {
+    return this.availableProductsForOrder.get(orderHash) || [];
+  }
+
+
 }
 
 export async function sampleOrder(
@@ -660,4 +750,14 @@ export async function sampleProducerInvoice(
     },
     ...partialProducerInvoice,
   };
+}
+
+export async function sampleAvailableProducts(client: OrdersClient, partialAvailableProducts: Partial<AvailableProducts> = {}): Promise<AvailableProducts> {
+    return {
+        ...{
+          order_hash: partialAvailableProducts.order_hash || (await client.createOrder(await sampleOrder(client))).actionHash,
+          products: [(await fakeActionHash())],
+        },
+        ...partialAvailableProducts
+    };
 }
