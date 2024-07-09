@@ -4,13 +4,20 @@ use roles_types::validate_agent_had_undeleted_role_claim_at_the_time;
 
 use crate::roles::{ORDER_MANAGER, ROLES_INTEGRITY_ZOME_NAME};
 
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[serde(tag = "type")]
+pub enum ProducerAvailability {
+    Available { available_products: Vec<ActionHash> },
+    Unavailable,
+}
+
 #[derive(Clone, PartialEq)]
 #[hdk_entry_helper]
 pub struct AvailableProducts {
     pub order_hash: ActionHash,
     pub original_producer_hash: ActionHash,
     pub latest_producer_hash: ActionHash,
-    pub products: Vec<ActionHash>,
+    pub producer_availability: ProducerAvailability,
 }
 
 pub fn validate_can_change_available_products(

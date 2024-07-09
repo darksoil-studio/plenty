@@ -93,14 +93,15 @@ export class CreateOrder extends SignalWatcher(LitElement) {
 
   render() {
     return html` <sl-card style="flex: 1;">
-      <span slot="header">${msg("Create Order")}</span>
-
       <form
         id="create-form"
         class="column"
         style="flex: 1; gap: 16px;"
         ${onSubmit((fields) => this.createOrder(fields))}
       >
+        <span class="title" style="margin-bottom: 12px"
+          >${msg("Create Order")}</span
+        >
         <sl-input name="name" .label=${msg("Name")} required></sl-input>
 
         <sl-button variant="primary" type="submit" .loading=${this.committing}

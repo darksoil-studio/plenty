@@ -94,7 +94,7 @@ export class MyHousehold extends SignalWatcher(LitElement) {
             this.agentToAccept = undefined;
             (
               this.shadowRoot?.getElementById("accept-dialog") as SlDialog
-            ).show();
+            ).hide();
           }}
           >${msg("Cancel")}</sl-button
         >

@@ -9,12 +9,13 @@ import {
 import { EntryRecord, mapValues, slice } from "@holochain-open-dev/utils";
 import {
   hashProperty,
+  notifyError,
   sharedStyles,
   wrapPathInSvg,
 } from "@holochain-open-dev/elements";
 import { consume } from "@lit/context";
-import { localized, msg } from "@lit/localize";
-import { mdiInformationOutline, mdiPencil } from "@mdi/js";
+import { localized, msg, str } from "@lit/localize";
+import { mdiDelete, mdiInformationOutline, mdiPencil } from "@mdi/js";
 
 import "@holochain-open-dev/elements/dist/elements/display-error.js";
 import "@shoelace-style/shoelace/dist/components/spinner/spinner.js";
@@ -31,6 +32,7 @@ import { Producer, Product, renderPackaging } from "../types.js";
 
 import "./product-summary.js";
 import { appStyles } from "../../../app-styles.js";
+import { SlDialog } from "@shoelace-style/shoelace";
 
 /**
  * @element products-for-producer
@@ -50,6 +52,35 @@ export class ProductsForProducer extends SignalWatcher(LitElement) {
   @consume({ context: producersStoreContext, subscribe: true })
   producersStore!: ProducersStore;
 
+  @state()
+  productToDelete: [ActionHash, string] | undefined;
+
+  @state()
+  deleting = false;
+
+  async deleteProduct(productHash: ActionHash) {
+    try {
+      this.deleting = true;
+      await this.producersStore.client.deleteProduct(productHash);
+
+      this.dispatchEvent(
+        new CustomEvent("product-deleted", {
+          bubbles: true,
+          composed: true,
+          detail: {
+            productHash,
+          },
+        }),
+      );
+      (this.shadowRoot?.getElementById("delete-product") as SlDialog).hide();
+      this.productToDelete = undefined;
+    } catch (e: any) {
+      console.error(e);
+      notifyError(msg("Error deleting the product"));
+    }
+    this.deleting = false;
+  }
+
   renderList(
     producer: EntryRecord<Producer>,
     map: ReadonlyMap<ActionHash, EntryRecord<Product>>,
@@ -68,6 +99,31 @@ export class ProductsForProducer extends SignalWatcher(LitElement) {
       >`;
 
     return html`
+      <sl-dialog id="delete-product" .label=${msg("Delete Product")}>
+        <span
+          >${msg(
+            str`Are you sure you want to delete the product "${this.productToDelete ? this.productToDelete[1] : ""}"?`,
+          )}</span
+        >
+
+        <sl-button
+          slot="footer"
+          @click=${() => {
+            (
+              this.shadowRoot?.getElementById("delete-product") as SlDialog
+            ).hide();
+          }}
+          >${msg("Cancel")}</sl-button
+        >
+        <sl-button
+          slot="footer"
+          variant="danger"
+          .loading=${this.deleting}
+          @click=${async () => this.deleteProduct(this.productToDelete![0])}
+          >${msg("Delete Product")}</sl-button
+        >
+      </sl-dialog>
+
       <vaadin-grid
         multi-sort
         .items=${Array.from(map.entries()).map(([productHash, p]) => ({
@@ -115,26 +171,48 @@ export class ProductsForProducer extends SignalWatcher(LitElement) {
         ></vaadin-grid-column>
         ${this.producersStore.canIEditProducts(producer)
           ? html` <vaadin-grid-column
-              .header=${msg("Edit")}
-              .renderer=${(root: any, _: any, model: any) => {
-                render(
-                  html`<sl-icon-button
-                    .src=${wrapPathInSvg(mdiPencil)}
-                    @click=${() =>
-                      this.dispatchEvent(
-                        new CustomEvent("edit-product-requested", {
-                          bubbles: true,
-                          composed: true,
-                          detail: {
-                            productHash: model.item.productHash,
-                          },
-                        }),
-                      )}
-                  ></sl-icon-button>`,
-                  root,
-                );
-              }}
-            ></vaadin-grid-column>`
+                .header=${msg("Edit")}
+                .renderer=${(root: any, _: any, model: any) => {
+                  render(
+                    html`<sl-icon-button
+                      .src=${wrapPathInSvg(mdiPencil)}
+                      @click=${() =>
+                        this.dispatchEvent(
+                          new CustomEvent("edit-product-requested", {
+                            bubbles: true,
+                            composed: true,
+                            detail: {
+                              productHash: model.item.productHash,
+                            },
+                          }),
+                        )}
+                    ></sl-icon-button>`,
+                    root,
+                  );
+                }}
+              ></vaadin-grid-column>
+              <vaadin-grid-column
+                .header=${msg("Delete")}
+                .renderer=${(root: any, _: any, model: any) => {
+                  render(
+                    html`<sl-icon-button
+                      .src=${wrapPathInSvg(mdiDelete)}
+                      @click=${() => {
+                        this.productToDelete = [
+                          model.item.productHash,
+                          model.item.name,
+                        ];
+                        (
+                          this.shadowRoot?.getElementById(
+                            "delete-product",
+                          ) as SlDialog
+                        ).show();
+                      }}
+                    ></sl-icon-button>`,
+                    root,
+                  );
+                }}
+              ></vaadin-grid-column>`
           : html``}
       </vaadin-grid>
     `;

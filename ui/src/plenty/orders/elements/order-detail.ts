@@ -1,16 +1,26 @@
 import { LitElement, html } from "lit";
 import { state, property, customElement } from "lit/decorators.js";
-import { EntryHash, Record, ActionHash } from "@holochain/client";
-import { EntryRecord } from "@holochain-open-dev/utils";
-import { SignalWatcher } from "@holochain-open-dev/signals";
+import {
+  EntryHash,
+  Record,
+  ActionHash,
+  encodeHashToBase64,
+} from "@holochain/client";
+import { EntryRecord, mapValues } from "@holochain-open-dev/utils";
+import { SignalWatcher, joinAsyncMap } from "@holochain-open-dev/signals";
 import {
   hashProperty,
   wrapPathInSvg,
   notifyError,
 } from "@holochain-open-dev/elements";
 import { consume } from "@lit/context";
-import { localized, msg } from "@lit/localize";
-import { mdiAlertCircleOutline, mdiPencil, mdiDelete } from "@mdi/js";
+import { localized, msg, str } from "@lit/localize";
+import {
+  mdiAlertCircleOutline,
+  mdiPencil,
+  mdiDelete,
+  mdiInformationOutline,
+} from "@mdi/js";
 
 import "@shoelace-style/shoelace/dist/components/icon-button/icon-button.js";
 import "@shoelace-style/shoelace/dist/components/card/card.js";
@@ -18,14 +28,19 @@ import "@shoelace-style/shoelace/dist/components/alert/alert.js";
 import "@shoelace-style/shoelace/dist/components/spinner/spinner.js";
 import SlAlert from "@shoelace-style/shoelace/dist/components/alert/alert.js";
 import "@shoelace-style/shoelace/dist/components/button/button.js";
+import "@shoelace-style/shoelace/dist/components/tag/tag.js";
 
 import "@holochain-open-dev/elements/dist/elements/display-error.js";
 import { appStyles } from "../../../app-styles.js";
 import "./edit-order.js";
+import "./available-products-for-order.js";
 
 import { OrdersStore } from "../orders-store.js";
 import { ordersStoreContext } from "../context.js";
-import { Order, OrderStatus } from "../types.js";
+import { AvailableProducts, Order, OrderStatus } from "../types.js";
+import { producersStoreContext } from "../../producers/context.js";
+import { ProducersStore } from "../../producers/producers-store.js";
+import { Producer } from "../../producers/types.js";
 
 /**
  * @element order-detail
@@ -72,7 +87,21 @@ export class OrderDetail extends SignalWatcher(LitElement) {
   }
 
   renderPreparing(order: EntryRecord<Order>) {
-    return html``;
+    return html`
+      <div class="column" style="flex: 1; gap: 16px">
+        <div class="row">
+          <span class="title">${order.entry.name}</span>
+        </div>
+        <div class="column" style="flex: 1; align-items: center">
+          <div class="column" style="width: 700px; gap: 16px; ">
+            <available-products-for-order
+              style="flex: 1"
+              .orderHash=${this.orderHash}
+            ></available-products-for-order>
+          </div>
+        </div>
+      </div>
+    `;
   }
 
   renderDetail(entryRecord: EntryRecord<Order>) {

@@ -22,6 +22,8 @@ import "./overlay-page.js";
 import "./plenty/orders/elements/all-orders.js";
 import "./plenty/orders/elements/create-order.js";
 import "./plenty/orders/elements/order-detail.js";
+import "./plenty/orders/elements/create-available-products.js";
+import "./plenty/orders/elements/edit-available-products.js";
 import { routerContext } from "./context.js";
 import { Routes } from "./router.js";
 import {
@@ -68,7 +70,10 @@ export class ProducersPage extends SignalWatcher(LitElement) {
           .title=${msg("Create Order")}
           @close-requested=${() => this.routes.pop()}
         >
-          <div class="column" style="flex: 1; align-items: center">
+          <div
+            class="column"
+            style="flex: 1; align-items: center; width: 50rem"
+          >
             <create-order
               style="width: 400px; margin-top: 12px"
               @close-requested=${() => this.routes.pop()}
@@ -115,6 +120,60 @@ export class ProducersPage extends SignalWatcher(LitElement) {
         </overlay-page>
       `,
     },
+    {
+      path: ":orderHash/available-products/:producerHash",
+      enter: (params) => {
+        this.routes.goto(`${params.orderHash}`);
+        return false;
+      },
+    },
+    {
+      path: ":orderHash/available-products/:producerHash/create",
+      render: (params) => html`
+        <overlay-page
+          .title=${msg("Set Available Products")}
+          @close-requested=${() => {
+            this.routes.pop();
+          }}
+        >
+          <create-available-products
+            style="width: 70rem"
+            .orderHash=${decodeHashFromBase64(
+              params.orderHash as ActionHashB64,
+            )}
+            .producerHash=${decodeHashFromBase64(
+              params.producerHash as ActionHashB64,
+            )}
+            @edit-canceled=${() => this.routes.pop()}
+            @available-products-created=${(e: CustomEvent) => {
+              this.routes.pop();
+            }}
+          ></create-available-products>
+        </overlay-page>
+      `,
+    },
+    {
+      path: ":orderHash/available-products/:availableProductsHash/edit",
+      render: (params) => html`
+        <overlay-page
+          .title=${msg("Edit Available Products")}
+          @close-requested=${() => {
+            this.routes.pop();
+          }}
+        >
+          <edit-available-products
+            style="width: 70rem"
+            .availableProductsHash=${decodeHashFromBase64(
+              params.availableProductsHash as ActionHashB64,
+            )}
+            @edit-canceled=${() => this.routes.pop()}
+            @available-products-updated=${(e: CustomEvent) => {
+              this.routes.pop();
+            }}
+          ></edit-available-products>
+        </overlay-page>
+      `,
+    },
   ]);
 
   renderOrder(orderHash: ActionHash) {
@@ -134,7 +193,18 @@ export class ProducersPage extends SignalWatcher(LitElement) {
           <div class="column" style="align-items: center">
             <div class="column" style="gap: 16px; width: 1000px;">
               <div class="row" style="align-items: center; gap: 12px; flex: 1">
-                <order-detail .orderHash=${orderHash}></order-detail>
+                <order-detail
+                  style="flex: 1"
+                  .orderHash=${orderHash}
+                  @set-available-products-requested=${(e: CustomEvent) =>
+                    this.routes.goto(
+                      `${encodeHashToBase64(orderHash)}/available-products/${encodeHashToBase64(e.detail.producerHash)}/create`,
+                    )}
+                  @edit-available-products-requested=${(e: CustomEvent) =>
+                    this.routes.goto(
+                      `${encodeHashToBase64(orderHash)}/available-products/${encodeHashToBase64(e.detail.availableProductsHash)}/edit`,
+                    )}
+                ></order-detail>
               </div>
             </div>
           </div>

@@ -140,9 +140,18 @@ export interface ProducerInvoice {
   invoice: EntryHash;
 }
 
+export type ProducerAvailability =
+  | {
+      type: "Available";
+      available_products: Array<ActionHash>;
+    }
+  | {
+      type: "Unavailable";
+    };
+
 export interface AvailableProducts {
   order_hash: ActionHash;
   original_producer_hash: ActionHash;
   latest_producer_hash: ActionHash;
-  products: Array<ActionHash>;
+  producer_availability: ProducerAvailability;
 }

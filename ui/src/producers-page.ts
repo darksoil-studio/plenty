@@ -63,7 +63,7 @@ export class ProducersPage extends SignalWatcher(LitElement) {
           @close-requested=${() => this.routes.pop()}
         >
           <create-producer
-            style="flex: 1"
+            style="flex: 1; width: 50rem"
             @close-requested=${() => this.routes.pop()}
             @producer-created=${(e: CustomEvent) => {
               this.routes.goto(`${encodeHashToBase64(e.detail.producerHash)}`);
@@ -96,6 +96,7 @@ export class ProducersPage extends SignalWatcher(LitElement) {
           }}
         >
           <edit-producer
+            style="width: 50rem"
             .producerHash=${decodeHashFromBase64(
               params.producerHash as ActionHashB64,
             )}
@@ -131,6 +132,7 @@ export class ProducersPage extends SignalWatcher(LitElement) {
           }}
         >
           <edit-product
+            style="width: 50rem"
             .productHash=${decodeHashFromBase64(
               params.productHash as ActionHashB64,
             )}
@@ -150,6 +152,7 @@ export class ProducersPage extends SignalWatcher(LitElement) {
           @close-requested=${() => this.routes.pop()}
         >
           <create-product
+            style="width: 50rem"
             .producerHash=${decodeHashFromBase64(
               params.producerHash as ActionHashB64,
             )}

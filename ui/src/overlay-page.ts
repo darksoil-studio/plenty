@@ -21,7 +21,10 @@ export class OverlayPage extends SignalWatcher(LitElement) {
           ></sl-icon-button>
           <span>${this.title}</span>
         </div>
-        <div style="align-self: center; width: 50rem; margin-top: 12px">
+        <div
+          class="column"
+          style="flex: 1; margin-top: 12px; align-items: center"
+        >
           <slot></slot>
         </div>
       </div>

@@ -39,7 +39,7 @@ export class OrderSummary extends SignalWatcher(LitElement) {
   renderSummary(entryRecord: EntryRecord<Order>) {
     return html`
       <div class="column" style="gap: 16px; flex: 1">
-        <span style="font-size: 3rem">${entryRecord.entry.name}</span>
+        <span style="font-size: 2rem">${entryRecord.entry.name}</span>
         <span style="flex: 1"></span>
 
         <div style="align-self: end">
