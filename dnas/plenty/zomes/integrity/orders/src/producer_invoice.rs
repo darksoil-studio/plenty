@@ -2,8 +2,7 @@ use hdi::prelude::*;
 use producers_types::*;
 use roles_types::*;
 
-pub const BOOKKEEPER_ROLE: &str = "bookkeeper";
-pub const ROLES_INTEGRITY_ZOME_NAME: &str = "roles_integrity";
+use crate::roles::{BOOKKEEPER_ROLE, ROLES_INTEGRITY_ZOME_NAME};
 
 #[derive(Clone, PartialEq)]
 #[hdk_entry_helper]

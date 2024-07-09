@@ -1,3 +1,5 @@
+use std::collections::BTreeMap;
+
 use hdi::prelude::*;
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
@@ -6,7 +8,7 @@ pub enum OrderStatus {
     Preparing,
     Open {
         deadline: Timestamp,
-        available_producers: Vec<ActionHash>,
+        available_products_by_producer: BTreeMap<ActionHash, Vec<ActionHash>>,
     },
     Closed {
         household_orders: Vec<ActionHash>,

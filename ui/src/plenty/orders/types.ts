@@ -18,7 +18,7 @@ import { TemplateResult, html } from "lit";
 export type OrdersSignal = ActionCommittedSignal<EntryTypes, LinkTypes>;
 
 export type EntryTypes =
- | ({ type: 'AvailableProducts'; } & AvailableProducts)
+  | ({ type: "AvailableProducts" } & AvailableProducts)
   | ({ type: "ProducerInvoice" } & ProducerInvoice)
   | ({ type: "ProducerDelivery" } & ProducerDelivery)
   | ({ type: "HouseholdOrder" } & HouseholdOrder)
@@ -33,7 +33,7 @@ export type OrderStatus =
   | {
       type: "Open";
       deadline: number;
-      available_producers: ActionHash[];
+      available_products_by_producer: ReadonlyMap<ActionHash, ActionHash[]>;
     }
   | {
       type: "Closed";
@@ -140,11 +140,9 @@ export interface ProducerInvoice {
   invoice: EntryHash;
 }
 
-
-
-export interface AvailableProducts { 
+export interface AvailableProducts {
   order_hash: ActionHash;
-
+  original_producer_hash: ActionHash;
+  latest_producer_hash: ActionHash;
   products: Array<ActionHash>;
 }
-

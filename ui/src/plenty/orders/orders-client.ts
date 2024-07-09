@@ -1,4 +1,4 @@
-import { AvailableProducts } from './types.js';
+import { AvailableProducts } from "./types.js";
 
 import { ProducerInvoice } from "./types.js";
 
@@ -95,6 +95,102 @@ export class OrdersClient extends ZomeClient<OrdersSignal> {
   ): Promise<SignedActionHashed<Delete> | undefined> {
     return this.callZome("get_oldest_delete_for_order", originalOrderHash);
   }
+  /** Available Products */
+
+  async createAvailableProducts(
+    availableProducts: AvailableProducts,
+  ): Promise<EntryRecord<AvailableProducts>> {
+    const record: Record = await this.callZome(
+      "create_available_products",
+      availableProducts,
+    );
+    return new EntryRecord(record);
+  }
+
+  async getLatestAvailableProducts(
+    availableProductsHash: ActionHash,
+  ): Promise<EntryRecord<AvailableProducts> | undefined> {
+    const record: Record = await this.callZome(
+      "get_latest_available_products",
+      availableProductsHash,
+    );
+    return record ? new EntryRecord(record) : undefined;
+  }
+
+  async getOriginalAvailableProducts(
+    availableProductsHash: ActionHash,
+  ): Promise<EntryRecord<AvailableProducts> | undefined> {
+    const record: Record = await this.callZome(
+      "get_original_available_products",
+      availableProductsHash,
+    );
+    return record ? new EntryRecord(record) : undefined;
+  }
+
+  async getAllRevisionsForAvailableProducts(
+    availableProductsHash: ActionHash,
+  ): Promise<Array<EntryRecord<AvailableProducts>>> {
+    const records: Record[] = await this.callZome(
+      "get_all_revisions_for_available_products",
+      availableProductsHash,
+    );
+    return records.map((r) => new EntryRecord(r));
+  }
+
+  async updateAvailableProducts(
+    originalAvailableProductsHash: ActionHash,
+    previousAvailableProductsHash: ActionHash,
+    updatedAvailableProducts: AvailableProducts,
+  ): Promise<EntryRecord<AvailableProducts>> {
+    const record: Record = await this.callZome("update_available_products", {
+      original_available_products_hash: originalAvailableProductsHash,
+      previous_available_products_hash: previousAvailableProductsHash,
+      updated_available_products: updatedAvailableProducts,
+    });
+    return new EntryRecord(record);
+  }
+
+  deleteAvailableProducts(
+    originalAvailableProductsHash: ActionHash,
+  ): Promise<ActionHash> {
+    return this.callZome(
+      "delete_available_products",
+      originalAvailableProductsHash,
+    );
+  }
+
+  getAllDeletesForAvailableProducts(
+    originalAvailableProductsHash: ActionHash,
+  ): Promise<Array<SignedActionHashed<Delete>> | undefined> {
+    return this.callZome(
+      "get_all_deletes_for_available_products",
+      originalAvailableProductsHash,
+    );
+  }
+
+  getOldestDeleteForAvailableProducts(
+    originalAvailableProductsHash: ActionHash,
+  ): Promise<SignedActionHashed<Delete> | undefined> {
+    return this.callZome(
+      "get_oldest_delete_for_available_products",
+      originalAvailableProductsHash,
+    );
+  }
+
+  async getAvailableProductsForOrder(
+    orderHash: ActionHash,
+  ): Promise<Array<Link>> {
+    return this.callZome("get_available_products_for_order", orderHash);
+  }
+
+  async getDeletedAvailableProductsForOrder(
+    orderHash: ActionHash,
+  ): Promise<
+    Array<[SignedActionHashed<CreateLink>, SignedActionHashed<DeleteLink>[]]>
+  > {
+    return this.callZome("get_deleted_available_products_for_order", orderHash);
+  }
+
   /** Household Order */
 
   async createHouseholdOrder(
@@ -388,55 +484,4 @@ export class OrdersClient extends ZomeClient<OrdersSignal> {
   async getAllOrders(): Promise<Array<Link>> {
     return this.callZome("get_all_orders", undefined);
   }
-  /** Available Products */
-
-  async createAvailableProducts(availableProducts: AvailableProducts): Promise<EntryRecord<AvailableProducts>> {
-    const record: Record = await this.callZome('create_available_products', availableProducts);
-    return new EntryRecord(record);
-  }
-  
-  async getLatestAvailableProducts(availableProductsHash: ActionHash): Promise<EntryRecord<AvailableProducts> | undefined> {
-    const record: Record = await this.callZome('get_latest_available_products', availableProductsHash);
-    return record ? new EntryRecord(record) : undefined;
-  }
-
-  async getOriginalAvailableProducts(availableProductsHash: ActionHash): Promise<EntryRecord<AvailableProducts> | undefined> {
-    const record: Record = await this.callZome('get_original_available_products', availableProductsHash);
-    return record ? new EntryRecord(record) : undefined;
-  }
-
-  async getAllRevisionsForAvailableProducts(availableProductsHash: ActionHash): Promise<Array<EntryRecord<AvailableProducts>>> {
-    const records: Record[] = await this.callZome('get_all_revisions_for_available_products', availableProductsHash);
-    return records.map(r => new EntryRecord(r));
-  }
-
-  async updateAvailableProducts(originalAvailableProductsHash: ActionHash, previousAvailableProductsHash: ActionHash, updatedAvailableProducts: AvailableProducts): Promise<EntryRecord<AvailableProducts>> {
-    const record: Record = await this.callZome('update_available_products', {
-      original_available_products_hash: originalAvailableProductsHash,
-      previous_available_products_hash: previousAvailableProductsHash,
-      updated_available_products: updatedAvailableProducts
-    });
-    return new EntryRecord(record);
-  }
-
-  deleteAvailableProducts(originalAvailableProductsHash: ActionHash): Promise<ActionHash> {
-    return this.callZome('delete_available_products', originalAvailableProductsHash);
-  }
-
-  getAllDeletesForAvailableProducts(originalAvailableProductsHash: ActionHash): Promise<Array<SignedActionHashed<Delete>> | undefined> {
-    return this.callZome('get_all_deletes_for_available_products', originalAvailableProductsHash);
-  }
-
-  getOldestDeleteForAvailableProducts(originalAvailableProductsHash: ActionHash): Promise<SignedActionHashed<Delete> | undefined> {
-    return this.callZome('get_oldest_delete_for_available_products', originalAvailableProductsHash);
-  }
-  
-  async getAvailableProductsForOrder(orderHash: ActionHash): Promise<Array<Link>> {
-    return this.callZome('get_available_products_for_order', orderHash);
-  }
-
-  async getDeletedAvailableProductsForOrder(orderHash: ActionHash): Promise<Array<[SignedActionHashed<CreateLink>, SignedActionHashed<DeleteLink>[]]>> {
-    return this.callZome('get_deleted_available_products_for_order', orderHash);
-  }
-
 }
