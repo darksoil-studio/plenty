@@ -51,11 +51,11 @@ export class HomePage extends SignalWatcher(LitElement) {
     },
     {
       path: "producers/*",
-      render: () => html` <producers-page></producers-page> `,
+      render: () => html` <producers-page style="flex: 1"></producers-page> `,
     },
     {
       path: "members/*",
-      render: () => html`<members-page></members-page>`,
+      render: () => html`<members-page style="flex: 1"></members-page>`,
     },
   ]);
 

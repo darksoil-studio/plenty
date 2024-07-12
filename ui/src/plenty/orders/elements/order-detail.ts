@@ -52,6 +52,8 @@ import {
 import { producersStoreContext } from "../../producers/context.js";
 import { ProducersStore } from "../../producers/producers-store.js";
 import { Producer } from "../../producers/types.js";
+import { RolesStore, rolesStoreContext } from "@darksoil-studio/roles";
+import { orderManagerRoleConfig } from "../../../roles.js";
 
 /**
  * @element order-detail
@@ -77,6 +79,12 @@ export class OrderDetail extends SignalWatcher(LitElement) {
    */
   @consume({ context: producersStoreContext, subscribe: true })
   producersStore!: ProducersStore;
+
+  /**
+   * @internal
+   */
+  @consume({ context: rolesStoreContext, subscribe: true })
+  rolesStore!: RolesStore;
 
   /**
    * @internal
@@ -191,6 +199,12 @@ export class OrderDetail extends SignalWatcher(LitElement) {
   }
 
   renderOpenOrderButton(order: EntryRecord<Order>) {
+    const amIOrderManager = this.rolesStore.myRoles.get();
+    if (
+      amIOrderManager.status !== "completed" ||
+      !amIOrderManager.value.includes(orderManagerRoleConfig.role)
+    )
+      return html``;
     const orderBeOpen = this.canOrderBeOpened();
     if (orderBeOpen.status !== "completed" || !orderBeOpen.value.canOrderBeOpen)
       return html``;

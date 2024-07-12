@@ -4,7 +4,7 @@ use households_types::*;
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct ProductOrder {
     pub original_product_hash: ActionHash,
-    pub orderded_product_hash: ActionHash,
+    pub ordered_product_hash: ActionHash,
     pub amount: u32,
 }
 

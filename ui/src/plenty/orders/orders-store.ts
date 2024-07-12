@@ -164,8 +164,10 @@ export class OrdersStore {
   /** Household Order */
 
   householdOrders = new LazyHoloHashMap((householdOrderHash: ActionHash) => ({
-    latestVersion: latestVersionOfEntrySignal(this.client, () =>
-      this.client.getLatestHouseholdOrder(householdOrderHash)
+    latestVersion: latestVersionOfEntrySignal(
+      this.client,
+      () => this.client.getLatestHouseholdOrder(householdOrderHash),
+      3000
     ),
     original: immutableEntrySignal(() =>
       this.client.getOriginalHouseholdOrder(householdOrderHash)
@@ -184,7 +186,8 @@ export class OrdersStore {
         this.client,
         householdHash,
         () => this.client.getHouseholdOrdersForHousehold(householdHash),
-        "HouseholdToHouseholdOrders"
+        "HouseholdToHouseholdOrders",
+        3000
       ),
       (links) =>
         slice(

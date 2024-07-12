@@ -1,5 +1,5 @@
 import { css, LitElement, html, render } from "lit";
-import { repeat } from "lit/directives/repeat.js";
+import { cache } from "lit/directives/cache.js";
 import { state, property, query, customElement } from "lit/decorators.js";
 import {
   ActionHash,
@@ -12,6 +12,7 @@ import {
 import {
   EntryRecord,
   HoloHashMap,
+  LazyHoloHashMap,
   mapValues,
   slice,
 } from "@holochain-open-dev/utils";
@@ -53,13 +54,15 @@ import SlAlert from "@shoelace-style/shoelace/dist/components/alert/alert.js";
 import { appStyles } from "../../../app-styles.js";
 import { OrdersStore } from "../orders-store.js";
 import { ordersStoreContext } from "../context.js";
-import { AvailableProducts, HouseholdOrder } from "../types.js";
+import { AvailableProducts, HouseholdOrder, ProductOrder } from "../types.js";
 import { Household } from "../../households/types.js";
 import { HouseholdsStore } from "../../households/households-store.js";
 import { householdsStoreContext } from "../../households/context.js";
 import { Producer, Product, renderPackaging } from "../../producers/types.js";
 import { ProducersStore } from "../../producers/producers-store.js";
 import { producersStoreContext } from "../../producers/context.js";
+
+const productsRandom = new LazyHoloHashMap(() => Math.random() * 1000);
 
 /**
  * @element my-household-order
@@ -73,12 +76,6 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
    */
   @property(hashProperty("order-hash"))
   orderHash!: ActionHash;
-
-  /**
-   * REQUIRED. The products for this HouseholdOrder
-   */
-  @property()
-  products!: Array<ActionHash>;
 
   /**
    * @internal
@@ -110,44 +107,81 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
   @query("#create-form")
   form!: HTMLFormElement;
 
-  async createHouseholdOrder(
+  productOrdersQueue = new HoloHashMap<ActionHash, ProductOrder>();
+
+  async setHouseholdProductOrder(
     householdHash: ActionHash,
-    fields: Partial<HouseholdOrder>
+    previousOrder: [ActionHash, EntryRecord<HouseholdOrder>] | undefined
   ) {
     if (this.orderHash === undefined)
       throw new Error(
         "Cannot create a new Household Order without its order_hash field"
       );
-    if (this.products === undefined)
-      throw new Error(
-        "Cannot create a new Household Order without its products field"
-      );
-
-    const householdOrder: HouseholdOrder = {
-      order_hash: this.orderHash!,
-      household_hash: householdHash!,
-      products: [], // TODO
-    };
 
     try {
       this.committing = true;
-      const record: EntryRecord<HouseholdOrder> =
-        await this.ordersStore.client.createHouseholdOrder(householdOrder);
 
-      this.dispatchEvent(
-        new CustomEvent("household-order-created", {
-          composed: true,
-          bubbles: true,
-          detail: {
-            householdOrderHash: record.actionHash,
-          },
-        })
-      );
+      if (!previousOrder) {
+        const householdOrder: HouseholdOrder = {
+          household_hash: householdHash,
+          order_hash: this.orderHash,
+          products: Array.from(this.productOrdersQueue.values()),
+        };
+        const record: EntryRecord<HouseholdOrder> =
+          await this.ordersStore.client.createHouseholdOrder(householdOrder);
 
-      this.form.reset();
+        this.dispatchEvent(
+          new CustomEvent("household-order-created", {
+            composed: true,
+            bubbles: true,
+            detail: {
+              householdOrderHash: record.actionHash,
+            },
+          })
+        );
+      } else {
+        const queuedProducts = Array.from(this.productOrdersQueue.values()).map(
+          (p) => encodeHashToBase64(p.original_product_hash)
+        );
+        let products = previousOrder[1].entry.products.filter(
+          (p) =>
+            !queuedProducts.includes(
+              encodeHashToBase64(p.original_product_hash)
+            )
+        );
+        products = [
+          ...products,
+          ...Array.from(this.productOrdersQueue.values()),
+        ];
+        const householdOrder: HouseholdOrder = {
+          order_hash: this.orderHash!,
+          household_hash: householdHash!,
+          products,
+        };
+        const record: EntryRecord<HouseholdOrder> =
+          await this.ordersStore.client.updateHouseholdOrder(
+            previousOrder[0],
+            previousOrder[1].actionHash,
+            householdOrder
+          );
+
+        this.dispatchEvent(
+          new CustomEvent("household-order-created", {
+            composed: true,
+            bubbles: true,
+            detail: {
+              householdOrderHash: record.actionHash,
+            },
+          })
+        );
+      }
     } catch (e: unknown) {
-      console.error(e);
-      notifyError(msg("Error creating the household order"));
+      console.warn(e);
+      // notifyError(msg("Error updating the household order"));
+      setTimeout(
+        () => this.setHouseholdProductOrder(householdHash, previousOrder),
+        100
+      );
     }
     this.committing = false;
   }
@@ -170,6 +204,7 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
   }
 
   renderProducerProducts(
+    myHouseholdHash: ActionHash,
     myHouseholdOrder: [ActionHash, EntryRecord<HouseholdOrder>] | undefined,
     producerHash: ActionHash,
     producer: EntryRecord<Producer>,
@@ -197,6 +232,7 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
               ([productHash, p]) => ({
                 ...p.entry,
                 productHash,
+                actionHash: p.actionHash,
               })
             )}
             style="flex: 1; height: 100%"
@@ -227,7 +263,8 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
             <vaadin-grid-column
               .header=${msg("Share")}
               .renderer=${(root: any, _: any, model: any) => {
-                if (!model.value) model.value = Math.random() * 100;
+                if (!model.value)
+                  model.value = productsRandom.get(model.item.productHash);
 
                 // TODO: actually set the value here
                 render(
@@ -242,24 +279,68 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
             <vaadin-grid-column
               .header=${msg("Order")}
               .renderer=${(root: any, __: any, model: any) => {
-                render(
-                  html`
-                    <sl-input
-                      type="number"
-                      min="0"
-                      .value=${model.order || 0}
-                      @sl-change=${(e: CustomEvent) =>
-                        (model.order = parseInt((e.target as SlInput).value))}
-                    ></sl-input>
-                  `,
-                  root
+                let value = 0;
+                const thisProduct = this.productOrdersQueue.get(
+                  model.item.productHash
                 );
+                if (thisProduct) {
+                  value = thisProduct.amount;
+                } else if (myHouseholdOrder) {
+                  const thisProduct = myHouseholdOrder[1].entry.products.find(
+                    (p) =>
+                      encodeHashToBase64(p.original_product_hash) ===
+                      encodeHashToBase64(model.item.productHash)
+                  );
+                  if (thisProduct) {
+                    value = thisProduct.amount;
+                  }
+                }
+                if (!root.innerHTML.includes("sl-input")) {
+                  if (!this.inputs.has(model.item.productHash)) {
+                    const div = document.createElement("div");
+                    render(
+                      html`
+                        <sl-input
+                          type="number"
+                          style="width: 5rem"
+                          min="0"
+                          .value=${value}
+                          @sl-change=${(e: CustomEvent) => {
+                            const amount = parseInt(
+                              (e.target as SlInput).value
+                            );
+                            this.productOrdersQueue.set(
+                              model.item.productHash,
+                              {
+                                amount,
+                                original_product_hash: model.item.productHash,
+                                ordered_product_hash: model.item.actionHash,
+                              }
+                            );
+                            // setTimeout(() => this.requestUpdate());
+                            this.setHouseholdProductOrder(
+                              myHouseholdHash,
+                              myHouseholdOrder
+                            );
+                          }}
+                        ></sl-input>
+                      `,
+                      div
+                    );
+                    this.inputs.set(model.item.productHash, div);
+                  }
+                  const div = this.inputs.get(model.item.productHash);
+                  (div.firstChild as SlInput).value = value.toString();
+                  root.appendChild(div);
+                }
               }}
             ></vaadin-grid-column>
           </vaadin-grid>
         `;
     }
   }
+
+  inputs = new HoloHashMap<ActionHash, HTMLDivElement>();
 
   renderMyHouseholdOrder(
     householdHash: ActionHash,
@@ -281,6 +362,7 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
             >
             <sl-tab-panel .name=${encodeHashToBase64(producerHash)}
               >${this.renderProducerProducts(
+                householdHash,
                 myHouseholdOrder,
                 producerHash,
                 producer.producer,
@@ -292,14 +374,7 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
       </sl-tab-group>
     </sl-card>`;
     return html` <sl-card style="flex: 1;">
-      <form
-        id="create-form"
-        class="column"
-        style="flex: 1; gap: 16px;"
-        ${onSubmit((fields) =>
-          this.createHouseholdOrder(householdHash, fields)
-        )}
-      >
+      <form id="create-form" class="column" style="flex: 1; gap: 16px;">
         <sl-button variant="primary" type="submit" .loading=${this.committing}
           >${msg("Create Household Order")}</sl-button
         >
