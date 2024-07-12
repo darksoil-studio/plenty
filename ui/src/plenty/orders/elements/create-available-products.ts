@@ -87,11 +87,11 @@ export class CreateAvailableProducts extends SignalWatcher(LitElement) {
   async createAvailableProducts(latestProducerHash: ActionHash, fields: any) {
     if (this.orderHash === undefined)
       throw new Error(
-        "Cannot create a new Available Products without its order_hash field",
+        "Cannot create a new Available Products without its order_hash field"
       );
     if (this.producerHash === undefined)
       throw new Error(
-        "Cannot create a new Available Products without its order_hash field",
+        "Cannot create a new Available Products without its order_hash field"
       );
 
     const available_products: Array<ActionHash> = Object.entries(fields)
@@ -118,7 +118,7 @@ export class CreateAvailableProducts extends SignalWatcher(LitElement) {
       this.committing = true;
       const record: EntryRecord<AvailableProducts> =
         await this.ordersStore.client.createAvailableProducts(
-          availableProducts,
+          availableProducts
         );
 
       this.dispatchEvent(
@@ -128,10 +128,8 @@ export class CreateAvailableProducts extends SignalWatcher(LitElement) {
           detail: {
             availableProductsHash: record.actionHash,
           },
-        }),
+        })
       );
-
-      this.form.reset();
     } catch (e: unknown) {
       console.error(e);
       notifyError(msg("Error creating the available products"));
@@ -150,7 +148,7 @@ export class CreateAvailableProducts extends SignalWatcher(LitElement) {
 
   renderProducts(
     producer: EntryRecord<Producer>,
-    map: ReadonlyMap<ActionHash, EntryRecord<Product>>,
+    map: ReadonlyMap<ActionHash, EntryRecord<Product>>
   ) {
     if (map.size === 0)
       return html` <div
@@ -166,14 +164,16 @@ export class CreateAvailableProducts extends SignalWatcher(LitElement) {
         >
         <span class="placeholder"
           >${msg(
-            "Create products for this producer to be able to set its availability.",
+            "Create products for this producer to be able to set its availability."
           )}</span
         >
       </div>`;
 
     return html`
       <form id="create-form" class="column" style="flex: 1; gap: 16px;"
-      ${onSubmit((fields) => this.createAvailableProducts(producer.actionHash, fields))}>
+      ${onSubmit((fields) =>
+        this.createAvailableProducts(producer.actionHash, fields)
+      )}>
         <span class="title" style="margin-bottom: 8px"
           >${msg("Set Available Products")}</span
         >
@@ -236,12 +236,14 @@ export class CreateAvailableProducts extends SignalWatcher(LitElement) {
                     checked
                   ></sl-checkbox>
                 </div>`,
-                root,
+                root
               );
             }}
           ></vaadin-grid-column>
         </vaadin-grid>
-        <sl-button style="align-self: end" variant="primary" type="submit" .loading=${this.committing}
+        <sl-button style="align-self: end" variant="primary" type="submit" .loading=${
+          this.committing
+        }
           >${msg("Set Available Products")}</sl-button
         >
       </div>
@@ -264,7 +266,7 @@ export class CreateAvailableProducts extends SignalWatcher(LitElement) {
       return producerLatestVersion;
 
     const latestVersion = joinAsyncMap(
-      mapValues(map.value, (p) => p.latestVersion.get()),
+      mapValues(map.value, (p) => p.latestVersion.get())
     );
     if (latestVersion.status !== "completed") return latestVersion;
 
@@ -322,19 +324,19 @@ export class CreateAvailableProducts extends SignalWatcher(LitElement) {
                 this.producerAvailable = (e.target as SlCheckbox).checked;
               }}
               >${msg(
-                str`Producer is available for the ${products.value.order.entry.name} order`,
+                str`Producer is available for the ${products.value.order.entry.name} order`
               )}</sl-checkbox
             >
 
             <span class="title"
               >${msg(
-                str`Available Products for the "${products.value.order.entry.name}" order`,
+                str`Available Products for the "${products.value.order.entry.name}" order`
               )}</span
             >
             <sl-card>
               ${this.renderProducts(
                 products.value.producer,
-                products.value.products,
+                products.value.products
               )}
             </sl-card>
           </div>

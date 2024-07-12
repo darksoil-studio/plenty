@@ -32,7 +32,7 @@ export class OrdersClient extends ZomeClient<OrdersSignal> {
   constructor(
     public client: AppClient,
     public roleName: string,
-    public zomeName = "orders",
+    public zomeName = "orders"
   ) {
     super(client, roleName, zomeName);
   }
@@ -44,25 +44,25 @@ export class OrdersClient extends ZomeClient<OrdersSignal> {
   }
 
   async getLatestOrder(
-    orderHash: ActionHash,
+    orderHash: ActionHash
   ): Promise<EntryRecord<Order> | undefined> {
     const record: Record = await this.callZome("get_latest_order", orderHash);
     return record ? new EntryRecord(record) : undefined;
   }
 
   async getOriginalOrder(
-    orderHash: ActionHash,
+    orderHash: ActionHash
   ): Promise<EntryRecord<Order> | undefined> {
     const record: Record = await this.callZome("get_original_order", orderHash);
     return record ? new EntryRecord(record) : undefined;
   }
 
   async getAllRevisionsForOrder(
-    orderHash: ActionHash,
+    orderHash: ActionHash
   ): Promise<Array<EntryRecord<Order>>> {
     const records: Record[] = await this.callZome(
       "get_all_revisions_for_order",
-      orderHash,
+      orderHash
     );
     return records.map((r) => new EntryRecord(r));
   }
@@ -70,7 +70,7 @@ export class OrdersClient extends ZomeClient<OrdersSignal> {
   async updateOrder(
     originalOrderHash: ActionHash,
     previousOrderHash: ActionHash,
-    updatedOrder: Order,
+    updatedOrder: Order
   ): Promise<EntryRecord<Order>> {
     const record: Record = await this.callZome("update_order", {
       original_order_hash: originalOrderHash,
@@ -85,54 +85,54 @@ export class OrdersClient extends ZomeClient<OrdersSignal> {
   }
 
   getAllDeletesForOrder(
-    originalOrderHash: ActionHash,
+    originalOrderHash: ActionHash
   ): Promise<Array<SignedActionHashed<Delete>> | undefined> {
     return this.callZome("get_all_deletes_for_order", originalOrderHash);
   }
 
   getOldestDeleteForOrder(
-    originalOrderHash: ActionHash,
+    originalOrderHash: ActionHash
   ): Promise<SignedActionHashed<Delete> | undefined> {
     return this.callZome("get_oldest_delete_for_order", originalOrderHash);
   }
   /** Available Products */
 
   async createAvailableProducts(
-    availableProducts: AvailableProducts,
+    availableProducts: AvailableProducts
   ): Promise<EntryRecord<AvailableProducts>> {
     const record: Record = await this.callZome(
       "create_available_products",
-      availableProducts,
+      availableProducts
     );
     return new EntryRecord(record);
   }
 
   async getLatestAvailableProducts(
-    availableProductsHash: ActionHash,
+    availableProductsHash: ActionHash
   ): Promise<EntryRecord<AvailableProducts> | undefined> {
     const record: Record = await this.callZome(
       "get_latest_available_products",
-      availableProductsHash,
+      availableProductsHash
     );
     return record ? new EntryRecord(record) : undefined;
   }
 
   async getOriginalAvailableProducts(
-    availableProductsHash: ActionHash,
+    availableProductsHash: ActionHash
   ): Promise<EntryRecord<AvailableProducts> | undefined> {
     const record: Record = await this.callZome(
       "get_original_available_products",
-      availableProductsHash,
+      availableProductsHash
     );
     return record ? new EntryRecord(record) : undefined;
   }
 
   async getAllRevisionsForAvailableProducts(
-    availableProductsHash: ActionHash,
+    availableProductsHash: ActionHash
   ): Promise<Array<EntryRecord<AvailableProducts>>> {
     const records: Record[] = await this.callZome(
       "get_all_revisions_for_available_products",
-      availableProductsHash,
+      availableProductsHash
     );
     return records.map((r) => new EntryRecord(r));
   }
@@ -140,7 +140,7 @@ export class OrdersClient extends ZomeClient<OrdersSignal> {
   async updateAvailableProducts(
     originalAvailableProductsHash: ActionHash,
     previousAvailableProductsHash: ActionHash,
-    updatedAvailableProducts: AvailableProducts,
+    updatedAvailableProducts: AvailableProducts
   ): Promise<EntryRecord<AvailableProducts>> {
     const record: Record = await this.callZome("update_available_products", {
       original_available_products_hash: originalAvailableProductsHash,
@@ -151,40 +151,40 @@ export class OrdersClient extends ZomeClient<OrdersSignal> {
   }
 
   deleteAvailableProducts(
-    originalAvailableProductsHash: ActionHash,
+    originalAvailableProductsHash: ActionHash
   ): Promise<ActionHash> {
     return this.callZome(
       "delete_available_products",
-      originalAvailableProductsHash,
+      originalAvailableProductsHash
     );
   }
 
   getAllDeletesForAvailableProducts(
-    originalAvailableProductsHash: ActionHash,
+    originalAvailableProductsHash: ActionHash
   ): Promise<Array<SignedActionHashed<Delete>> | undefined> {
     return this.callZome(
       "get_all_deletes_for_available_products",
-      originalAvailableProductsHash,
+      originalAvailableProductsHash
     );
   }
 
   getOldestDeleteForAvailableProducts(
-    originalAvailableProductsHash: ActionHash,
+    originalAvailableProductsHash: ActionHash
   ): Promise<SignedActionHashed<Delete> | undefined> {
     return this.callZome(
       "get_oldest_delete_for_available_products",
-      originalAvailableProductsHash,
+      originalAvailableProductsHash
     );
   }
 
   async getAvailableProductsForOrder(
-    orderHash: ActionHash,
+    orderHash: ActionHash
   ): Promise<Array<Link>> {
     return this.callZome("get_available_products_for_order", orderHash);
   }
 
   async getDeletedAvailableProductsForOrder(
-    orderHash: ActionHash,
+    orderHash: ActionHash
   ): Promise<
     Array<[SignedActionHashed<CreateLink>, SignedActionHashed<DeleteLink>[]]>
   > {
@@ -194,41 +194,41 @@ export class OrdersClient extends ZomeClient<OrdersSignal> {
   /** Household Order */
 
   async createHouseholdOrder(
-    householdOrder: HouseholdOrder,
+    householdOrder: HouseholdOrder
   ): Promise<EntryRecord<HouseholdOrder>> {
     const record: Record = await this.callZome(
       "create_household_order",
-      householdOrder,
+      householdOrder
     );
     return new EntryRecord(record);
   }
 
   async getLatestHouseholdOrder(
-    householdOrderHash: ActionHash,
+    householdOrderHash: ActionHash
   ): Promise<EntryRecord<HouseholdOrder> | undefined> {
     const record: Record = await this.callZome(
       "get_latest_household_order",
-      householdOrderHash,
+      householdOrderHash
     );
     return record ? new EntryRecord(record) : undefined;
   }
 
   async getOriginalHouseholdOrder(
-    householdOrderHash: ActionHash,
+    householdOrderHash: ActionHash
   ): Promise<EntryRecord<HouseholdOrder> | undefined> {
     const record: Record = await this.callZome(
       "get_original_household_order",
-      householdOrderHash,
+      householdOrderHash
     );
     return record ? new EntryRecord(record) : undefined;
   }
 
   async getAllRevisionsForHouseholdOrder(
-    householdOrderHash: ActionHash,
+    householdOrderHash: ActionHash
   ): Promise<Array<EntryRecord<HouseholdOrder>>> {
     const records: Record[] = await this.callZome(
       "get_all_revisions_for_household_order",
-      householdOrderHash,
+      householdOrderHash
     );
     return records.map((r) => new EntryRecord(r));
   }
@@ -236,7 +236,7 @@ export class OrdersClient extends ZomeClient<OrdersSignal> {
   async updateHouseholdOrder(
     originalHouseholdOrderHash: ActionHash,
     previousHouseholdOrderHash: ActionHash,
-    updatedHouseholdOrder: HouseholdOrder,
+    updatedHouseholdOrder: HouseholdOrder
   ): Promise<EntryRecord<HouseholdOrder>> {
     const record: Record = await this.callZome("update_household_order", {
       original_household_order_hash: originalHouseholdOrderHash,
@@ -247,43 +247,43 @@ export class OrdersClient extends ZomeClient<OrdersSignal> {
   }
 
   deleteHouseholdOrder(
-    originalHouseholdOrderHash: ActionHash,
+    originalHouseholdOrderHash: ActionHash
   ): Promise<ActionHash> {
     return this.callZome("delete_household_order", originalHouseholdOrderHash);
   }
 
   getAllDeletesForHouseholdOrder(
-    originalHouseholdOrderHash: ActionHash,
+    originalHouseholdOrderHash: ActionHash
   ): Promise<Array<SignedActionHashed<Delete>> | undefined> {
     return this.callZome(
       "get_all_deletes_for_household_order",
-      originalHouseholdOrderHash,
+      originalHouseholdOrderHash
     );
   }
 
   getOldestDeleteForHouseholdOrder(
-    originalHouseholdOrderHash: ActionHash,
+    originalHouseholdOrderHash: ActionHash
   ): Promise<SignedActionHashed<Delete> | undefined> {
     return this.callZome(
       "get_oldest_delete_for_household_order",
-      originalHouseholdOrderHash,
+      originalHouseholdOrderHash
     );
   }
 
   async getHouseholdOrdersForOrder(
-    orderHash: ActionHash,
+    orderHash: ActionHash
   ): Promise<Array<Link>> {
     return this.callZome("get_household_orders_for_order", orderHash);
   }
 
   async getHouseholdOrdersForHousehold(
-    householdHash: ActionHash,
+    householdHash: ActionHash
   ): Promise<Array<Link>> {
     return this.callZome("get_household_orders_for_household", householdHash);
   }
 
   async getDeletedHouseholdOrdersForOrder(
-    orderHash: ActionHash,
+    orderHash: ActionHash
   ): Promise<
     Array<[SignedActionHashed<CreateLink>, SignedActionHashed<DeleteLink>[]]>
   > {
@@ -292,48 +292,48 @@ export class OrdersClient extends ZomeClient<OrdersSignal> {
   /** Producer Delivery */
 
   async createProducerDelivery(
-    producerDelivery: ProducerDelivery,
+    producerDelivery: ProducerDelivery
   ): Promise<EntryRecord<ProducerDelivery>> {
     const record: Record = await this.callZome(
       "create_producer_delivery",
-      producerDelivery,
+      producerDelivery
     );
     return new EntryRecord(record);
   }
 
   async getLatestProducerDelivery(
-    producerDeliveryHash: ActionHash,
+    producerDeliveryHash: ActionHash
   ): Promise<EntryRecord<ProducerDelivery> | undefined> {
     const record: Record = await this.callZome(
       "get_latest_producer_delivery",
-      producerDeliveryHash,
+      producerDeliveryHash
     );
     return record ? new EntryRecord(record) : undefined;
   }
 
   async getOriginalProducerDelivery(
-    producerDeliveryHash: ActionHash,
+    producerDeliveryHash: ActionHash
   ): Promise<EntryRecord<ProducerDelivery> | undefined> {
     const record: Record = await this.callZome(
       "get_original_producer_delivery",
-      producerDeliveryHash,
+      producerDeliveryHash
     );
     return record ? new EntryRecord(record) : undefined;
   }
 
   async getAllRevisionsForProducerDelivery(
-    producerDeliveryHash: ActionHash,
+    producerDeliveryHash: ActionHash
   ): Promise<Array<EntryRecord<ProducerDelivery>>> {
     const records: Record[] = await this.callZome(
       "get_all_revisions_for_producer_delivery",
-      producerDeliveryHash,
+      producerDeliveryHash
     );
     return records.map((r) => new EntryRecord(r));
   }
 
   async updateProducerDelivery(
     previousProducerDeliveryHash: ActionHash,
-    updatedProducerDelivery: ProducerDelivery,
+    updatedProducerDelivery: ProducerDelivery
   ): Promise<EntryRecord<ProducerDelivery>> {
     const record: Record = await this.callZome("update_producer_delivery", {
       previous_producer_delivery_hash: previousProducerDeliveryHash,
@@ -343,93 +343,93 @@ export class OrdersClient extends ZomeClient<OrdersSignal> {
   }
 
   deleteProducerDelivery(
-    originalProducerDeliveryHash: ActionHash,
+    originalProducerDeliveryHash: ActionHash
   ): Promise<ActionHash> {
     return this.callZome(
       "delete_producer_delivery",
-      originalProducerDeliveryHash,
+      originalProducerDeliveryHash
     );
   }
 
   getAllDeletesForProducerDelivery(
-    originalProducerDeliveryHash: ActionHash,
+    originalProducerDeliveryHash: ActionHash
   ): Promise<Array<SignedActionHashed<Delete>> | undefined> {
     return this.callZome(
       "get_all_deletes_for_producer_delivery",
-      originalProducerDeliveryHash,
+      originalProducerDeliveryHash
     );
   }
 
   getOldestDeleteForProducerDelivery(
-    originalProducerDeliveryHash: ActionHash,
+    originalProducerDeliveryHash: ActionHash
   ): Promise<SignedActionHashed<Delete> | undefined> {
     return this.callZome(
       "get_oldest_delete_for_producer_delivery",
-      originalProducerDeliveryHash,
+      originalProducerDeliveryHash
     );
   }
 
   async getProducerDeliveriesForOrder(
-    orderHash: ActionHash,
+    orderHash: ActionHash
   ): Promise<Array<Link>> {
     return this.callZome("get_producer_deliveries_for_order", orderHash);
   }
 
   async getDeletedProducerDeliveriesForOrder(
-    orderHash: ActionHash,
+    orderHash: ActionHash
   ): Promise<
     Array<[SignedActionHashed<CreateLink>, SignedActionHashed<DeleteLink>[]]>
   > {
     return this.callZome(
       "get_deleted_producer_deliveries_for_order",
-      orderHash,
+      orderHash
     );
   }
   /** Producer Invoice */
 
   async createProducerInvoice(
-    producerInvoice: ProducerInvoice,
+    producerInvoice: ProducerInvoice
   ): Promise<EntryRecord<ProducerInvoice>> {
     const record: Record = await this.callZome(
       "create_producer_invoice",
-      producerInvoice,
+      producerInvoice
     );
     return new EntryRecord(record);
   }
 
   async getLatestProducerInvoice(
-    producerInvoiceHash: ActionHash,
+    producerInvoiceHash: ActionHash
   ): Promise<EntryRecord<ProducerInvoice> | undefined> {
     const record: Record = await this.callZome(
       "get_latest_producer_invoice",
-      producerInvoiceHash,
+      producerInvoiceHash
     );
     return record ? new EntryRecord(record) : undefined;
   }
 
   async getOriginalProducerInvoice(
-    producerInvoiceHash: ActionHash,
+    producerInvoiceHash: ActionHash
   ): Promise<EntryRecord<ProducerInvoice> | undefined> {
     const record: Record = await this.callZome(
       "get_original_producer_invoice",
-      producerInvoiceHash,
+      producerInvoiceHash
     );
     return record ? new EntryRecord(record) : undefined;
   }
 
   async getAllRevisionsForProducerInvoice(
-    producerInvoiceHash: ActionHash,
+    producerInvoiceHash: ActionHash
   ): Promise<Array<EntryRecord<ProducerInvoice>>> {
     const records: Record[] = await this.callZome(
       "get_all_revisions_for_producer_invoice",
-      producerInvoiceHash,
+      producerInvoiceHash
     );
     return records.map((r) => new EntryRecord(r));
   }
 
   async updateProducerInvoice(
     previousProducerInvoiceHash: ActionHash,
-    updatedProducerInvoice: ProducerInvoice,
+    updatedProducerInvoice: ProducerInvoice
   ): Promise<EntryRecord<ProducerInvoice>> {
     const record: Record = await this.callZome("update_producer_invoice", {
       previous_producer_invoice_hash: previousProducerInvoiceHash,
@@ -439,40 +439,40 @@ export class OrdersClient extends ZomeClient<OrdersSignal> {
   }
 
   deleteProducerInvoice(
-    originalProducerInvoiceHash: ActionHash,
+    originalProducerInvoiceHash: ActionHash
   ): Promise<ActionHash> {
     return this.callZome(
       "delete_producer_invoice",
-      originalProducerInvoiceHash,
+      originalProducerInvoiceHash
     );
   }
 
   getAllDeletesForProducerInvoice(
-    originalProducerInvoiceHash: ActionHash,
+    originalProducerInvoiceHash: ActionHash
   ): Promise<Array<SignedActionHashed<Delete>> | undefined> {
     return this.callZome(
       "get_all_deletes_for_producer_invoice",
-      originalProducerInvoiceHash,
+      originalProducerInvoiceHash
     );
   }
 
   getOldestDeleteForProducerInvoice(
-    originalProducerInvoiceHash: ActionHash,
+    originalProducerInvoiceHash: ActionHash
   ): Promise<SignedActionHashed<Delete> | undefined> {
     return this.callZome(
       "get_oldest_delete_for_producer_invoice",
-      originalProducerInvoiceHash,
+      originalProducerInvoiceHash
     );
   }
 
   async getProducerInvoicesForOrder(
-    orderHash: ActionHash,
+    orderHash: ActionHash
   ): Promise<Array<Link>> {
     return this.callZome("get_producer_invoices_for_order", orderHash);
   }
 
   async getDeletedProducerInvoicesForOrder(
-    orderHash: ActionHash,
+    orderHash: ActionHash
   ): Promise<
     Array<[SignedActionHashed<CreateLink>, SignedActionHashed<DeleteLink>[]]>
   > {

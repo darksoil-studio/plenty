@@ -47,7 +47,7 @@ export class HomePage extends SignalWatcher(LitElement) {
     },
     {
       path: "orders/*",
-      render: () => html` <orders-page></orders-page> `,
+      render: () => html` <orders-page style="flex: 1"></orders-page> `,
     },
     {
       path: "producers/*",

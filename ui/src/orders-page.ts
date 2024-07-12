@@ -1,5 +1,5 @@
 import { AsyncResult, SignalWatcher, pipe } from "@holochain-open-dev/signals";
-import { LitElement, html } from "lit";
+import { css, LitElement, html } from "lit";
 import { customElement } from "lit/decorators.js";
 import { consume } from "@lit/context";
 import "@shoelace-style/shoelace/dist/components/button/button.js";
@@ -90,13 +90,13 @@ export class ProducersPage extends SignalWatcher(LitElement) {
       nameSignal: (params) =>
         pipe(
           this.ordersStore.orders.get(
-            decodeHashFromBase64(params.orderHash as ActionHashB64),
+            decodeHashFromBase64(params.orderHash as ActionHashB64)
           ).latestVersion,
-          (order) => order.entry.name,
+          (order) => order.entry.name
         ),
       render: (params) =>
         this.renderOrder(
-          decodeHashFromBase64(params.orderHash as ActionHashB64),
+          decodeHashFromBase64(params.orderHash as ActionHashB64)
         ),
     },
     {
@@ -110,7 +110,7 @@ export class ProducersPage extends SignalWatcher(LitElement) {
         >
           <edit-order
             .orderHash=${decodeHashFromBase64(
-              params.orderHash as ActionHashB64,
+              params.orderHash as ActionHashB64
             )}
             @edit-canceled=${() => this.routes.pop()}
             @order-updated=${(e: CustomEvent) => {
@@ -139,10 +139,10 @@ export class ProducersPage extends SignalWatcher(LitElement) {
           <create-available-products
             style="width: 70rem"
             .orderHash=${decodeHashFromBase64(
-              params.orderHash as ActionHashB64,
+              params.orderHash as ActionHashB64
             )}
             .producerHash=${decodeHashFromBase64(
-              params.producerHash as ActionHashB64,
+              params.producerHash as ActionHashB64
             )}
             @edit-canceled=${() => this.routes.pop()}
             @available-products-created=${(e: CustomEvent) => {
@@ -164,7 +164,7 @@ export class ProducersPage extends SignalWatcher(LitElement) {
           <edit-available-products
             style="width: 70rem"
             .availableProductsHash=${decodeHashFromBase64(
-              params.availableProductsHash as ActionHashB64,
+              params.availableProductsHash as ActionHashB64
             )}
             @edit-canceled=${() => this.routes.pop()}
             @available-products-updated=${(e: CustomEvent) => {
@@ -190,24 +190,26 @@ export class ProducersPage extends SignalWatcher(LitElement) {
 
       case "completed":
         return html`
-          <div class="column" style="align-items: center">
-            <div class="column" style="gap: 16px; width: 1000px;">
-              <div class="row" style="align-items: center; gap: 12px; flex: 1">
-                <order-detail
-                  style="flex: 1"
-                  .orderHash=${orderHash}
-                  @set-available-products-requested=${(e: CustomEvent) =>
-                    this.routes.goto(
-                      `${encodeHashToBase64(orderHash)}/available-products/${encodeHashToBase64(e.detail.producerHash)}/create`,
-                    )}
-                  @edit-available-products-requested=${(e: CustomEvent) =>
-                    this.routes.goto(
-                      `${encodeHashToBase64(orderHash)}/available-products/${encodeHashToBase64(e.detail.availableProductsHash)}/edit`,
-                    )}
-                ></order-detail>
-              </div>
-            </div>
-          </div>
+          <order-detail
+            style="flex: 1"
+            .orderHash=${orderHash}
+            @set-available-products-requested=${(e: CustomEvent) =>
+              this.routes.goto(
+                `${encodeHashToBase64(
+                  orderHash
+                )}/available-products/${encodeHashToBase64(
+                  e.detail.producerHash
+                )}/create`
+              )}
+            @edit-available-products-requested=${(e: CustomEvent) =>
+              this.routes.goto(
+                `${encodeHashToBase64(
+                  orderHash
+                )}/available-products/${encodeHashToBase64(
+                  e.detail.availableProductsHash
+                )}/edit`
+              )}
+          ></order-detail>
         `;
     }
   }
@@ -227,7 +229,7 @@ export class ProducersPage extends SignalWatcher(LitElement) {
   render() {
     const showCreateOrderButton = this.canICreateOrders();
     return html`
-      <div class="column" style="margin: 12px 0">
+      <div class="column" style="margin: 12px 0; flex: 1">
         <div class="row" style="align-items: center; height: 38px">
           <span class="title">${msg("Orders")}</span>
           <routes-breadcrumbs
@@ -251,5 +253,13 @@ export class ProducersPage extends SignalWatcher(LitElement) {
     `;
   }
 
-  static styles = [...appStyles];
+  static styles = [
+    ...appStyles,
+    css`
+      :host {
+        display: flex;
+        flex: 1;
+      }
+    `,
+  ];
 }

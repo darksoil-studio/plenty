@@ -28,9 +28,13 @@ jobs:
         with:
           name: holochain-open-dev
 
+      - uses: cachix/cachix-action@v14
+        with:
+          name: darksoil-studio
+
       - name: Install and Build 🔧 
         run: |
-          nix develop github:holochain-open-dev/infrastructure#synchronized-pnpm --command bash -c "pnpm install && pnpm -F site build"
+          nix develop --accept-flake-config --command bash -c "pnpm install && pnpm -F site build"
 
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4.3.3

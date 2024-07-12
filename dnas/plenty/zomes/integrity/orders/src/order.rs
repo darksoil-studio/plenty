@@ -1,6 +1,7 @@
-use std::collections::BTreeMap;
-
 use hdi::prelude::*;
+use roles_types::validate_agent_had_undeleted_role_claim_at_the_time;
+
+use crate::roles::{ORDER_MANAGER, ROLES_INTEGRITY_ZOME_NAME};
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[serde(tag = "type")]
@@ -8,7 +9,7 @@ pub enum OrderStatus {
     Preparing,
     Open {
         deadline: Timestamp,
-        available_products_by_producer: BTreeMap<ActionHash, Vec<ActionHash>>,
+        available_products: Vec<ActionHash>,
     },
     Closed {
         household_orders: Vec<ActionHash>,
@@ -30,9 +31,19 @@ pub struct Order {
 }
 
 pub fn validate_create_order(
-    _action: EntryCreationAction,
+    action_hash: &ActionHash,
+    action: EntryCreationAction,
     _order: Order,
 ) -> ExternResult<ValidateCallbackResult> {
+    let validate = validate_agent_had_undeleted_role_claim_at_the_time(
+        action.author(),
+        action_hash,
+        &String::from(ORDER_MANAGER),
+        &ZomeName::from(ROLES_INTEGRITY_ZOME_NAME),
+    )?;
+    let ValidateCallbackResult::Valid = validate else {
+        return Ok(validate);
+    };
     Ok(ValidateCallbackResult::Valid)
 }
 

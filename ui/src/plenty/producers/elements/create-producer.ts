@@ -65,6 +65,10 @@ export class CreateProducer extends SignalWatcher(LitElement) {
   @query("#create-form")
   form!: HTMLFormElement;
 
+  firstUpdated() {
+    setTimeout(() => this.form.reset());
+  }
+
   async createProducer(fields: Partial<Producer>) {
     const producer: Producer = {
       name: fields.name!,
@@ -89,7 +93,7 @@ export class CreateProducer extends SignalWatcher(LitElement) {
           detail: {
             producerHash: record.actionHash,
           },
-        }),
+        })
       );
 
       this.form.reset();
@@ -158,6 +162,7 @@ export class CreateProducer extends SignalWatcher(LitElement) {
                 name="editors"
                 .label=${msg("Product Editors")}
                 required
+                .defaultValue=${msg("Liason")}
               >
                 <sl-option value="Liason">${msg("Liason")}</sl-option>
                 <sl-option value="AllMembers">${msg("All Members")}</sl-option>

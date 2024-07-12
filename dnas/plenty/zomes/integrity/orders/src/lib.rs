@@ -69,9 +69,11 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
     match op.flattened::<EntryTypes, LinkTypes>()? {
         FlatOp::StoreEntry(store_entry) => match store_entry {
             OpEntry::CreateEntry { app_entry, action } => match app_entry {
-                EntryTypes::Order(order) => {
-                    validate_create_order(EntryCreationAction::Create(action), order)
-                }
+                EntryTypes::Order(order) => validate_create_order(
+                    action_hash(&op),
+                    EntryCreationAction::Create(action),
+                    order,
+                ),
                 EntryTypes::HouseholdOrder(household_order) => validate_create_household_order(
                     action_hash(&op).clone(),
                     EntryCreationAction::Create(action),
@@ -99,9 +101,11 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
             OpEntry::UpdateEntry {
                 app_entry, action, ..
             } => match app_entry {
-                EntryTypes::Order(order) => {
-                    validate_create_order(EntryCreationAction::Update(action), order)
-                }
+                EntryTypes::Order(order) => validate_create_order(
+                    action_hash(&op),
+                    EntryCreationAction::Update(action),
+                    order,
+                ),
                 EntryTypes::HouseholdOrder(household_order) => validate_create_household_order(
                     action_hash(&op).clone(),
                     EntryCreationAction::Update(action),
@@ -505,9 +509,11 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
         },
         FlatOp::StoreRecord(store_record) => match store_record {
             OpRecord::CreateEntry { app_entry, action } => match app_entry {
-                EntryTypes::Order(order) => {
-                    validate_create_order(EntryCreationAction::Create(action), order)
-                }
+                EntryTypes::Order(order) => validate_create_order(
+                    action_hash(&op),
+                    EntryCreationAction::Create(action),
+                    order,
+                ),
                 EntryTypes::HouseholdOrder(household_order) => validate_create_household_order(
                     action_hash(&op).clone(),
                     EntryCreationAction::Create(action),
@@ -553,6 +559,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 match app_entry {
                     EntryTypes::Order(order) => {
                         let result = validate_create_order(
+                            action_hash(&op),
                             EntryCreationAction::Update(action.clone()),
                             order.clone(),
                         )?;

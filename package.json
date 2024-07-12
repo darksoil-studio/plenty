@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "UI_PORT=8888 concurrently -k \"nix run .#network\" \"pnpm -F ui start\"",
+    "start": "UI_PORT=8888 concurrently -k \"nix run -L .#network\" \"pnpm -F ui start\"",
     "network:mobile": "pnpm happ:build-debug && BOOTSTRAP_PORT=$(port) SIGNAL_PORT=$(port) INTERNAL_IP=$(internal-ip --ipv4) concurrently -k \"pnpm local-services\" \"pnpm -F ui start\" \"pnpm tauri ios dev\" \"pnpm tauri dev\"",
     "network:android": "pnpm happ:build-debug && BOOTSTRAP_PORT=$(port) SIGNAL_PORT=$(port) INTERNAL_IP=$(internal-ip --ipv4) concurrently -k \"pnpm local-services\" \"pnpm -F ui start\" \"pnpm tauri dev\" \"pnpm tauri android dev\"",
     "launch": "concurrently-repeat \"pnpm tauri dev --no-watch\" $AGENTS",

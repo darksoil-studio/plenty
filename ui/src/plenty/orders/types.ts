@@ -10,6 +10,7 @@ import {
   Delete,
   CreateLink,
   DeleteLink,
+  ActionHashB64,
 } from "@holochain/client";
 import { ActionCommittedSignal, HoloHashMap } from "@holochain-open-dev/utils";
 import { msg } from "@lit/localize";
@@ -33,7 +34,7 @@ export type OrderStatus =
   | {
       type: "Open";
       deadline: number;
-      available_products_by_producer: ReadonlyMap<ActionHash, ActionHash[]>;
+      available_products: ActionHash[];
     }
   | {
       type: "Closed";
