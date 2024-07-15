@@ -103,8 +103,10 @@ export class SlCombobox extends LitElement implements FormField {
   }
 
   addValue() {
-    if (!(this.noRepeatedValues && this.value.includes(this.input.value))) {
-      this.value = [...this.value, this.input.value];
+    if (this.input.value === "") return;
+    const newValue = this.input.value.trim();
+    if (!(this.noRepeatedValues && this.value.includes(newValue))) {
+      this.value = [...this.value, newValue];
     }
     this.input.value = "";
   }
@@ -135,7 +137,10 @@ export class SlCombobox extends LitElement implements FormField {
             }
           }}
           @keydown=${(e: KeyboardEvent) => {
-            if (e.key === "Enter" && this.input.value.length > 0) {
+            if (
+              (e.key === "Enter" || e.key === " ") &&
+              this.input.value.length > 0
+            ) {
               e.stopPropagation();
               this.addValue();
             } else if (e.key === "Backspace" && this.input.value.length === 0) {

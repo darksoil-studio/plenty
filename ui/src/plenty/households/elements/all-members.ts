@@ -55,7 +55,7 @@ export class AllMembers extends SignalWatcher(LitElement) {
         <div class="column" style="flex: 1; gap: 16px">
           ${members.map(
             (member) =>
-              html` <div class="row" style="align-items: center">
+              html` <div class="row" style="align-items: center; gap: 12px">
                 <profile-list-item .agentPubKey=${member}></profile-list-item>
                 <span style="flex: 1"></span>
 
