@@ -37,6 +37,8 @@ import {
   mdiInformationOutline,
 } from "@mdi/js";
 import { SlInput, SlTabGroup } from "@shoelace-style/shoelace";
+import { RolesStore, rolesStoreContext } from "@darksoil-studio/roles";
+import { GridDataProviderCallback } from "@vaadin/grid/vaadin-grid.js";
 
 import "@holochain-open-dev/elements/dist/elements/display-error.js";
 import "@shoelace-style/shoelace/dist/components/alert/alert.js";
@@ -57,6 +59,8 @@ import "@shoelace-style/shoelace/dist/components/tab-group/tab-group.js";
 import "@shoelace-style/shoelace/dist/components/tab-panel/tab-panel.js";
 import SlAlert from "@shoelace-style/shoelace/dist/components/alert/alert.js";
 
+import "./households-orders-summary.js";
+
 import { appStyles } from "../../../app-styles.js";
 import { OrdersStore } from "../orders-store.js";
 import { ordersStoreContext } from "../context.js";
@@ -68,9 +72,7 @@ import { Producer, Product, renderPackaging } from "../../producers/types.js";
 import { ProducersStore } from "../../producers/producers-store.js";
 import { producersStoreContext } from "../../producers/context.js";
 import { sleep } from "../../../utils.js";
-import { RolesStore, rolesStoreContext } from "@darksoil-studio/roles";
 import { orderManagerRoleConfig } from "../../../roles.js";
-import { GridDataProviderCallback } from "@vaadin/grid/vaadin-grid.js";
 
 const productsRandom = new LazyHoloHashMap(() => Math.random() * 1000);
 
@@ -350,7 +352,7 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
   }
 
   renderOrderSummary() {
-    return html``;
+    return html`<households-orders-summary style="flex: 1" .orderHash=${this.orderHash}></household-orders-summary>`;
   }
 
   inputs = new HoloHashMap<ActionHash, HTMLDivElement>();
@@ -415,7 +417,6 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
     );
 
     const producersItems = producers.map((producerHash) => ({
-      id: encodeHashToBase64(producerHash),
       name: availableProducers.get(producerHash)!.producer.entry.name,
       children: Array.from(
         myHouseholdOrder[1].entry.products.filter(
@@ -436,12 +437,10 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
         ).toFixed(2);
         const amount = productOrder.amount;
         return {
-          id: encodeHashToBase64(productOrder.original_product_hash),
           name: productInfo.product.entry.name,
           packaging: productInfo.product.entry.packaging,
           amount: productOrder.amount,
           price_with_vat: price_with_vat_rounded,
-          parent: encodeHashToBase64(productInfo.producer.actionHash),
           total_price: (
             Math.round(amount * price_with_vat * 100) / 100
           ).toFixed(2),

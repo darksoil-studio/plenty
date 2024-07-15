@@ -23,6 +23,8 @@ function setupStore(appClient: AppClient): HouseholdsStore {
   const householdStore = new HouseholdsStore(
     new HouseholdsClient(notificationsStore, appClient, "plenty"),
     profilesStore,
+    notificationsStore,
+    () => {},
   );
   notificationsStore.notificationsConfig.types = {
     ...notificationsStore.notificationsConfig.types,
