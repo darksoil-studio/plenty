@@ -1,17 +1,72 @@
 use holochain_types::web_app::WebAppBundle;
 use lair_keystore::dependencies::sodoken::{BufRead, BufWrite};
 use std::{collections::HashMap, path::PathBuf};
-use tauri::Manager;
+use tauri::{AppHandle, Emitter, Manager};
 use tauri_plugin_holochain::{HolochainExt, HolochainPluginConfig};
 use url2::Url2;
 
+mod commands;
+
 const APP_ID: &'static str = "plenty";
 
-pub fn web_happ_bundle() -> WebAppBundle {
-    let bytes = include_bytes!("../../workdir/plenty.webhapp");
-    WebAppBundle::decode(bytes).expect("Failed to decode plenty happ")
-}
+#[cfg_attr(mobile, tauri::mobile_entry_point)]
+pub fn run() {
+    tauri::Builder::default()
+        .plugin(
+            tauri_plugin_log::Builder::default()
+                .level(log::LevelFilter::Warn)
+                .build(),
+        )
+        // .plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
+        //     println!("{}, {argv:?}, {cwd}", app.package_info().name);
+        //     // app.emit("single-instance", Payload { args: argv, cwd })
+        //     //     .unwrap();
+        // }))
+        .plugin(tauri_plugin_deep_link::init())
+        .plugin(tauri_plugin_holochain::init(
+            vec_to_locked(vec![]).expect("Can't build passphrase"),
+            HolochainPluginConfig {
+                signal_url: signal_url(),
+                bootstrap_url: bootstrap_url(),
+                holochain_dir: holochain_dir(),
+            },
+        ))
+        .invoke_handler(tauri::generate_handler![
+            commands::create_plenty_instance,
+            commands::join_plenty_instance
+        ])
+        .setup(|app| {
+            let handle = app.handle().clone();
+            let result: anyhow::Result<()> = tauri::async_runtime::block_on(async move {
+                let admin_ws = handle.holochain()?.admin_websocket().await?;
 
+                let installed_apps = admin_ws
+                    .list_apps(None)
+                    .await
+                    .map_err(|err| tauri_plugin_holochain::Error::ConductorApiError(err))?;
+
+                if installed_apps.len() == 0 {
+                    app.holochain()?
+                        .main_window_builder(String::from("lobby"), false, None, None)
+                        .await?
+                        .build()?;
+                } else {
+                    app.holochain()?
+                        .web_happ_window_builder(String::from(APP_ID), None)
+                        .await?
+                        .build()?;
+                }
+                app.emit("setup-completed", ())?;
+
+                Ok(())
+            });
+            result?;
+
+            Ok(())
+        })
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
+}
 pub fn vec_to_locked(mut pass_tmp: Vec<u8>) -> std::io::Result<BufRead> {
     match BufWrite::new_mem_locked(pass_tmp.len()) {
         Err(e) => {
@@ -79,63 +134,4 @@ fn holochain_dir() -> PathBuf {
         .expect("Could not get app root")
         .join("holochain")
     }
-}
-
-#[cfg_attr(mobile, tauri::mobile_entry_point)]
-pub fn run() {
-    tauri::Builder::default()
-        .plugin(
-            tauri_plugin_log::Builder::default()
-                .level(log::LevelFilter::Warn)
-                .build(),
-        )
-        .plugin(tauri_plugin_holochain::init(
-            vec_to_locked(vec![]).expect("Can't build passphrase"),
-            HolochainPluginConfig {
-                signal_url: signal_url(),
-                bootstrap_url: bootstrap_url(),
-                holochain_dir: holochain_dir(),
-            },
-        ))
-        .setup(|app| {
-            let handle = app.handle().clone();
-            let result: anyhow::Result<()> = tauri::async_runtime::block_on(async move {
-                let admin_ws = handle.holochain()?.admin_websocket().await?;
-
-                let installed_apps = admin_ws
-                    .list_apps(None)
-                    .await
-                    .map_err(|err| tauri_plugin_holochain::Error::ConductorApiError(err))?;
-
-                if installed_apps.len() == 0 {
-                    handle
-                        .holochain()?
-                        .install_web_app(
-                            String::from(APP_ID),
-                            web_happ_bundle(),
-                            HashMap::new(),
-                            None,
-                        )
-                        .await
-                        .map(|_| ())?;
-                }
-                app.emit("setup-completed", ())?;
-
-                app.holochain()?
-                    .main_window_builder(
-                        String::from("plenty"),
-                        false,
-                        Some(String::from(APP_ID)),
-                        None,
-                    )
-                    .await?
-                    .build()?;
-                Ok(())
-            });
-            result?;
-
-            Ok(())
-        })
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
 }
