@@ -65,15 +65,17 @@ async fn internal_create_plenty_instance(
 #[tauri::command]
 pub async fn join_plenty_instance(
     app: AppHandle,
+    window: WebviewWindow,
     progenitor: AgentPubKeyB64,
 ) -> Result<(), String> {
-    internal_join_plenty_instance(app, progenitor.into())
+    internal_join_plenty_instance(app, window, progenitor.into())
         .await
         .map_err(|err| format!("{:?}", err))
 }
 
 async fn internal_join_plenty_instance(
     app: AppHandle,
+    window: WebviewWindow,
     progenitor: AgentPubKey,
 ) -> anyhow::Result<()> {
     let bundle = override_progenitor_in_web_happ(plenty_happ_bundle(), progenitor.clone()).await?;
@@ -87,6 +89,8 @@ async fn internal_join_plenty_instance(
         .web_happ_window_builder(String::from(APP_ID), None)
         .await?
         .build()?;
+
+    window.close()?;
 
     Ok(())
 }

@@ -130,7 +130,7 @@ export class HomePage extends SignalWatcher(LitElement) {
                 navigator.clipboard.writeText(`plenty://${progenitor}`);
                 notify(
                   msg(
-                    "Copied invite link to the clipboard! Send it to the person you want to invite to this buyers club.",
+                    "Invite link copied! Send it to the person you want to invite to this buyers club.",
                   ),
                 );
               }}

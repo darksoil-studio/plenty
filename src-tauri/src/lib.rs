@@ -38,7 +38,9 @@ pub fn run() {
             commands::join_plenty_instance
         ])
         .setup(|app| {
-            app.deep_link().register("plenty")?;
+            if let Err(err) = app.deep_link().register("plenty") {
+                log::error!("Error setting up the deep link handler: {err:?}");
+            }
 
             let handle = app.handle().clone();
             let result: anyhow::Result<()> = tauri::async_runtime::block_on(async move {
