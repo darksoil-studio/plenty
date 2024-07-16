@@ -29,8 +29,8 @@ export class MembersPage extends SignalWatcher(LitElement) {
       path: "",
       name: msg("All Households"),
       render: () => html`
-        <div class="column" style="margin: 16px 0">
-          <div class="row" style="align-items: center">
+        <div class="column" style="margin: 12px 0">
+          <div class="row" style="align-items: center; height: 38px">
             <span class="title">${msg("Members")}</span>
             <routes-breadcrumbs
               style="margin-left: 24px"
@@ -49,7 +49,7 @@ export class MembersPage extends SignalWatcher(LitElement) {
       name: msg("Manage Roles"),
       render: () => html`
         <div class="column" style="margin: 12px 0">
-          <div class="row" style="align-items: center">
+          <div class="row" style="align-items: center; height: 38px">
             <span class="title">${msg("Members")}</span>
             <routes-breadcrumbs
               style="margin-left: 24px"

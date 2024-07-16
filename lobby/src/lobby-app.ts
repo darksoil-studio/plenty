@@ -21,7 +21,7 @@ export class LobbyApp extends SignalWatcher(LitElement) {
     if (this._loading)
       return html`<div
         class="row"
-        style="flex: 1; height: 100%; align-content: center; justify-content: center;"
+        style="flex: 1; height: 100%; align-items: center; justify-content: center;"
       >
         <sl-spinner style="font-size: 2rem"></sl-spinner>
       </div>`;
@@ -29,7 +29,7 @@ export class LobbyApp extends SignalWatcher(LitElement) {
     if (this._error)
       return html`
         <div
-          style="flex: 1; height: 100%; align-content: center; justify-content: center;"
+          style="flex: 1; height: 100%; align-items: center; justify-content: center;"
         >
           <display-error
             .error=${this._error}

@@ -9,8 +9,21 @@ export const appStyles = [
     }
     .top-bar {
       align-items: center;
-      background-color: var(--sl-color-primary-500);
+      background-color: var(--sl-color-primary-600);
+      color: white;
       padding: 16px;
+      height: 32px;
+    }
+    .top-bar sl-icon-button {
+      color: white;
+    }
+    .top-bar sl-icon-button::part(base):hover {
+      color: rgb(220, 220, 220);
+    }
+    my-notifications-icon-button::part(icon-button) {
+      color: white;
+      --sl-color-primary-600: rgb(220, 220, 220);
+      --sl-color-primary-700: rgb(180, 180, 180);
     }
     sl-tab-group {
       display: flex;

@@ -51,8 +51,8 @@ importers:
   lobby:
     dependencies:
       '@darksoil-studio/notifications':
-        specifier: github:darksoil-studio/notifications#398cf50aca5d977b011356c1ca33cbe91686f88c&path:ui
-        version: https://codeload.github.com/darksoil-studio/notifications/tar.gz/398cf50aca5d977b011356c1ca33cbe91686f88c#path:ui(@types/react@18.3.3)
+        specifier: github:darksoil-studio/notifications#2144d76247553b9b4dcd4e162478163872d57db4&path:ui
+        version: https://codeload.github.com/darksoil-studio/notifications/tar.gz/2144d76247553b9b4dcd4e162478163872d57db4#path:ui(@types/react@18.3.3)
       '@holochain-open-dev/elements':
         specifier: ^0.300.0
         version: 0.300.0(@types/react@18.3.3)
@@ -139,8 +139,8 @@ importers:
   tests:
     dependencies:
       '@darksoil-studio/notifications':
-        specifier: github:darksoil-studio/notifications#398cf50aca5d977b011356c1ca33cbe91686f88c&path:ui
-        version: https://codeload.github.com/darksoil-studio/notifications/tar.gz/398cf50aca5d977b011356c1ca33cbe91686f88c#path:ui(@types/react@18.3.3)
+        specifier: github:darksoil-studio/notifications#2144d76247553b9b4dcd4e162478163872d57db4&path:ui
+        version: https://codeload.github.com/darksoil-studio/notifications/tar.gz/2144d76247553b9b4dcd4e162478163872d57db4#path:ui(@types/react@18.3.3)
       '@holochain-open-dev/profiles':
         specifier: github:holochain-open-dev/profiles#748bb4879e247eff44a4a23a8d2aaa02a585578a&path:ui
         version: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/748bb4879e247eff44a4a23a8d2aaa02a585578a#path:ui(@types/react@18.3.3)
@@ -169,8 +169,8 @@ importers:
   ui:
     dependencies:
       '@darksoil-studio/notifications':
-        specifier: github:darksoil-studio/notifications#398cf50aca5d977b011356c1ca33cbe91686f88c&path:ui
-        version: https://codeload.github.com/darksoil-studio/notifications/tar.gz/398cf50aca5d977b011356c1ca33cbe91686f88c#path:ui(@types/react@18.3.3)
+        specifier: github:darksoil-studio/notifications#2144d76247553b9b4dcd4e162478163872d57db4&path:ui
+        version: https://codeload.github.com/darksoil-studio/notifications/tar.gz/2144d76247553b9b4dcd4e162478163872d57db4#path:ui(@types/react@18.3.3)
       '@darksoil-studio/roles':
         specifier: github:darksoil-studio/roles#a0ec335b4a17afa36fd73bc0202bde9ecb9162b9&path:ui
         version: https://codeload.github.com/darksoil-studio/roles/tar.gz/a0ec335b4a17afa36fd73bc0202bde9ecb9162b9#path:ui(@types/react@18.3.3)
@@ -329,8 +329,8 @@ packages:
   '@dabh/diagnostics@2.0.3':
     resolution: {integrity: sha512-hrlQOIi7hAfzsMqlGSFyVucrx38O+j6wiGOf//H2ecvIEqYN4ADBSS2iLMh5UFyDunCNniUIPk/q3riFv45xRA==}
 
-  '@darksoil-studio/notifications@https://codeload.github.com/darksoil-studio/notifications/tar.gz/398cf50aca5d977b011356c1ca33cbe91686f88c#path:ui':
-    resolution: {path: ui, tarball: https://codeload.github.com/darksoil-studio/notifications/tar.gz/398cf50aca5d977b011356c1ca33cbe91686f88c}
+  '@darksoil-studio/notifications@https://codeload.github.com/darksoil-studio/notifications/tar.gz/2144d76247553b9b4dcd4e162478163872d57db4#path:ui':
+    resolution: {path: ui, tarball: https://codeload.github.com/darksoil-studio/notifications/tar.gz/2144d76247553b9b4dcd4e162478163872d57db4}
     version: 0.1.0
 
   '@darksoil-studio/notifications@https://codeload.github.com/darksoil-studio/notifications/tar.gz/f121b9b526bc997c5cef72640b7fe29a4d77598e#path:ui':
@@ -2957,7 +2957,7 @@ snapshots:
       enabled: 2.0.0
       kuler: 2.0.0
 
-  '@darksoil-studio/notifications@https://codeload.github.com/darksoil-studio/notifications/tar.gz/398cf50aca5d977b011356c1ca33cbe91686f88c#path:ui(@types/react@18.3.3)':
+  '@darksoil-studio/notifications@https://codeload.github.com/darksoil-studio/notifications/tar.gz/2144d76247553b9b4dcd4e162478163872d57db4#path:ui(@types/react@18.3.3)':
     dependencies:
       '@holochain-open-dev/elements': 0.300.0(@types/react@18.3.3)
       '@holochain-open-dev/profiles': https://codeload.github.com/holochain-open-dev/profiles/tar.gz/748bb4879e247eff44a4a23a8d2aaa02a585578a#path:ui(@types/react@18.3.3)

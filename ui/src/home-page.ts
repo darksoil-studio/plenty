@@ -93,7 +93,7 @@ export class HomePage extends SignalWatcher(LitElement) {
               style="width: 32px; height: 32px;"
               .imageHash=${household.value?.entry.avatar}
             ></show-image>
-            <span style="margin: 0 16px;">${household.value?.entry.name}</span>
+            <span style="margin: 0 8px;">${household.value?.entry.name}</span>
           </div>
         </div>`;
     }
