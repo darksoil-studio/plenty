@@ -85,53 +85,37 @@ export class EditHousehold extends SignalWatcher(LitElement) {
 
   renderEditForm(currentRecord: EntryRecord<Household>) {
     return html` <sl-card>
-      <span slot="header">${msg("Edit Household")}</span>
-
       <form
         class="column"
         style="flex: 1; gap: 16px;"
         ${ref((form) => setTimeout(() => (form as HTMLFormElement)?.reset()))}
         ${onSubmit((fields) => this.updateHousehold(currentRecord, fields))}
       >
-        <div>
-          <sl-input
-            name="name"
-            .label=${msg("Name")}
-            required
-            .defaultValue=${currentRecord.entry.name}
-          ></sl-input>
-        </div>
+        <span class="title" style="margin-bottom: 8px"
+          >${msg("Edit Household")}</span
+        >
+        <sl-input
+          name="name"
+          .label=${msg("Name")}
+          required
+          .defaultValue=${currentRecord.entry.name}
+        ></sl-input>
 
-        <div>
-          <upload-files
-            name="avatar"
-            one-file
-            accepted-files="image/jpeg,image/png,image/gif"
-            required
-            .defaultValue=${currentRecord.entry.avatar}
-          ></upload-files>
-        </div>
+        <upload-files
+          name="avatar"
+          one-file
+          accepted-files="image/jpeg,image/png,image/gif"
+          required
+          .defaultValue=${currentRecord.entry.avatar}
+        ></upload-files>
 
-        <div class="row" style="gap: 8px;">
-          <sl-button
-            @click=${() =>
-              this.dispatchEvent(
-                new CustomEvent("edit-canceled", {
-                  bubbles: true,
-                  composed: true,
-                }),
-              )}
-            style="flex: 1;"
-            >${msg("Cancel")}</sl-button
-          >
-          <sl-button
-            type="submit"
-            variant="primary"
-            style="flex: 1;"
-            .loading=${this.committing}
-            >${msg("Save")}</sl-button
-          >
-        </div>
+        <sl-button
+          type="submit"
+          variant="primary"
+          style="flex: 1;"
+          .loading=${this.committing}
+          >${msg("Save")}</sl-button
+        >
       </form>
     </sl-card>`;
   }

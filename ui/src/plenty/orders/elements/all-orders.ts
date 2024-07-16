@@ -30,7 +30,10 @@ export class AllOrders extends SignalWatcher(LitElement) {
 
   renderList(hashes: Array<ActionHash>) {
     if (hashes.length === 0)
-      return html` <div class="column center-content" style="gap: 16px;">
+      return html` <div
+        class="column center-content"
+        style="gap: 16px; padding: 24px"
+      >
         <sl-icon
           .src=${wrapPathInSvg(mdiInformationOutline)}
           style="color: grey; height: 64px; width: 64px;"

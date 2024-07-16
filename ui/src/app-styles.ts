@@ -4,6 +4,9 @@ import { css } from "lit";
 export const appStyles = [
   ...sharedStyles,
   css`
+    show-image::part(image) {
+      border-radius: 4px;
+    }
     .top-bar {
       align-items: center;
       background-color: var(--sl-color-primary-500);

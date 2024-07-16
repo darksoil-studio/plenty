@@ -83,17 +83,19 @@ export class HomePage extends SignalWatcher(LitElement) {
           tooltip
         ></display-error>`;
       case "completed":
-        return html`<div
-          class="row"
-          style="align-items: center; cursor: pointer"
-          @click=${() => this.router.goto("/my-household")}
-        >
-          <show-image
-            style="width: 32px; height: 32px;"
-            .imageHash=${household.value?.entry.avatar}
-          ></show-image>
-          <span style="margin: 0 16px;">${household.value?.entry.name}</span>
-        </a>`;
+        return html` <div class="row" style="align-items: center; gap: 12px">
+          <div
+            class="row"
+            style="align-items: center; cursor: pointer"
+            @click=${() => this.router.goto("/my-household")}
+          >
+            <show-image
+              style="width: 32px; height: 32px;"
+              .imageHash=${household.value?.entry.avatar}
+            ></show-image>
+            <span style="margin: 0 16px;">${household.value?.entry.name}</span>
+          </div>
+        </div>`;
     }
   }
 

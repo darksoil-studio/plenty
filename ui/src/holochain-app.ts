@@ -1,6 +1,6 @@
-import { ordersStoreContext } from './plenty/orders/context.js';
-import { OrdersClient } from './plenty/orders/orders-client.js';
-import { OrdersStore } from './plenty/orders/orders-store.js';
+import { ordersStoreContext } from "./plenty/orders/context.js";
+import { OrdersClient } from "./plenty/orders/orders-client.js";
+import { OrdersStore } from "./plenty/orders/orders-store.js";
 
 import {
   Router,
@@ -19,6 +19,7 @@ import {
   profilesStoreContext,
 } from "@holochain-open-dev/profiles";
 import "@holochain-open-dev/profiles/dist/elements/agent-avatar.js";
+import "@holochain-open-dev/profiles/dist/elements/my-profile.js";
 import "@holochain-open-dev/profiles/dist/elements/profile-list-item-skeleton.js";
 import "@holochain-open-dev/profiles/dist/elements/profile-prompt.js";
 import {
@@ -72,7 +73,7 @@ export class HolochainApp extends SignalWatcher(LitElement) {
   @property()
   _ordersStore!: OrdersStore;
 
-@provide({ context: producersStoreContext })
+  @provide({ context: producersStoreContext })
   @property()
   _producersStore!: ProducersStore;
 
@@ -167,7 +168,7 @@ export class HolochainApp extends SignalWatcher(LitElement) {
       },
       this._notificationsStore,
     );
-    this._ordersStore = new OrdersStore(new OrdersClient(appClient, 'plenty'));
+    this._ordersStore = new OrdersStore(new OrdersClient(appClient, "plenty"));
   }
 
   renderMyHousehold() {
@@ -228,4 +229,5 @@ export class HolochainApp extends SignalWatcher(LitElement) {
       }
     `,
     ...appStyles,
-  ];}
+  ];
+}

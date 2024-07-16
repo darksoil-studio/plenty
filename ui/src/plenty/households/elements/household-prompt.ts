@@ -28,11 +28,14 @@ import {
   joinAsyncMap,
 } from "@holochain-open-dev/signals";
 
+import "../../../overlay-page.js";
+import "./create-household.js";
+
 import { householdsStoreContext } from "../context.js";
 import { HouseholdsStore } from "../households-store.js";
 import { Household } from "../types.js";
-import "./create-household.js";
 import { tryAndRetry } from "../../../utils.js";
+import { appStyles } from "../../../app-styles.js";
 
 type HouseholdRequestStatus =
   | { status: "ACCEPTED_JOINING"; household: EntryRecord<Household> }
@@ -69,15 +72,15 @@ export class HouseholdPrompt extends SignalWatcher(LitElement) {
       </div>`;
 
     return html`<div class="column" style="gap: 16px">
-      ${Array.from(households.values()).map(
-        (h, i) => html`
+      ${Array.from(households.entries()).map(
+        ([householdHash, h], i) => html`
           <div
             class="row"
             @click=${() => {
-              this.selectedHousehold = h.actionHash;
+              this.selectedHousehold = householdHash;
             }}
             @keydown=${() => {
-              this.selectedHousehold = h.actionHash;
+              this.selectedHousehold = householdHash;
             }}
             style="${styleMap({
               cursor: "pointer",
@@ -85,7 +88,7 @@ export class HouseholdPrompt extends SignalWatcher(LitElement) {
               padding: "8px",
               "align-items": "center",
               "background-color":
-                this.selectedHousehold?.toString() === h.actionHash.toString()
+                this.selectedHousehold?.toString() === householdHash.toString()
                   ? "var(--sl-color-primary-500)"
                   : "auto",
             })}"
@@ -186,10 +189,10 @@ export class HouseholdPrompt extends SignalWatcher(LitElement) {
         class="column"
         style="flex: 1; gap: 16px; align-items: center; justify-content: center"
       >
-        ${Array.from(requestedHouseholds.values()).map(
-          (household, i) => html`
+        ${Array.from(requestedHouseholds.entries()).map(
+          ([householdHash, household], i) => html`
             <sl-dialog
-              id="cancel-join-request-${household.actionHash.toString()}"
+              id="cancel-join-request-${householdHash.toString()}"
               .label=${msg("Cancel join request")}
             >
               <span
@@ -201,9 +204,7 @@ export class HouseholdPrompt extends SignalWatcher(LitElement) {
                 slot="footer"
                 variant="danger"
                 @click=${() =>
-                  this.householdsStore.client.cancelJoinRequest(
-                    household.actionHash,
-                  )}
+                  this.householdsStore.client.cancelJoinRequest(householdHash)}
                 >${msg("Cancel join request")}</sl-button
               >
             </sl-dialog>
@@ -233,7 +234,7 @@ export class HouseholdPrompt extends SignalWatcher(LitElement) {
                   @click=${() =>
                     (
                       this.shadowRoot?.getElementById(
-                        `cancel-join-request-${household.actionHash.toString()}`,
+                        `cancel-join-request-${householdHash.toString()}`,
                       ) as SlDialog
                     ).show()}
                   >${msg("Cancel Join Request")}</sl-button
@@ -352,16 +353,26 @@ export class HouseholdPrompt extends SignalWatcher(LitElement) {
 
   render() {
     if (this.creatingHousehold)
-      return html`<div
-        class="column"
-        style="align-items: center; justify-content: center; flex: 1;"
-      >
-        <create-household
-          @household-created=${() => {
+      return html`
+        <overlay-page
+          .title=${msg("Create Household")}
+          @close-requested=${() => {
             this.creatingHousehold = false;
           }}
-        ></create-household>
-      </div>`;
+        >
+          <div
+            class="column"
+            style="align-items: center; justify-content: center; flex: 1;"
+          >
+            <create-household
+              style="width: 400px"
+              @household-created=${() => {
+                this.creatingHousehold = false;
+              }}
+            ></create-household>
+          </div>
+        </overlay-page>
+      `;
 
     const householdsStatus = this.getHouseholdStatus();
 
@@ -411,7 +422,7 @@ export class HouseholdPrompt extends SignalWatcher(LitElement) {
   }
 
   static styles = [
-    sharedStyles,
+    ...appStyles,
     css`
       :host {
         display: flex;

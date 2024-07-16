@@ -98,18 +98,14 @@ export class CreateHousehold extends SignalWatcher(LitElement) {
         ${onSubmit((fields) => this.createHousehold(fields))}
       >
         <span class="title">${msg("Create Household")}</span>
-        <div>
-          <sl-input name="name" .label=${msg("Name")} required></sl-input>
-        </div>
+        <sl-input name="name" .label=${msg("Name")} required></sl-input>
 
-        <div>
-          <upload-files
-            name="avatar"
-            one-file
-            accepted-files="image/jpeg,image/png,image/gif"
-            required
-          ></upload-files>
-        </div>
+        <upload-files
+          name="avatar"
+          one-file
+          accepted-files="image/jpeg,image/png,image/gif"
+          required
+        ></upload-files>
 
         <sl-button variant="primary" type="submit" .loading=${this.committing}
           >${msg("Create Household")}</sl-button

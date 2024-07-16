@@ -6,12 +6,13 @@ import {
 } from "@holochain-open-dev/elements";
 import "@holochain-open-dev/elements/dist/elements/display-error.js";
 import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
+import "@holochain-open-dev/profiles/dist/elements/profile-detail.js";
+import "@holochain-open-dev/profiles/dist/elements/edit-profile.js";
 import { EntryRecord } from "@holochain-open-dev/utils";
 import { ActionHash, AgentPubKey, EntryHash, Record } from "@holochain/client";
 import { consume } from "@lit/context";
 import { localized, msg, str } from "@lit/localize";
 import { mdiAlertCircleOutline, mdiDelete, mdiPencil } from "@mdi/js";
-import SlAlert from "@shoelace-style/shoelace/dist/components/alert/alert.js";
 import "@shoelace-style/shoelace/dist/components/alert/alert.js";
 import "@shoelace-style/shoelace/dist/components/button/button.js";
 import "@shoelace-style/shoelace/dist/components/card/card.js";
@@ -25,17 +26,18 @@ import {
   SignalWatcher,
   mapCompleted,
 } from "@holochain-open-dev/signals";
-
-import { householdsStoreContext } from "../context.js";
-import { HouseholdsStore } from "../households-store.js";
-import { Household } from "../types.js";
-import "./edit-household.js";
 import { SlDialog } from "@shoelace-style/shoelace";
 import {
   Profile,
   ProfilesStore,
   profilesStoreContext,
 } from "@holochain-open-dev/profiles";
+
+import { householdsStoreContext } from "../context.js";
+import { HouseholdsStore } from "../households-store.js";
+import { Household } from "../types.js";
+import "./edit-household.js";
+import "../../../overlay-page.js";
 import { appStyles } from "../../../app-styles.js";
 
 /**
@@ -60,7 +62,13 @@ export class MyHousehold extends SignalWatcher(LitElement) {
    * @internal
    */
   @state()
-  _editing = false;
+  _editingHousehold = false;
+
+  /**
+   * @internal
+   */
+  @state()
+  _editingProfile = false;
 
   /**
    * @internal
@@ -152,7 +160,7 @@ export class MyHousehold extends SignalWatcher(LitElement) {
             this.agentToReject = undefined;
             (
               this.shadowRoot?.getElementById("reject-dialog") as SlDialog
-            ).show();
+            ).hide();
           }}
           >${msg("Cancel")}</sl-button
         >
@@ -179,17 +187,57 @@ export class MyHousehold extends SignalWatcher(LitElement) {
     `;
   }
 
+  /**
+   * @internal
+   */
+  @state()
+  leaving = false;
+
+  renderLeaveDialog(householdHash: ActionHash) {
+    return html`
+      <sl-dialog id="leave-dialog" .label=${msg("Leave Your Household")}>
+        <span>${msg("Are you sure you want to leave your household?")}</span>
+        <sl-button
+          slot="footer"
+          @click=${() => {
+            (
+              this.shadowRoot?.getElementById("leave-dialog") as SlDialog
+            ).hide();
+          }}
+          >${msg("Cancel")}</sl-button
+        >
+        <sl-button
+          slot="footer"
+          variant="danger"
+          .loading=${this.leaving}
+          @click=${async () => {
+            this.leaving = true;
+
+            await this.householdsStore.client.leaveHousehold(householdHash);
+            this.leaving = false;
+            (
+              this.shadowRoot?.getElementById("leave-dialog") as SlDialog
+            ).hide();
+          }}
+          >${msg("Leave household")}</sl-button
+        >
+      </sl-dialog>
+    `;
+  }
+
   renderDetail(
+    householdHash: ActionHash,
     entryRecord: EntryRecord<Household>,
     requestors: Array<AgentPubKey>,
     members: Array<AgentPubKey>,
   ) {
     return html`
-      ${this.renderAcceptDialog(entryRecord.actionHash)}
-      ${this.renderRejectDialog(entryRecord.actionHash)}
+      ${this.renderAcceptDialog(householdHash)}
+      ${this.renderRejectDialog(householdHash)}
+      ${this.renderLeaveDialog(householdHash)}
       <div class="column" style="gap: 32px; width: 600px;">
         <div class="column">
-          <span class="title">${msg("Profile")}</span>
+          <span class="title">${msg("Your Household's Profile")}</span>
           <sl-divider></sl-divider>
           <sl-card>
             <div class="row" style="gap: 16px; align-items: center; flex: 1">
@@ -204,7 +252,7 @@ export class MyHousehold extends SignalWatcher(LitElement) {
               <sl-icon-button
                 .src=${wrapPathInSvg(mdiPencil)}
                 @click=${() => {
-                  this._editing = true;
+                  this._editingHousehold = true;
                 }}
               ></sl-icon-button>
             </div>
@@ -281,12 +329,35 @@ export class MyHousehold extends SignalWatcher(LitElement) {
             </div>
           </sl-card>
         </div>
-        <sl-button
-          variant="danger"
-          @click=${() =>
-            this.householdsStore.client.leaveHousehold(entryRecord.actionHash)}
-          >${msg("Leave Household")}</sl-button
-        >
+        <div class="column">
+          <span class="title">${msg("Your Profile")}</span>
+          <sl-divider></sl-divider>
+          <sl-card>
+            <profile-detail
+              .agentPubKey=${this.householdsStore.client.client.myPubKey}
+              style="flex: 1"
+            >
+              <sl-icon-button
+                slot="action"
+                .src=${wrapPathInSvg(mdiPencil)}
+                @click=${() => {
+                  this._editingProfile = true;
+                }}
+              ></sl-icon-button>
+            </profile-detail>
+          </sl-card>
+        </div>
+        <div class="row" style="justify-content: end">
+          <sl-button
+            variant="danger"
+            @click=${() => {
+              (
+                this.shadowRoot?.getElementById("leave-dialog") as SlDialog
+              ).show();
+            }}
+            >${msg("Leave Household")}</sl-button
+          >
+        </div>
       </div>
     `;
   }
@@ -294,18 +365,27 @@ export class MyHousehold extends SignalWatcher(LitElement) {
   myHouseholdLatestVersion() {
     const myHousehold = this.householdsStore.myHousehold.get();
     if (myHousehold.status !== "completed") return myHousehold;
+    if (!myHousehold.value)
+      return {
+        status: "error" as const,
+        error: msg("You are not part of any household yet"),
+      };
 
     const requestors = myHousehold.value!.requestors.live.get();
     const latestVersion = myHousehold.value!.latestVersion.get();
     const members = myHousehold.value!.members.live.get();
+    const myProfile = this.profilesStore.myProfile.get();
 
     if (requestors.status !== "completed") return requestors;
     if (latestVersion.status !== "completed") return latestVersion;
     if (members.status !== "completed") return members;
+    if (myProfile.status !== "completed") return myProfile;
 
     return {
       status: "completed" as "completed",
       value: {
+        myProfile: myProfile.value,
+        householdHash: myHousehold.value!.householdHash,
         requestors: requestors.value,
         latestVersion: latestVersion.value,
         members: members.value.map((l) => l.target),
@@ -329,20 +409,58 @@ export class MyHousehold extends SignalWatcher(LitElement) {
           .error=${result.error}
         ></display-error>`;
       case "completed":
-        if (this._editing) {
-          return html`<edit-household
-            .householdHash=${result.value.latestVersion.actionHash}
-            @household-updated=${async () => {
-              this._editing = false;
-            }}
-            @edit-canceled=${() => {
-              this._editing = false;
-            }}
-            style="display: flex; flex: 1;"
-          ></edit-household>`;
+        if (this._editingHousehold) {
+          return html`
+            <overlay-page
+              @close-requested=${() => {
+                this._editingHousehold = false;
+              }}
+              .title=${msg("Edit Household")}
+            >
+              <edit-household
+                .householdHash=${result.value.latestVersion.actionHash}
+                @household-updated=${async () => {
+                  this._editingHousehold = false;
+                }}
+                style="width: 400px"
+              ></edit-household>
+            </overlay-page>
+          `;
+        }
+        if (this._editingProfile) {
+          return html`
+            <overlay-page
+              @close-requested=${() => {
+                this._editingProfile = false;
+              }}
+              .title=${msg("Edit Profile")}
+            >
+              <sl-card style="width: 400px">
+                <div class="column" style="gap: 16px; flex: 1">
+                  <span class="title">${msg("Edit Your Profile")}</span>
+                  <edit-profile
+                    style="flex: 1"
+                    .profile=${result.value.myProfile}
+                    @save-profile=${async (e: CustomEvent) => {
+                      try {
+                        await this.profilesStore.client.updateProfile(
+                          e.detail.profile,
+                        );
+                        this._editingProfile = false;
+                      } catch (e) {
+                        notifyError(msg("Error updating your profile"));
+                        console.error(e);
+                      }
+                    }}
+                  ></edit-profile>
+                </div>
+              </sl-card>
+            </overlay-page>
+          `;
         }
 
         return this.renderDetail(
+          result.value.householdHash,
           result.value.latestVersion,
           result.value.requestors,
           result.value.members,

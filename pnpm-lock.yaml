@@ -57,8 +57,8 @@ importers:
         specifier: ^0.300.0
         version: 0.300.0(@types/react@18.3.3)
       '@holochain-open-dev/file-storage':
-        specifier: github:holochain-open-dev/file-storage#bd25db205ecf2b493045adcdcfdfc7fc1d93758e&path:ui
-        version: https://codeload.github.com/holochain-open-dev/file-storage/tar.gz/bd25db205ecf2b493045adcdcfdfc7fc1d93758e#path:ui(@types/react@18.3.3)
+        specifier: github:holochain-open-dev/file-storage#f4a4e0ef0378d1e6235f998ac1c507ea3a29cd62&path:ui
+        version: https://codeload.github.com/holochain-open-dev/file-storage/tar.gz/f4a4e0ef0378d1e6235f998ac1c507ea3a29cd62#path:ui(@types/react@18.3.3)
       '@holochain-open-dev/profiles':
         specifier: github:holochain-open-dev/profiles#748bb4879e247eff44a4a23a8d2aaa02a585578a&path:ui
         version: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/748bb4879e247eff44a4a23a8d2aaa02a585578a#path:ui(@types/react@18.3.3)
@@ -178,8 +178,8 @@ importers:
         specifier: ^0.300.0
         version: 0.300.0(@types/react@18.3.3)
       '@holochain-open-dev/file-storage':
-        specifier: github:holochain-open-dev/file-storage#bd25db205ecf2b493045adcdcfdfc7fc1d93758e&path:ui
-        version: https://codeload.github.com/holochain-open-dev/file-storage/tar.gz/bd25db205ecf2b493045adcdcfdfc7fc1d93758e#path:ui(@types/react@18.3.3)
+        specifier: github:holochain-open-dev/file-storage#f4a4e0ef0378d1e6235f998ac1c507ea3a29cd62&path:ui
+        version: https://codeload.github.com/holochain-open-dev/file-storage/tar.gz/f4a4e0ef0378d1e6235f998ac1c507ea3a29cd62#path:ui(@types/react@18.3.3)
       '@holochain-open-dev/profiles':
         specifier: github:holochain-open-dev/profiles#748bb4879e247eff44a4a23a8d2aaa02a585578a&path:ui
         version: https://codeload.github.com/holochain-open-dev/profiles/tar.gz/748bb4879e247eff44a4a23a8d2aaa02a585578a#path:ui(@types/react@18.3.3)
@@ -648,8 +648,8 @@ packages:
   '@holochain-open-dev/elements@0.300.0':
     resolution: {integrity: sha512-ooctMs2f/tPqrjdNLaRFYM8HhoBSmB41sXz6peAAI3k40/ZNIgTRPd73+Ww/fjNKsMifDloiBF4hm4ZdmaU1rA==}
 
-  '@holochain-open-dev/file-storage@https://codeload.github.com/holochain-open-dev/file-storage/tar.gz/bd25db205ecf2b493045adcdcfdfc7fc1d93758e#path:ui':
-    resolution: {path: ui, tarball: https://codeload.github.com/holochain-open-dev/file-storage/tar.gz/bd25db205ecf2b493045adcdcfdfc7fc1d93758e}
+  '@holochain-open-dev/file-storage@https://codeload.github.com/holochain-open-dev/file-storage/tar.gz/f4a4e0ef0378d1e6235f998ac1c507ea3a29cd62#path:ui':
+    resolution: {path: ui, tarball: https://codeload.github.com/holochain-open-dev/file-storage/tar.gz/f4a4e0ef0378d1e6235f998ac1c507ea3a29cd62}
     version: 0.300.0
 
   '@holochain-open-dev/profiles@https://codeload.github.com/holochain-open-dev/profiles/tar.gz/748bb4879e247eff44a4a23a8d2aaa02a585578a#path:ui':
@@ -3220,10 +3220,10 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@holochain-open-dev/file-storage@https://codeload.github.com/holochain-open-dev/file-storage/tar.gz/bd25db205ecf2b493045adcdcfdfc7fc1d93758e#path:ui(@types/react@18.3.3)':
+  '@holochain-open-dev/file-storage@https://codeload.github.com/holochain-open-dev/file-storage/tar.gz/f4a4e0ef0378d1e6235f998ac1c507ea3a29cd62#path:ui(@types/react@18.3.3)':
     dependencies:
       '@holochain-open-dev/elements': 0.300.0(@types/react@18.3.3)
-      '@holochain-open-dev/utils': 0.300.0
+      '@holochain-open-dev/utils': 0.300.1
       '@holochain/client': 0.17.0
       '@lit-labs/task': 2.1.2
       '@lit/context': 1.1.2
