@@ -66,6 +66,7 @@ export class ProducersZomeMock extends ZomeMock implements AppClient {
     this.producersForLiason.set(producer.liason, [
       ...existingLiason,
       {
+        base: producer.liason,
         target: record.signed_action.hashed.hash,
         author: this.myPubKey,
         timestamp: Date.now() * 1000,
@@ -152,6 +153,7 @@ export class ProducersZomeMock extends ZomeMock implements AppClient {
     this.producersForLiason.set(producer.liason, [
       ...existingLiason,
       {
+        base: producer.liason,
         target: record.signed_action.hashed.hash,
         author: record.signed_action.hashed.content.author,
         timestamp: record.signed_action.hashed.content.timestamp,
@@ -175,6 +177,7 @@ export class ProducersZomeMock extends ZomeMock implements AppClient {
     );
     return Promise.all(
       records.map(async (record) => ({
+        base: await fakeEntryHash(),
         target: record.signed_action.hashed.hash,
         author: record.signed_action.hashed.content.author,
         timestamp: record.signed_action.hashed.content.timestamp,
@@ -212,6 +215,7 @@ export class ProducersZomeMock extends ZomeMock implements AppClient {
     this.productsForProducer.set(product.producer_hash, [
       ...existingProducerHash,
       {
+        base: product.producer_hash,
         target: record.signed_action.hashed.hash,
         author: this.myPubKey,
         timestamp: Date.now() * 1000,
@@ -297,6 +301,7 @@ export class ProducersZomeMock extends ZomeMock implements AppClient {
     this.productsForProducer.set(product.producer_hash, [
       ...existingProducerHash,
       {
+        base: product.producer_hash,
         target: record.signed_action.hashed.hash,
         author: record.signed_action.hashed.content.author,
         timestamp: record.signed_action.hashed.content.timestamp,

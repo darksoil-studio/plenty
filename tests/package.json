@@ -6,12 +6,12 @@
   },
   "dependencies": {
     "@msgpack/msgpack": "^2.7.0",
-    "@holochain/client": "^0.17.0",
+    "@holochain/client": "^0.17.1",
     "@holochain/tryorama": "^v0.16.0",
-    "@holochain-open-dev/profiles": "github:holochain-open-dev/profiles#748bb4879e247eff44a4a23a8d2aaa02a585578a&path:ui",
-    "@darksoil-studio/notifications": "github:darksoil-studio/notifications#2144d76247553b9b4dcd4e162478163872d57db4&path:ui",
-    "@holochain-open-dev/signals": "^0.300.0",
-    "@holochain-open-dev/utils": "^0.300.0",
+    "@holochain-open-dev/profiles": "github:holochain-open-dev/profiles#8c50a65a597dc933eff83ff6e81cab1b2ef7fb89&path:ui",
+    "@darksoil-studio/notifications": "github:darksoil-studio/notifications#585277862fb27e2f47d444b07627a411ac9ec5d1&path:ui",
+    "@holochain-open-dev/signals": "^0.300.6",
+    "@holochain-open-dev/utils": "^0.300.2",
     "typescript": "^5.4.0",
     "vitest": "^1.4.0"
   },

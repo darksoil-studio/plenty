@@ -160,6 +160,7 @@ export class OrdersZomeMock extends ZomeMock implements AppClient {
     this.householdOrdersForOrder.set(householdOrder.order_hash, [
       ...existingOrderHash,
       {
+        base: householdOrder.order_hash,
         target: record.signed_action.hashed.hash,
         author: this.myPubKey,
         timestamp: Date.now() * 1000,
@@ -249,6 +250,7 @@ export class OrdersZomeMock extends ZomeMock implements AppClient {
     this.householdOrdersForOrder.set(householdOrder.order_hash, [
       ...existingOrderHash,
       {
+        base: householdOrder.order_hash,
         target: record.signed_action.hashed.hash,
         author: record.signed_action.hashed.content.author,
         timestamp: record.signed_action.hashed.content.timestamp,
@@ -296,6 +298,7 @@ export class OrdersZomeMock extends ZomeMock implements AppClient {
     this.producerDeliveriesForOrder.set(producerDelivery.order_hash, [
       ...existingOrderHash,
       {
+        base: producerDelivery.order_hash,
         target: record.signed_action.hashed.hash,
         author: this.myPubKey,
         timestamp: Date.now() * 1000,
@@ -394,6 +397,7 @@ export class OrdersZomeMock extends ZomeMock implements AppClient {
     this.producerDeliveriesForOrder.set(producerDelivery.order_hash, [
       ...existingOrderHash,
       {
+        base: producerDelivery.order_hash,
         target: record.signed_action.hashed.hash,
         author: record.signed_action.hashed.content.author,
         timestamp: record.signed_action.hashed.content.timestamp,
@@ -441,6 +445,7 @@ export class OrdersZomeMock extends ZomeMock implements AppClient {
     this.producerInvoicesForOrder.set(producerInvoice.order_hash, [
       ...existingOrderHash,
       {
+        base: producerInvoice.order_hash,
         target: record.signed_action.hashed.hash,
         author: this.myPubKey,
         timestamp: Date.now() * 1000,
@@ -539,6 +544,7 @@ export class OrdersZomeMock extends ZomeMock implements AppClient {
     this.producerInvoicesForOrder.set(producerInvoice.order_hash, [
       ...existingOrderHash,
       {
+        base: producerInvoice.order_hash,
         target: record.signed_action.hashed.hash,
         author: record.signed_action.hashed.content.author,
         timestamp: record.signed_action.hashed.content.timestamp,
@@ -564,6 +570,7 @@ export class OrdersZomeMock extends ZomeMock implements AppClient {
     );
     return Promise.all(
       records.map(async (record) => ({
+        base: await fakeEntryHash(),
         target: record.signed_action.hashed.hash,
         author: record.signed_action.hashed.content.author,
         timestamp: record.signed_action.hashed.content.timestamp,
@@ -603,6 +610,7 @@ export class OrdersZomeMock extends ZomeMock implements AppClient {
     this.availableProductsForOrder.set(availableProducts.order_hash, [
       ...existingOrderHash,
       {
+        base: availableProducts.order_hash,
         target: record.signed_action.hashed.hash,
         author: this.myPubKey,
         timestamp: Date.now() * 1000,
@@ -692,6 +700,7 @@ export class OrdersZomeMock extends ZomeMock implements AppClient {
     this.availableProductsForOrder.set(availableProducts.order_hash, [
       ...existingOrderHash,
       {
+        base: availableProducts.order_hash,
         target: record.signed_action.hashed.hash,
         author: record.signed_action.hashed.content.author,
         timestamp: record.signed_action.hashed.content.timestamp,

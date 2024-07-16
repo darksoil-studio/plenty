@@ -157,6 +157,7 @@ export class HouseholdsZomeMock extends ZomeMock implements AppClient {
     this.householdToRequestor.set(input.household_hash, [
       ...existing,
       {
+        base: input.household_hash,
         target: input.requestor,
         author: this.myPubKey,
         timestamp: Date.now() * 1000,
@@ -170,6 +171,7 @@ export class HouseholdsZomeMock extends ZomeMock implements AppClient {
     this.requestorToHousehold.set(input.requestor, [
       ...existing2,
       {
+        base: input.requestor,
         target: input.household_hash,
         author: this.myPubKey,
         timestamp: Date.now() * 1000,
@@ -204,6 +206,7 @@ export class HouseholdsZomeMock extends ZomeMock implements AppClient {
     this.householdToMember.set(input.household_hash, [
       ...existing,
       {
+        base: input.household_hash,
         target: input.member,
         author: this.myPubKey,
         timestamp: Date.now() * 1000,
@@ -258,6 +261,7 @@ export class HouseholdsZomeMock extends ZomeMock implements AppClient {
     );
     return Promise.all(
       records.map(async (record) => ({
+        base: await fakeEntryHash(),
         target: record.signed_action.hashed.hash,
         author: record.signed_action.hashed.content.author,
         timestamp: record.signed_action.hashed.content.timestamp,
