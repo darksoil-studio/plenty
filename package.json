@@ -6,7 +6,7 @@
     "start": "UI_PORT=8888 concurrently -k \"nix run -L .#network\" \"pnpm -F ui start\"",
     "network:mobile": "pnpm happ:build-debug && BOOTSTRAP_PORT=$(port) SIGNAL_PORT=$(port) INTERNAL_IP=$(internal-ip --ipv4) concurrently -k \"pnpm local-services\" \"pnpm -F ui start\" \"pnpm tauri ios dev\" \"pnpm tauri dev\"",
     "network:android": "pnpm happ:build-debug && BOOTSTRAP_PORT=$(port) SIGNAL_PORT=$(port) INTERNAL_IP=$(internal-ip --ipv4) concurrently -k \"pnpm local-services\" \"pnpm -F ui start\" \"pnpm tauri dev\" \"pnpm tauri android dev\"",
-    "network": "pnpm happ:build && UI_PORT=1420 BOOTSTRAP_PORT=$(port) SIGNAL_PORT=$(port) INTERNAL_IP=$(internal-ip --ipv4) concurrently -k \"pnpm local-services\" \"pnpm -F ui start\" \"pnpm tauri dev\" \"pnpm tauri dev\"",
+    "network": "pnpm happ:build && UI_PORT=1420 BOOTSTRAP_PORT=$(port) SIGNAL_PORT=$(port) INTERNAL_IP=$(internal-ip --ipv4) concurrently -k \"pnpm local-services\" \"pnpm -F lobby start\" \"pnpm tauri dev\"",
     "launch": "concurrently-repeat \"pnpm tauri dev --no-watch\" $AGENTS",
     "local-services": "hc run-local-services --bootstrap-interface $INTERNAL_IP --bootstrap-port $BOOTSTRAP_PORT  --signal-interfaces $INTERNAL_IP --signal-port $SIGNAL_PORT",
     "test": "pnpm run happ:build-debug && nix flake check -L && pnpm -F tests test",

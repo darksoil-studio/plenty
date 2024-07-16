@@ -1,7 +1,7 @@
-use holochain_types::web_app::WebAppBundle;
 use lair_keystore::dependencies::sodoken::{BufRead, BufWrite};
-use std::{collections::HashMap, path::PathBuf};
-use tauri::{AppHandle, Emitter, Manager};
+use std::path::PathBuf;
+use tauri::Emitter;
+use tauri_plugin_deep_link::DeepLinkExt;
 use tauri_plugin_holochain::{HolochainExt, HolochainPluginConfig};
 use url2::Url2;
 
@@ -11,17 +11,19 @@ const APP_ID: &'static str = "plenty";
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    gdk::init();
+    gtk::init().unwrap();
     tauri::Builder::default()
         .plugin(
             tauri_plugin_log::Builder::default()
                 .level(log::LevelFilter::Warn)
                 .build(),
         )
-        // .plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
-        //     println!("{}, {argv:?}, {cwd}", app.package_info().name);
-        //     // app.emit("single-instance", Payload { args: argv, cwd })
-        //     //     .unwrap();
-        // }))
+        .plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
+            println!("{}, {argv:?}, {cwd}", app.package_info().name);
+            // app.emit("single-instance", Payload { args: argv, cwd })
+            //     .unwrap();
+        }))
         .plugin(tauri_plugin_deep_link::init())
         .plugin(tauri_plugin_holochain::init(
             vec_to_locked(vec![]).expect("Can't build passphrase"),
@@ -36,6 +38,8 @@ pub fn run() {
             commands::join_plenty_instance
         ])
         .setup(|app| {
+            app.deep_link().register("plenty")?;
+
             let handle = app.handle().clone();
             let result: anyhow::Result<()> = tauri::async_runtime::block_on(async move {
                 let admin_ws = handle.holochain()?.admin_websocket().await?;
@@ -54,6 +58,7 @@ pub fn run() {
                     app.holochain()?
                         .web_happ_window_builder(String::from(APP_ID), None)
                         .await?
+                        .enable_clipboard_access()
                         .build()?;
                 }
                 app.emit("setup-completed", ())?;

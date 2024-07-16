@@ -9,7 +9,7 @@ use holochain_types::{
     web_app::{WebAppBundle, WebAppManifest},
 };
 use mr_bundle::{Bundle, Manifest};
-use tauri::AppHandle;
+use tauri::{AppHandle, WebviewWindow};
 use tauri_plugin_holochain::HolochainExt;
 use tempdir::TempDir;
 
@@ -21,13 +21,16 @@ pub fn plenty_happ_bundle() -> WebAppBundle {
 }
 
 #[tauri::command]
-pub async fn create_plenty_instance(app: AppHandle) -> Result<(), String> {
-    internal_create_plenty_instance(app)
+pub async fn create_plenty_instance(app: AppHandle, window: WebviewWindow) -> Result<(), String> {
+    internal_create_plenty_instance(app, window)
         .await
         .map_err(|err| format!("{:?}", err))
 }
 
-async fn internal_create_plenty_instance(app: AppHandle) -> anyhow::Result<()> {
+async fn internal_create_plenty_instance(
+    app: AppHandle,
+    window: WebviewWindow,
+) -> anyhow::Result<()> {
     let admin_ws = app.holochain()?.admin_websocket().await?;
 
     let agent_key = admin_ws
@@ -51,7 +54,10 @@ async fn internal_create_plenty_instance(app: AppHandle) -> anyhow::Result<()> {
     app.holochain()?
         .web_happ_window_builder(String::from(APP_ID), None)
         .await?
+        .enable_clipboard_access()
         .build()?;
+
+    window.close()?;
 
     Ok(())
 }
@@ -108,10 +114,9 @@ happ_manifest:
   bundled: "./plenty.happ"
 "#;
     let manifest_path = tempdir.path().join("web-happ.yaml");
-    std::fs::write(manifest_path, webhapp_yaml.as_bytes())?;
+    std::fs::write(manifest_path.clone(), webhapp_yaml.as_bytes())?;
 
-    let web_app_bundle =
-        Bundle::<WebAppManifest>::pack_yaml(WebAppManifest::path().as_path()).await?;
+    let web_app_bundle = Bundle::<WebAppManifest>::pack_yaml(&manifest_path).await?;
 
     let bundle = WebAppBundle::decode(&web_app_bundle.encode()?)?;
 

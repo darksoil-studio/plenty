@@ -1,6 +1,7 @@
 import {
   Router,
   Routes,
+  notify,
   sharedStyles,
   wrapPathInSvg,
 } from "@holochain-open-dev/elements";
@@ -14,7 +15,7 @@ import "@shoelace-style/shoelace/dist/components/icon/icon.js";
 import { EntryRecord } from "@holochain-open-dev/utils";
 import { consume } from "@lit/context";
 import { msg } from "@lit/localize";
-import { mdiBasket, mdiCarrot, mdiHomeGroup } from "@mdi/js";
+import { mdiAccountPlus, mdiBasket, mdiCarrot, mdiHomeGroup } from "@mdi/js";
 
 import "./producers-page.js";
 import "./orders-page.js";
@@ -25,6 +26,13 @@ import { HouseholdsStore } from "./plenty/households/households-store.js";
 import { householdsStoreContext } from "./plenty/households/context.js";
 import { routerContext } from "./context.js";
 import { appStyles } from "./app-styles.js";
+import {
+  CellInfo,
+  CellType,
+  ProvisionedCell,
+  encodeHashToBase64,
+} from "@holochain/client";
+import { decode } from "@msgpack/msgpack";
 
 @customElement("home-page")
 export class HomePage extends SignalWatcher(LitElement) {
@@ -106,6 +114,27 @@ export class HomePage extends SignalWatcher(LitElement) {
           <span class="title" style="flex: 1">${msg("Plenty")}</span>
 
           <div class="row" style="gap: 16px" slot="actionItems">
+            <sl-icon-button
+              style="font-size: 24px"
+              .src=${wrapPathInSvg(mdiAccountPlus)}
+              @click=${async () => {
+                const appInfo =
+                  await this.householdsStore.client.client.appInfo();
+                const cellInfo: CellInfo = appInfo!.cell_info["plenty"][0]!;
+                const cell: ProvisionedCell = (cellInfo as any)[
+                  CellType.Provisioned
+                ] as ProvisionedCell;
+                const props: any = decode(cell.dna_modifiers.properties);
+                const progenitor = props.progenitors[0];
+
+                navigator.clipboard.writeText(`plenty://${progenitor}`);
+                notify(
+                  msg(
+                    "Copied invite link to the clipboard! Send it to the person you want to invite to this buyers club.",
+                  ),
+                );
+              }}
+            ></sl-icon-button>
             <my-notifications-icon-button></my-notifications-icon-button>
             ${this.renderMyProfile()}
           </div>

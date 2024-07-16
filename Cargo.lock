@@ -6421,6 +6421,8 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "app_dirs2",
+ "gdk",
+ "gtk",
  "holochain_client",
  "holochain_types",
  "lair_keystore",

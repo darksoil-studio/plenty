@@ -3,12 +3,11 @@
   "version": "0.0.0",
   "identifier": "studio.darksoil.plenty",
   "build": {
-    "beforeBuildCommand": "pnpm -F ui build && pnpm happ:build-debug",
+    "beforeBuildCommand": "pnpm -F lobby build",
     "devUrl": "http://localhost:1420",
     "frontendDist": "../lobby/dist"
   },
   "app": {
-    "withGlobalTauri": false,
     "security": {
       "csp": null
     }
