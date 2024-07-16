@@ -69,7 +69,7 @@ export class LobbyApp extends SignalWatcher(LitElement) {
 
     return html`
       <div class="column center-content" style="flex: 1; gap: 16px">
-        <img src="icon.png" style="height: 200px; width: 200px;" />
+        <img src="icon.png" style="height: 288px; width: 288px;" />
         <sl-card style="width: 900px">
           <div class="column" style="gap: 32px">
             <span class="title">${msg("Welcome to Plenty!")}</span>
