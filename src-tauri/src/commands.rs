@@ -8,7 +8,7 @@ use holochain_types::{
     prelude::YamlProperties,
     web_app::{WebAppBundle, WebAppManifest},
 };
-use mr_bundle::{Bundle, Manifest};
+use mr_bundle::Bundle;
 use tauri::{AppHandle, WebviewWindow};
 use tauri_plugin_holochain::HolochainExt;
 use tempdir::TempDir;
@@ -157,4 +157,32 @@ async fn override_properties_in_happ(
 
     let bundle = AppBundle::decode(&inner.encode()?)?;
     Ok(bundle)
+}
+
+#[tauri::command]
+pub async fn leave_buyers_club(app: AppHandle, window: WebviewWindow) -> Result<(), String> {
+    internal_leave_buyers_club(app, window)
+        .await
+        .map_err(|err| format!("{:?}", err))
+}
+
+pub async fn internal_leave_buyers_club(
+    app: AppHandle,
+    window: WebviewWindow,
+) -> anyhow::Result<()> {
+    let admin_ws = app.holochain()?.admin_websocket().await?;
+
+    admin_ws
+        .uninstall_app(APP_ID.into())
+        .await
+        .map_err(|err| anyhow!("{err:?}"))?;
+
+    window.close()?;
+
+    app.holochain()?
+        .main_window_builder(String::from("lobby"), false, None, None)
+        .await?
+        .build()?;
+
+    Ok(())
 }

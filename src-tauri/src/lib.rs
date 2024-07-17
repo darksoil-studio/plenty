@@ -40,7 +40,8 @@ pub fn run() {
         ))
         .invoke_handler(tauri::generate_handler![
             commands::create_plenty_instance,
-            commands::join_plenty_instance
+            commands::join_plenty_instance,
+            commands::leave_buyers_club
         ])
         .setup(|app| {
             if let Err(err) = app.deep_link().register("plenty") {

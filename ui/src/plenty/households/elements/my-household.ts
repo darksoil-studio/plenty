@@ -32,6 +32,7 @@ import {
   ProfilesStore,
   profilesStoreContext,
 } from "@holochain-open-dev/profiles";
+import { core } from "@tauri-apps/api";
 
 import { householdsStoreContext } from "../context.js";
 import { HouseholdsStore } from "../households-store.js";
@@ -211,15 +212,73 @@ export class MyHousehold extends SignalWatcher(LitElement) {
           variant="danger"
           .loading=${this.leaving}
           @click=${async () => {
+            if (this.leaving) return;
             this.leaving = true;
 
-            await this.householdsStore.client.leaveHousehold(householdHash);
-            this.leaving = false;
-            (
-              this.shadowRoot?.getElementById("leave-dialog") as SlDialog
-            ).hide();
+            try {
+              await this.householdsStore.client.leaveHousehold(householdHash);
+              this.leaving = false;
+              (
+                this.shadowRoot?.getElementById("leave-dialog") as SlDialog
+              ).hide();
+            } catch (e) {
+              notifyError(msg("Error leaving your household."));
+              console.error(e);
+            }
           }}
           >${msg("Leave household")}</sl-button
+        >
+      </sl-dialog>
+    `;
+  }
+
+  /**
+   * @internal
+   */
+  @state()
+  leavingBuyersClub = false;
+
+  renderLeaveBuyersClubDialog(householdHash: ActionHash) {
+    return html`
+      <sl-dialog
+        id="leave-buyers-club-dialog"
+        .label=${msg("Leave Buyers Club")}
+      >
+        <span>${msg("Are you sure you want to leave this buyers club?")}</span>
+        <sl-button
+          slot="footer"
+          @click=${() => {
+            (
+              this.shadowRoot?.getElementById(
+                "leave-buyers-club-dialog",
+              ) as SlDialog
+            ).hide();
+          }}
+          >${msg("Cancel")}</sl-button
+        >
+        <sl-button
+          slot="footer"
+          variant="danger"
+          .loading=${this.leavingBuyersClub}
+          @click=${async () => {
+            if (this.leavingBuyersClub) return;
+
+            this.leavingBuyersClub = true;
+            try {
+              await this.householdsStore.client.leaveHousehold(householdHash);
+              await core.invoke("leave_buyers_club");
+              this.leavingBuyersClub = false;
+              (
+                this.shadowRoot?.getElementById(
+                  "leave-buyers-club-dialog",
+                ) as SlDialog
+              ).hide();
+            } catch (e) {
+              notifyError(msg("Error leaving this buyers club."));
+              console.error(e);
+            }
+          }}
+          >${msg("Leave Buyers Club")}</sl-button
         >
       </sl-dialog>
     `;
@@ -235,6 +294,7 @@ export class MyHousehold extends SignalWatcher(LitElement) {
       ${this.renderAcceptDialog(householdHash)}
       ${this.renderRejectDialog(householdHash)}
       ${this.renderLeaveDialog(householdHash)}
+      ${this.renderLeaveBuyersClubDialog(householdHash)}
       <div class="column" style="gap: 32px; width: 600px;">
         <div class="column">
           <span class="title">${msg("Your Household's Profile")}</span>
@@ -347,16 +407,31 @@ export class MyHousehold extends SignalWatcher(LitElement) {
             </profile-detail>
           </sl-card>
         </div>
-        <div class="row" style="justify-content: end">
-          <sl-button
-            variant="danger"
-            @click=${() => {
-              (
-                this.shadowRoot?.getElementById("leave-dialog") as SlDialog
-              ).show();
-            }}
-            >${msg("Leave Household")}</sl-button
-          >
+        <div class="column">
+          <span class="title">${msg("Danger Zone")}</span>
+          <sl-divider></sl-divider>
+          <div class="row" style="justify-content: end; gap: 12px">
+            <sl-button
+              variant="danger"
+              @click=${() => {
+                (
+                  this.shadowRoot?.getElementById("leave-dialog") as SlDialog
+                ).show();
+              }}
+              >${msg("Leave Household")}</sl-button
+            >
+            <sl-button
+              variant="danger"
+              @click=${() => {
+                (
+                  this.shadowRoot?.getElementById(
+                    "leave-buyers-club-dialog",
+                  ) as SlDialog
+                ).show();
+              }}
+              >${msg("Leave Buyers Club")}</sl-button
+            >
+          </div>
         </div>
       </div>
     `;
