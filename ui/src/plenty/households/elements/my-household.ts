@@ -226,7 +226,7 @@ export class MyHousehold extends SignalWatcher(LitElement) {
               console.error(e);
             }
           }}
-          >${msg("Leave household")}</sl-button
+          >${msg("Leave Household")}</sl-button
         >
       </sl-dialog>
     `;
@@ -407,9 +407,10 @@ export class MyHousehold extends SignalWatcher(LitElement) {
             </profile-detail>
           </sl-card>
         </div>
-        <div class="column">
+        <div class="column" style="gap: 8px">
           <span class="title">${msg("Danger Zone")}</span>
           <sl-divider></sl-divider>
+          <span>${msg("Be careful! These actions cannot be reversed.")}</span>
           <div class="row" style="justify-content: end; gap: 12px">
             <sl-button
               variant="danger"
