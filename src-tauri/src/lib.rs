@@ -11,8 +11,11 @@ const APP_ID: &'static str = "plenty";
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    gdk::init();
-    gtk::init().unwrap();
+    let mut context = tauri::generate_context!();
+    if tauri::is_dev() {
+        context.config_mut().identifier = String::from("hie");
+    }
+
     tauri::Builder::default()
         .plugin(
             tauri_plugin_log::Builder::default()
@@ -71,7 +74,7 @@ pub fn run() {
 
             Ok(())
         })
-        .run(tauri::generate_context!())
+        .run(context)
         .expect("error while running tauri application");
 }
 pub fn vec_to_locked(mut pass_tmp: Vec<u8>) -> std::io::Result<BufRead> {
