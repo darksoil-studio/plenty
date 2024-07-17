@@ -6483,8 +6483,6 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "app_dirs2",
- "gdk",
- "gtk",
  "holochain_client 0.5.0-rc.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "holochain_types",
  "lair_keystore",
@@ -6501,6 +6499,7 @@ dependencies = [
  "tauri-plugin-single-instance",
  "tempdir",
  "url2",
+ "uuid 1.10.0",
 ]
 
 [[package]]

@@ -13,7 +13,8 @@ const APP_ID: &'static str = "plenty";
 pub fn run() {
     let mut context = tauri::generate_context!();
     if tauri::is_dev() {
-        context.config_mut().identifier = String::from("hie");
+        let identifier = context.config().identifier.clone();
+        context.config_mut().identifier = format!("{}{}", identifier, uuid::Uuid::new_v4());
     }
 
     tauri::Builder::default()
@@ -24,6 +25,7 @@ pub fn run() {
         )
         .plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
             println!("{}, {argv:?}, {cwd}", app.package_info().name);
+            // TODO: join plenty instance
             // app.emit("single-instance", Payload { args: argv, cwd })
             //     .unwrap();
         }))
