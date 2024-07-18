@@ -6,7 +6,6 @@ import {
 } from "@holochain-open-dev/elements";
 import { AsyncSignal, Signal } from "@holochain-open-dev/signals";
 import { ReactiveControllerHost } from "lit";
-import { Router as NNativeRouter } from "@lit-labs/router";
 
 export type RouteConfigWithSignalName = RouteConfig & {
   nameSignal?: (params: {
