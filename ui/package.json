@@ -16,7 +16,7 @@
     "@darksoil-studio/roles": "github:darksoil-studio/roles#4ed443e86c578fc50803ebd8e0fa2171fe4c1b72&path:ui",
     "@darksoil-studio/tasks": "github:darksoil-studio/tasks#fcc543c1d20083caad90bad7b473a28e61a7aaa2&path:ui",
     "@holochain-open-dev/elements": "^0.300.1",
-    "@holochain-open-dev/file-storage": "github:holochain-open-dev/file-storage#5398c59337f37aaca9e466d3c9bd57cbc700c112&path:ui",
+    "@holochain-open-dev/file-storage": "github:holochain-open-dev/file-storage#5b8b49cd5111888e63e7b7b6f9b472b3a4567e53&path:ui",
     "@holochain-open-dev/profiles": "github:holochain-open-dev/profiles#8c50a65a597dc933eff83ff6e81cab1b2ef7fb89&path:ui",
     "@holochain-open-dev/signals": "^0.300.6",
     "@holochain-open-dev/utils": "^0.300.2",
