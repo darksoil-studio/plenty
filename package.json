@@ -11,7 +11,7 @@
     "local-services": "hc run-local-services --bootstrap-interface $INTERNAL_IP --bootstrap-port $BOOTSTRAP_PORT  --signal-interfaces $INTERNAL_IP --signal-port $SIGNAL_PORT",
     "test": "pnpm run happ:build-debug && nix flake check -L && pnpm -F tests test",
     "happ:build-debug": "nix build -L .#plenty_happ -o workdir/plenty.happ",
-    "happ:build": "nix build -L .#plenty_happ.meta.release -o workdir/plenty.happ && pnpm -F ui package && hc web-app pack workdir",
+    "happ:build": "nix build --accept-flake-config -L .#plenty_happ.meta.release -o workdir/plenty.happ && pnpm -F ui package && hc web-app pack workdir",
     "playground": "holochain-playground"
   },
   "devDependencies": {
