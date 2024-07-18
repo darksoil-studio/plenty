@@ -98,13 +98,13 @@ export class ProducersPage extends SignalWatcher(LitElement) {
       nameSignal: (params) =>
         pipe(
           this.producersStore.producers.get(
-            decodeHashFromBase64(params.producerHash as ActionHashB64)
+            decodeHashFromBase64(params.producerHash as ActionHashB64),
           ).latestVersion,
-          (producer) => producer.entry.name
+          (producer) => producer.entry.name,
         ),
       render: (params) =>
         this.renderProducer(
-          decodeHashFromBase64(params.producerHash as ActionHashB64)
+          decodeHashFromBase64(params.producerHash as ActionHashB64),
         ),
     },
     {
@@ -119,7 +119,7 @@ export class ProducersPage extends SignalWatcher(LitElement) {
           <edit-producer
             style="width: 50rem"
             .producerHash=${decodeHashFromBase64(
-              params.producerHash as ActionHashB64
+              params.producerHash as ActionHashB64,
             )}
             @edit-canceled=${() => this.routes.pop()}
             @producer-updated=${(e: CustomEvent) => {
@@ -153,9 +153,9 @@ export class ProducersPage extends SignalWatcher(LitElement) {
           }}
         >
           <edit-product
-            style="width: 70rem"
+            style="width: 50rem"
             .productHash=${decodeHashFromBase64(
-              params.productHash as ActionHashB64
+              params.productHash as ActionHashB64,
             )}
             @edit-canceled=${() => this.routes.pop()}
             @product-updated=${(e: CustomEvent) => {
@@ -173,9 +173,9 @@ export class ProducersPage extends SignalWatcher(LitElement) {
           @close-requested=${() => this.routes.pop()}
         >
           <create-product
-            style="width: 70rem"
+            style="width: 50rem"
             .producerHash=${decodeHashFromBase64(
-              params.producerHash as ActionHashB64
+              params.producerHash as ActionHashB64,
             )}
             @product-created=${(e: CustomEvent) => {
               this.routes.pop();
@@ -230,7 +230,7 @@ export class ProducersPage extends SignalWatcher(LitElement) {
                   ? html`<sl-button
                       @click=${() =>
                         this.routes.goto(
-                          `${encodeHashToBase64(producerHash)}/edit`
+                          `${encodeHashToBase64(producerHash)}/edit`,
                         )}
                       style="align-self: start"
                     >
@@ -252,7 +252,7 @@ export class ProducersPage extends SignalWatcher(LitElement) {
                           @click=${() => {
                             (
                               this.shadowRoot?.getElementById(
-                                "upload-products-csv-dialog"
+                                "upload-products-csv-dialog",
                               ) as SlDialog
                             ).show();
                           }}
@@ -267,8 +267,8 @@ export class ProducersPage extends SignalWatcher(LitElement) {
                           @click=${() =>
                             this.routes.goto(
                               `${encodeHashToBase64(
-                                producerHash
-                              )}/create-product`
+                                producerHash,
+                              )}/create-product`,
                             )}
                         >
                           <sl-icon
@@ -289,10 +289,10 @@ export class ProducersPage extends SignalWatcher(LitElement) {
                 @edit-product-requested=${(e: CustomEvent) =>
                   this.routes.goto(
                     `${encodeHashToBase64(
-                      producerHash
+                      producerHash,
                     )}/products/${encodeHashToBase64(
-                      e.detail.productHash
-                    )}/edit`
+                      e.detail.productHash,
+                    )}/edit`,
                   )}
               ></products-for-producer>
             </div>
@@ -309,7 +309,7 @@ export class ProducersPage extends SignalWatcher(LitElement) {
 
   async uploadProducts(
     producerHash: ActionHash,
-    products: Array<Omit<Product, "producer_hash">>
+    products: Array<Omit<Product, "producer_hash">>,
   ) {
     if (this.uploading) return;
 
@@ -317,7 +317,7 @@ export class ProducersPage extends SignalWatcher(LitElement) {
 
     try {
       await this.producersStore.client.createProducts(
-        products.map((p) => ({ ...p, producer_hash: producerHash }))
+        products.map((p) => ({ ...p, producer_hash: producerHash })),
       );
     } catch (e: any) {
       notifyError(msg(str`Error uploading producers: ${e.message}`));
@@ -379,7 +379,7 @@ export class ProducersPage extends SignalWatcher(LitElement) {
         <div class="column" style="gap: 16px; flex: 1">
           <span
             >${msg(
-              "Upload a CSV file with the products you want to import."
+              "Upload a CSV file with the products you want to import.",
             )}</span
           >
           <div class="row" style="gap: 12px">
@@ -396,7 +396,7 @@ export class ProducersPage extends SignalWatcher(LitElement) {
                   this.uploadedProducts = await processCsvProductsFile(file);
                 } catch (e: any) {
                   notifyError(
-                    msg(str`Error processing the CSV file: ${e.message}`)
+                    msg(str`Error processing the CSV file: ${e.message}`),
                   );
                   console.error(e);
                   (event.target! as any).value = "";

@@ -6,6 +6,7 @@ import {
 } from "@holochain-open-dev/elements";
 import { AsyncSignal, Signal } from "@holochain-open-dev/signals";
 import { ReactiveControllerHost } from "lit";
+import { Router as NNativeRouter } from "@lit-labs/router";
 
 export type RouteConfigWithSignalName = RouteConfig & {
   nameSignal?: (params: {
@@ -46,7 +47,7 @@ export class Routes extends NativeRoutes {
     this.currentRouteSignal.set(cr);
   }
 
-  pop(parentPath: string = "") {
+  pop() {
     const previousPathname = this.currentPathname();
     window.history.back();
 

@@ -34,7 +34,7 @@ jobs:
         with:
           name: darksoil-studio
 
-      - name: Install and test
+      - name: Build .webhapp
         run: |
           nix-store --gc
           nix develop --command bash -c "pnpm install && pnpm happ:build"

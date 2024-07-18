@@ -10,12 +10,9 @@ import "@shoelace-style/shoelace/dist/components/breadcrumb-item/breadcrumb-item
 import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
 import "@holochain-open-dev/profiles/dist/elements/profile-list-item.js";
 import { msg } from "@lit/localize";
-import {
-  Router,
-  sharedStyles,
-  wrapPathInSvg,
-} from "@holochain-open-dev/elements";
+import { wrapPathInSvg } from "@holochain-open-dev/elements";
 import { mdiPencil, mdiPlus } from "@mdi/js";
+import { RolesStore, rolesStoreContext } from "@darksoil-studio/roles";
 
 import "./routes-breadcrumbs.js";
 import "./overlay-page.js";
@@ -39,7 +36,6 @@ import { Producer } from "./plenty/producers/types.js";
 import { appStyles } from "./app-styles.js";
 import { ordersStoreContext } from "./plenty/orders/context.js";
 import { OrdersStore } from "./plenty/orders/orders-store.js";
-import { RolesStore, rolesStoreContext } from "@darksoil-studio/roles";
 import { orderManagerRoleConfig } from "./roles.js";
 
 @customElement("orders-page")
@@ -90,13 +86,13 @@ export class ProducersPage extends SignalWatcher(LitElement) {
       nameSignal: (params) =>
         pipe(
           this.ordersStore.orders.get(
-            decodeHashFromBase64(params.orderHash as ActionHashB64)
+            decodeHashFromBase64(params.orderHash as ActionHashB64),
           ).latestVersion,
-          (order) => order.entry.name
+          (order) => order.entry.name,
         ),
       render: (params) =>
         this.renderOrder(
-          decodeHashFromBase64(params.orderHash as ActionHashB64)
+          decodeHashFromBase64(params.orderHash as ActionHashB64),
         ),
     },
     {
@@ -110,7 +106,7 @@ export class ProducersPage extends SignalWatcher(LitElement) {
         >
           <edit-order
             .orderHash=${decodeHashFromBase64(
-              params.orderHash as ActionHashB64
+              params.orderHash as ActionHashB64,
             )}
             @edit-canceled=${() => this.routes.pop()}
             @order-updated=${(e: CustomEvent) => {
@@ -139,10 +135,10 @@ export class ProducersPage extends SignalWatcher(LitElement) {
           <create-available-products
             style="width: 70rem"
             .orderHash=${decodeHashFromBase64(
-              params.orderHash as ActionHashB64
+              params.orderHash as ActionHashB64,
             )}
             .producerHash=${decodeHashFromBase64(
-              params.producerHash as ActionHashB64
+              params.producerHash as ActionHashB64,
             )}
             @edit-canceled=${() => this.routes.pop()}
             @available-products-created=${(e: CustomEvent) => {
@@ -164,7 +160,7 @@ export class ProducersPage extends SignalWatcher(LitElement) {
           <edit-available-products
             style="width: 70rem"
             .availableProductsHash=${decodeHashFromBase64(
-              params.availableProductsHash as ActionHashB64
+              params.availableProductsHash as ActionHashB64,
             )}
             @edit-canceled=${() => this.routes.pop()}
             @available-products-updated=${(e: CustomEvent) => {
@@ -196,18 +192,18 @@ export class ProducersPage extends SignalWatcher(LitElement) {
             @set-available-products-requested=${(e: CustomEvent) =>
               this.routes.goto(
                 `${encodeHashToBase64(
-                  orderHash
+                  orderHash,
                 )}/available-products/${encodeHashToBase64(
-                  e.detail.producerHash
-                )}/create`
+                  e.detail.producerHash,
+                )}/create`,
               )}
             @edit-available-products-requested=${(e: CustomEvent) =>
               this.routes.goto(
                 `${encodeHashToBase64(
-                  orderHash
+                  orderHash,
                 )}/available-products/${encodeHashToBase64(
-                  e.detail.availableProductsHash
-                )}/edit`
+                  e.detail.availableProductsHash,
+                )}/edit`,
               )}
           ></order-detail>
         `;

@@ -25,13 +25,14 @@ export class RoutesBreadcrumbs extends SignalWatcher(LitElement) {
 
   matchingRoutes(): Array<[RouteConfigWithSignalName, string]> {
     const currentRoute = this.routes.currentRoute.get();
-    const currentPathname = this.routes.currentPathname();
     if (!currentRoute) return [];
+
+    const currentPathname = this.routes.currentPathname();
 
     const split = currentPathname.split("/").filter((s) => !!s);
 
     const possibleRoutes = this.routes.routes.filter(
-      (route) => route.name || (route as RouteConfigWithSignalName).nameSignal
+      (route) => route.name || (route as RouteConfigWithSignalName).nameSignal,
     );
 
     const matchingRoutes: Array<[RouteConfigWithSignalName, string]> = [];
@@ -61,7 +62,7 @@ export class RoutesBreadcrumbs extends SignalWatcher(LitElement) {
           <sl-breadcrumb-item href="${this.routes.link(matchingPathname)}"
             >${this.name(route)}</sl-breadcrumb-item
           >
-        `
+        `,
       )}
     </sl-breadcrumb>`;
   }

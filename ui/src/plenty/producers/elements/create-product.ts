@@ -87,11 +87,11 @@ export class CreateProduct extends SignalWatcher(LitElement) {
   async createProduct(fields: Partial<Product>) {
     if (this.producerHash === undefined)
       throw new Error(
-        "Cannot create a new Product without its producer_hash field"
+        "Cannot create a new Product without its producer_hash field",
       );
 
     const productsIds = await toPromise(
-      new AsyncComputed(() => this.allProductsIds())
+      new AsyncComputed(() => this.allProductsIds()),
     );
 
     if (productsIds.includes(fields.product_id!)) {
@@ -114,8 +114,8 @@ export class CreateProduct extends SignalWatcher(LitElement) {
       categories: (Array.isArray(fields.categories!)
         ? fields.categories!
         : fields.categories
-        ? ([fields.categories!] as unknown as Array<string>)
-        : []
+          ? ([fields.categories!] as unknown as Array<string>)
+          : []
       ).map((el) => el),
       packaging,
       maximum_available: fields.maximum_available
@@ -142,7 +142,7 @@ export class CreateProduct extends SignalWatcher(LitElement) {
           detail: {
             productHash: record.actionHash,
           },
-        })
+        }),
       );
 
       this.form.reset();
@@ -175,13 +175,13 @@ export class CreateProduct extends SignalWatcher(LitElement) {
     if (products.status !== "completed") return products;
 
     const productsLatestVersion = joinAsyncMap(
-      mapValues(products.value, (p) => p.latestVersion.get())
+      mapValues(products.value, (p) => p.latestVersion.get()),
     );
     if (productsLatestVersion.status !== "completed")
       return productsLatestVersion;
 
     const productsIds = Array.from(productsLatestVersion.value.values()).map(
-      (p) => p.entry.product_id
+      (p) => p.entry.product_id,
     );
 
     return {
@@ -229,7 +229,7 @@ export class CreateProduct extends SignalWatcher(LitElement) {
             <div class="column" style="flex: 1; gap: 12px">
               <div class="column" style="gap: 4px">
                 <span style="font-size: 16px">${msg("Packaging")}*</span>
-                <div class="row" style="gap: 12px; align-items: center">
+                <div class="row" style="gap: 8px; align-items: center">
                   <sl-input
                     type="number"
                     name="number_of_packages"
@@ -239,7 +239,7 @@ export class CreateProduct extends SignalWatcher(LitElement) {
                     style="width: 4rem"
                   >
                   </sl-input>
-                  <span style="width: 9em">${msg("packages of")}</span>
+                  <span style="width: 7em">${msg("units of")}</span>
                   <sl-input
                     type="number"
                     name="amount_per_package"
@@ -247,25 +247,21 @@ export class CreateProduct extends SignalWatcher(LitElement) {
                     style="width: 5rem"
                   >
                   </sl-input>
-                  <div class="row" style="gap: 12px; align-items: center">
-                    <sl-select name="packaging_unit" value="Kilograms">
-                      <sl-option value="Piece">${msg("Piece")}</sl-option>
-                      <sl-option value="Kilograms"
-                        >${msg("Kilograms")}</sl-option
-                      >
-                      <sl-option value="Grams">${msg("Grams")}</sl-option>
-                      <sl-option value="Liters">${msg("Liters")}</sl-option>
-                      <sl-option value="Milliliters"
-                        >${msg("Milliliters")}</sl-option
-                      >
-                      <sl-option value="Pounds">${msg("Pounds")}</sl-option>
-                      <sl-option value="Ounces">${msg("Ounces")}</sl-option>
-                    </sl-select>
-                    <sl-checkbox name="estimate"
-                      >${msg("Estimate")}</sl-checkbox
+                  <sl-select name="packaging_unit" value="Kilograms">
+                    <sl-option value="Piece">${msg("Piece")}</sl-option>
+                    <sl-option value="Kilograms">${msg("Kilograms")}</sl-option>
+                    <sl-option value="Grams">${msg("Grams")}</sl-option>
+                    <sl-option value="Liters">${msg("Liters")}</sl-option>
+                    <sl-option value="Milliliters"
+                      >${msg("Milliliters")}</sl-option
                     >
-                  </div>
+                    <sl-option value="Pounds">${msg("Pounds")}</sl-option>
+                    <sl-option value="Ounces">${msg("Ounces")}</sl-option>
+                  </sl-select>
                 </div>
+                <sl-checkbox name="estimate"
+                  >${msg("Estimate amount")}</sl-checkbox
+                >
               </div>
 
               <sl-input

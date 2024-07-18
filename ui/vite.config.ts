@@ -26,4 +26,10 @@ export default defineConfig({
       ],
     }),
   ],
+  resolve: {
+    alias: {
+      "@lit-labs/router":
+        "./node_modules/@lit-labs/router/development/index.js",
+    },
+  },
 });
