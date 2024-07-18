@@ -234,11 +234,12 @@ export class CreateProduct extends SignalWatcher(LitElement) {
                     type="number"
                     name="number_of_packages"
                     required
-                    .defaultValue=${"1"}
+                    min="1"
+                    value="1"
                     style="width: 3rem"
                   >
-                    <span slot="suffix">${msg("packages of")}</span>
                   </sl-input>
+                  <span>${msg("packages of")}</span>
                   <sl-input
                     type="number"
                     name="amount_per_package"
@@ -254,6 +255,9 @@ export class CreateProduct extends SignalWatcher(LitElement) {
                       >
                       <sl-option value="Grams">${msg("Grams")}</sl-option>
                       <sl-option value="Liters">${msg("Liters")}</sl-option>
+                      <sl-option value="Milliliters"
+                        >${msg("Milliliters")}</sl-option
+                      >
                       <sl-option value="Pounds">${msg("Pounds")}</sl-option>
                       <sl-option value="Ounces">${msg("Ounces")}</sl-option>
                     </sl-select>

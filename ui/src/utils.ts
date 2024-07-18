@@ -197,7 +197,7 @@ export function parsePackagingField(packagingStr: string): Packaging {
 function parsePackagingWithoutNumberOfPackages(
   packagingStr: string
 ): [PackagingUnit, number] {
-  const matches = packagingStr.match(/([\d,])+(.)+/g);
+  const matches = packagingStr.match(/([\d,.])+(.)+/g);
 
   if (!matches)
     throw new Error(msg(str`Unrecognized packaging field: ${packagingStr}`));

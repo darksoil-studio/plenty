@@ -235,32 +235,50 @@ export class EditProduct extends SignalWatcher(LitElement) {
           </div>
 
           <div class="column" style="flex: 1; gap: 12px">
-            <div class="row" style="gap: 12px; align-items: end">
-              <sl-input
-                type="number"
-                name="amount"
-                .label=${msg("Packaging")}
-                .defaultValue=${currentRecord.entry.packaging.amount}
-                required
-                style="width: 6rem"
-              ></sl-input>
-              <div class="row" style="gap: 12px; align-items: center">
-                <sl-select
-                  name="packaging_unit"
-                  .defaultValue=${currentRecord.entry.packaging.unit}
+            <div class="column" style="gap: 12px">
+              <span style="font-size: 16px">${msg("Packaging")}</span>
+              <div class="row" style="gap: 12px; align-items: end">
+                <sl-input
+                  type="number"
+                  name="number_of_packages"
+                  required
+                  min="1"
+                  .defaultValue=${currentRecord.entry.packaging
+                    .number_of_packages}
+                  style="width: 3rem"
                 >
-                  <sl-option value="Piece">${msg("Piece")}</sl-option>
-                  <sl-option value="Kilograms">${msg("Kilograms")}</sl-option>
-                  <sl-option value="Grams">${msg("Grams")}</sl-option>
-                  <sl-option value="Liters">${msg("Liters")}</sl-option>
-                  <sl-option value="Pounds">${msg("Pounds")}</sl-option>
-                  <sl-option value="Ounces">${msg("Ounces")}</sl-option>
-                </sl-select>
-                <sl-checkbox
-                  name="estimate"
-                  .defaultValue=${currentRecord.entry.packaging.estimate}
-                  >${msg("Estimate")}</sl-checkbox
+                </sl-input>
+                <span>${msg("packages of")}</span>
+                <sl-input
+                  type="number"
+                  name="amount_per_package"
+                  .defaultValue=${currentRecord.entry.packaging
+                    .amount_per_package}
+                  required
+                  style="width: 3rem"
                 >
+                </sl-input>
+                <div class="row" style="gap: 12px; align-items: center">
+                  <sl-select
+                    name="packaging_unit"
+                    .defaultValue=${currentRecord.entry.packaging.unit}
+                  >
+                    <sl-option value="Piece">${msg("Piece")}</sl-option>
+                    <sl-option value="Kilograms">${msg("Kilograms")}</sl-option>
+                    <sl-option value="Grams">${msg("Grams")}</sl-option>
+                    <sl-option value="Liters">${msg("Liters")}</sl-option>
+                    <sl-option value="Milliliters"
+                      >${msg("Milliliters")}</sl-option
+                    >
+                    <sl-option value="Pounds">${msg("Pounds")}</sl-option>
+                    <sl-option value="Ounces">${msg("Ounces")}</sl-option>
+                  </sl-select>
+                  <sl-checkbox
+                    name="estimate"
+                    .defaultValue=${currentRecord.entry.packaging.estimate}
+                    >${msg("Estimate")}</sl-checkbox
+                  >
+                </div>
               </div>
             </div>
 
