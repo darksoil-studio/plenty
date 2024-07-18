@@ -171,8 +171,12 @@ export class CreateProducer extends SignalWatcher(LitElement) {
             </div>
           </div>
 
-          <sl-button variant="primary" type="submit" .loading=${this.committing}
-            >${msg("Create Producer")}</sl-button
+          <sl-button
+            variant="primary"
+            type="submit"
+            .loading=${this.committing}
+          >
+            ${msg("Create Producer")}</sl-button
           >
         </form>
       </sl-card>

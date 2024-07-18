@@ -40,6 +40,7 @@ import { Household } from "../types.js";
 import "./edit-household.js";
 import "../../../overlay-page.js";
 import { appStyles } from "../../../app-styles.js";
+import { sleep } from "../../../utils.js";
 
 /**
  * @element my-household
@@ -94,7 +95,11 @@ export class MyHousehold extends SignalWatcher(LitElement) {
       <sl-dialog id="accept-dialog" .label=${msg("Accept join request")}>
         <span
           >${msg(
-            str`Are you sure you want to accept the join request by ${profile.status === "completed" ? profile.value!.entry.nickname : ""}?`,
+            str`Are you sure you want to accept the join request by ${
+              profile.status === "completed"
+                ? profile.value!.entry.nickname
+                : ""
+            }?`
           )}</span
         >
         <sl-button
@@ -115,7 +120,7 @@ export class MyHousehold extends SignalWatcher(LitElement) {
             this.accepting = true;
             await this.householdsStore.client.acceptJoinRequest(
               householdHash,
-              this.agentToAccept!,
+              this.agentToAccept!
             );
             this.accepting = false;
             this.agentToAccept = undefined;
@@ -152,7 +157,11 @@ export class MyHousehold extends SignalWatcher(LitElement) {
       <sl-dialog id="reject-dialog" .label=${msg("Reject join request")}>
         <span
           >${msg(
-            str`Are you sure you want to reject the join request by ${profile.status === "completed" ? profile.value!.entry.nickname : ""}?`,
+            str`Are you sure you want to reject the join request by ${
+              profile.status === "completed"
+                ? profile.value!.entry.nickname
+                : ""
+            }?`
           )}</span
         >
         <sl-button
@@ -174,7 +183,7 @@ export class MyHousehold extends SignalWatcher(LitElement) {
 
             await this.householdsStore.client.rejectJoinRequest(
               householdHash,
-              this.agentToReject!,
+              this.agentToReject!
             );
             this.rejecting = false;
             this.agentToReject = undefined;
@@ -250,7 +259,7 @@ export class MyHousehold extends SignalWatcher(LitElement) {
           @click=${() => {
             (
               this.shadowRoot?.getElementById(
-                "leave-buyers-club-dialog",
+                "leave-buyers-club-dialog"
               ) as SlDialog
             ).hide();
           }}
@@ -266,11 +275,15 @@ export class MyHousehold extends SignalWatcher(LitElement) {
             this.leavingBuyersClub = true;
             try {
               await this.householdsStore.client.leaveHousehold(householdHash);
+              // Wait for the leave household actions to get propagated
+              // TODO: improve this so that it's guaranteed to be propagated
+              await sleep(4000);
+
               await core.invoke("leave_buyers_club");
               this.leavingBuyersClub = false;
               (
                 this.shadowRoot?.getElementById(
-                  "leave-buyers-club-dialog",
+                  "leave-buyers-club-dialog"
                 ) as SlDialog
               ).hide();
             } catch (e) {
@@ -288,7 +301,7 @@ export class MyHousehold extends SignalWatcher(LitElement) {
     householdHash: ActionHash,
     entryRecord: EntryRecord<Household>,
     requestors: Array<AgentPubKey>,
-    members: Array<AgentPubKey>,
+    members: Array<AgentPubKey>
   ) {
     return html`
       ${this.renderAcceptDialog(householdHash)}
@@ -328,7 +341,7 @@ export class MyHousehold extends SignalWatcher(LitElement) {
                 <sl-divider></sl-divider>
                 <span class="placeholder" style="margin-bottom: 16px"
                   >${msg(
-                    "These people have requested to join your household:",
+                    "These people have requested to join your household:"
                   )}</span
                 >
 
@@ -348,7 +361,7 @@ export class MyHousehold extends SignalWatcher(LitElement) {
                                 this.agentToReject = requestor;
                                 (
                                   this.shadowRoot?.getElementById(
-                                    "reject-dialog",
+                                    "reject-dialog"
                                   ) as SlDialog
                                 ).show();
                               }}
@@ -360,7 +373,7 @@ export class MyHousehold extends SignalWatcher(LitElement) {
                                 this.agentToAccept = requestor;
                                 (
                                   this.shadowRoot?.getElementById(
-                                    "accept-dialog",
+                                    "accept-dialog"
                                   ) as SlDialog
                                 ).show();
                               }}
@@ -369,7 +382,7 @@ export class MyHousehold extends SignalWatcher(LitElement) {
                           </div>
                         </div>
                       </sl-card>
-                    `,
+                    `
                   )}
                 </div>
               </div>
@@ -384,7 +397,7 @@ export class MyHousehold extends SignalWatcher(LitElement) {
               ${members.map(
                 (member) => html`
                   <profile-list-item .agentPubKey=${member}></profile-list-item>
-                `,
+                `
               )}
             </div>
           </sl-card>
@@ -426,7 +439,7 @@ export class MyHousehold extends SignalWatcher(LitElement) {
               @click=${() => {
                 (
                   this.shadowRoot?.getElementById(
-                    "leave-buyers-club-dialog",
+                    "leave-buyers-club-dialog"
                   ) as SlDialog
                 ).show();
               }}
@@ -520,7 +533,7 @@ export class MyHousehold extends SignalWatcher(LitElement) {
                     @save-profile=${async (e: CustomEvent) => {
                       try {
                         await this.profilesStore.client.updateProfile(
-                          e.detail.profile,
+                          e.detail.profile
                         );
                         this._editingProfile = false;
                       } catch (e) {
@@ -539,7 +552,7 @@ export class MyHousehold extends SignalWatcher(LitElement) {
           result.value.householdHash,
           result.value.latestVersion,
           result.value.requestors,
-          result.value.members,
+          result.value.members
         );
     }
   }

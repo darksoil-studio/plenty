@@ -178,8 +178,8 @@ importers:
         specifier: github:darksoil-studio/notifications#585277862fb27e2f47d444b07627a411ac9ec5d1&path:ui
         version: https://codeload.github.com/darksoil-studio/notifications/tar.gz/585277862fb27e2f47d444b07627a411ac9ec5d1#path:ui(@types/react@18.3.3)
       '@darksoil-studio/roles':
-        specifier: github:darksoil-studio/roles#e2d77ad3fa49a4a4cb44c1efd3743ae566645b0a&path:ui
-        version: https://codeload.github.com/darksoil-studio/roles/tar.gz/e2d77ad3fa49a4a4cb44c1efd3743ae566645b0a#path:ui(@types/react@18.3.3)
+        specifier: github:darksoil-studio/roles#4ed443e86c578fc50803ebd8e0fa2171fe4c1b72&path:ui
+        version: https://codeload.github.com/darksoil-studio/roles/tar.gz/4ed443e86c578fc50803ebd8e0fa2171fe4c1b72#path:ui(@types/react@18.3.3)
       '@darksoil-studio/tasks':
         specifier: github:darksoil-studio/tasks#fcc543c1d20083caad90bad7b473a28e61a7aaa2&path:ui
         version: https://codeload.github.com/darksoil-studio/tasks/tar.gz/fcc543c1d20083caad90bad7b473a28e61a7aaa2#path:ui(@types/react@18.3.3)
@@ -342,8 +342,8 @@ packages:
     resolution: {path: ui, tarball: https://codeload.github.com/darksoil-studio/notifications/tar.gz/585277862fb27e2f47d444b07627a411ac9ec5d1}
     version: 0.1.0
 
-  '@darksoil-studio/roles@https://codeload.github.com/darksoil-studio/roles/tar.gz/e2d77ad3fa49a4a4cb44c1efd3743ae566645b0a#path:ui':
-    resolution: {path: ui, tarball: https://codeload.github.com/darksoil-studio/roles/tar.gz/e2d77ad3fa49a4a4cb44c1efd3743ae566645b0a}
+  '@darksoil-studio/roles@https://codeload.github.com/darksoil-studio/roles/tar.gz/4ed443e86c578fc50803ebd8e0fa2171fe4c1b72#path:ui':
+    resolution: {path: ui, tarball: https://codeload.github.com/darksoil-studio/roles/tar.gz/4ed443e86c578fc50803ebd8e0fa2171fe4c1b72}
     version: 0.1.0
 
   '@darksoil-studio/tasks@https://codeload.github.com/darksoil-studio/tasks/tar.gz/fcc543c1d20083caad90bad7b473a28e61a7aaa2#path:ui':
@@ -2983,7 +2983,7 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@darksoil-studio/roles@https://codeload.github.com/darksoil-studio/roles/tar.gz/e2d77ad3fa49a4a4cb44c1efd3743ae566645b0a#path:ui(@types/react@18.3.3)':
+  '@darksoil-studio/roles@https://codeload.github.com/darksoil-studio/roles/tar.gz/4ed443e86c578fc50803ebd8e0fa2171fe4c1b72#path:ui(@types/react@18.3.3)':
     dependencies:
       '@darksoil-studio/notifications': https://codeload.github.com/darksoil-studio/notifications/tar.gz/585277862fb27e2f47d444b07627a411ac9ec5d1#path:ui(@types/react@18.3.3)
       '@holochain-open-dev/elements': 0.300.1(@types/react@18.3.3)

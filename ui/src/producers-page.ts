@@ -1,6 +1,6 @@
 import { SignalWatcher, pipe } from "@holochain-open-dev/signals";
 import { LitElement, html } from "lit";
-import { customElement } from "lit/decorators.js";
+import { customElement, state } from "lit/decorators.js";
 import { consume } from "@lit/context";
 import "@shoelace-style/shoelace/dist/components/button/button.js";
 import "@shoelace-style/shoelace/dist/components/breadcrumb/breadcrumb.js";
@@ -9,8 +9,9 @@ import "@shoelace-style/shoelace/dist/components/skeleton/skeleton.js";
 import "@shoelace-style/shoelace/dist/components/breadcrumb-item/breadcrumb-item.js";
 import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
 import "@holochain-open-dev/profiles/dist/elements/profile-list-item.js";
-import { msg } from "@lit/localize";
+import { msg, str } from "@lit/localize";
 import {
+  notifyError,
   Router,
   sharedStyles,
   wrapPathInSvg,
@@ -33,14 +34,29 @@ import {
 import { producersStoreContext } from "./plenty/producers/context.js";
 import { ProducersStore } from "./plenty/producers/producers-store.js";
 import { EntryRecord } from "@holochain-open-dev/utils";
-import { Producer } from "./plenty/producers/types.js";
+import {
+  Producer,
+  Product,
+  renderPackaging,
+} from "./plenty/producers/types.js";
 import { appStyles } from "./app-styles.js";
-import { mdiPencil } from "@mdi/js";
+import { mdiFileUpload, mdiPencil, mdiPlus } from "@mdi/js";
+import {
+  adminRoleConfig,
+  RolesStore,
+  rolesStoreContext,
+} from "@darksoil-studio/roles";
+import { SlDialog } from "@shoelace-style/shoelace";
+import { processCsvProductsFile } from "./utils.js";
+import { GridDataProviderCallback } from "@vaadin/grid";
 
 @customElement("producers-page")
 export class ProducersPage extends SignalWatcher(LitElement) {
   @consume({ context: producersStoreContext, subscribe: true })
   producersStore!: ProducersStore;
+
+  @consume({ context: rolesStoreContext, subscribe: true })
+  rolesStore!: RolesStore;
 
   routes = new Routes(this, [
     {
@@ -77,13 +93,13 @@ export class ProducersPage extends SignalWatcher(LitElement) {
       nameSignal: (params) =>
         pipe(
           this.producersStore.producers.get(
-            decodeHashFromBase64(params.producerHash as ActionHashB64),
+            decodeHashFromBase64(params.producerHash as ActionHashB64)
           ).latestVersion,
-          (producer) => producer.entry.name,
+          (producer) => producer.entry.name
         ),
       render: (params) =>
         this.renderProducer(
-          decodeHashFromBase64(params.producerHash as ActionHashB64),
+          decodeHashFromBase64(params.producerHash as ActionHashB64)
         ),
     },
     {
@@ -98,7 +114,7 @@ export class ProducersPage extends SignalWatcher(LitElement) {
           <edit-producer
             style="width: 50rem"
             .producerHash=${decodeHashFromBase64(
-              params.producerHash as ActionHashB64,
+              params.producerHash as ActionHashB64
             )}
             @edit-canceled=${() => this.routes.pop()}
             @producer-updated=${(e: CustomEvent) => {
@@ -134,7 +150,7 @@ export class ProducersPage extends SignalWatcher(LitElement) {
           <edit-product
             style="width: 50rem"
             .productHash=${decodeHashFromBase64(
-              params.productHash as ActionHashB64,
+              params.productHash as ActionHashB64
             )}
             @edit-canceled=${() => this.routes.pop()}
             @product-updated=${(e: CustomEvent) => {
@@ -154,7 +170,7 @@ export class ProducersPage extends SignalWatcher(LitElement) {
           <create-product
             style="width: 50rem"
             .producerHash=${decodeHashFromBase64(
-              params.producerHash as ActionHashB64,
+              params.producerHash as ActionHashB64
             )}
             @product-created=${(e: CustomEvent) => {
               this.routes.pop();
@@ -209,7 +225,7 @@ export class ProducersPage extends SignalWatcher(LitElement) {
                   ? html`<sl-button
                       @click=${() =>
                         this.routes.goto(
-                          `${encodeHashToBase64(producerHash)}/edit`,
+                          `${encodeHashToBase64(producerHash)}/edit`
                         )}
                       style="align-self: start"
                     >
@@ -225,13 +241,35 @@ export class ProducersPage extends SignalWatcher(LitElement) {
               <div class="row" style="margin-top: 8px; align-items: center">
                 <span class="title" style="flex: 1">${msg("Products")}</span>
                 ${this.producersStore.canIEditProducts(producer.value)
-                  ? html`<sl-button
-                      @click=${() =>
-                        this.routes.goto(
-                          `${encodeHashToBase64(producerHash)}/create-product`,
-                        )}
-                      >${msg("Create Product")}</sl-button
-                    >`
+                  ? html`
+                      <div class="row" style="gap: 12px">
+                        <sl-button
+                          @click=${() => {
+                            (
+                              this.shadowRoot?.getElementById(
+                                "upload-products-csv-dialog"
+                              ) as SlDialog
+                            ).show();
+                          }}
+                        >
+                          <sl-icon
+                            .src=${wrapPathInSvg(mdiFileUpload)}
+                            slot="prefix"
+                          ></sl-icon>
+                          ${msg("Import products from CSV file")}</sl-button
+                        >
+                        <sl-button
+                          @click=${() =>
+                            this.routes.goto(
+                              `${encodeHashToBase64(
+                                producerHash
+                              )}/create-product`
+                            )}
+                          >${msg("Create Product")}</sl-button
+                        >
+                      </div>
+                      ${this.renderUploadProductsCsvDialog(producerHash)}
+                    `
                   : html``}
               </div>
 
@@ -240,13 +278,128 @@ export class ProducersPage extends SignalWatcher(LitElement) {
                 .producerHash=${producerHash}
                 @edit-product-requested=${(e: CustomEvent) =>
                   this.routes.goto(
-                    `${encodeHashToBase64(producerHash)}/products/${encodeHashToBase64(e.detail.productHash)}/edit`,
+                    `${encodeHashToBase64(
+                      producerHash
+                    )}/products/${encodeHashToBase64(
+                      e.detail.productHash
+                    )}/edit`
                   )}
               ></products-for-producer>
             </div>
           </div>
         `;
     }
+  }
+
+  @state()
+  uploadedProducts: Array<Product> | undefined;
+
+  @state()
+  uploading = false;
+
+  async uploadProducts(
+    producerHash: ActionHash,
+    products: Array<Omit<Product, "producer_hash">>
+  ) {
+    if (this.uploading) return;
+
+    this.uploading = true;
+
+    try {
+      for (const product of products) {
+        const finalProduct: Product = {
+          ...product,
+          producer_hash: producerHash,
+        };
+        await this.producersStore.client.createProduct(finalProduct);
+      }
+    } catch (e: any) {
+      notifyError(msg(str`Error uploading producers: ${e.message}`));
+      console.error(e);
+    }
+
+    this.uploading = false;
+  }
+
+  renderGrid(products: Array<Product>) {
+    return html`
+      <div class="column" style="gap: 12px">
+        <span class="title">${msg("Preview")}</span>
+        <vaadin-grid
+          multi-sort
+          .items=${products}
+          style="flex: 1; height: 100%"
+        >
+          <vaadin-grid-tree-column
+            .header=${msg("Product")}
+            path="name"
+          ></vaadin-grid-tree-column>
+          <vaadin-grid-column
+            .header=${msg("Packaging")}
+            .renderer=${(root: any, __: any, model: any) => {
+              const product: Product = model.item;
+              if (product.packaging) {
+                root.textContent = renderPackaging(product.packaging);
+              } else {
+                root.textContent = "";
+              }
+            }}
+          ></vaadin-grid-column>
+          <vaadin-grid-sort-column
+            .header=${msg("Price without VAT")}
+            path="price"
+          ></vaadin-grid-sort-column>
+          <vaadin-grid-sort-column
+            .header=${msg("VAT")}
+            path="vat_percentage"
+          ></vaadin-grid-sort-column>
+        </vaadin-grid>
+      </div>
+    `;
+  }
+
+  renderUploadProductsCsvDialog(producerHash: ActionHash) {
+    return html`
+      <sl-dialog
+        id="upload-products-csv-dialog"
+        .label=${msg("Import Products")}
+      >
+        <div class="column" style="gap: 12px">
+          <span>${msg("Upload a CSV with this format:")}</span>
+          <input
+            type="file"
+            accept="csv"
+            @change=${async (e: Event) => {
+              try {
+                const file = (e.target as any).files[0];
+                if (!file) {
+                  this.uploadedProducts = undefined;
+                  return;
+                }
+                this.uploadedProducts = await processCsvProductsFile(file);
+              } catch (e: any) {
+                notifyError(
+                  msg(str`Error processing the CSV file: ${e.message}`)
+                );
+                console.error(e);
+              }
+            }}
+          />
+          ${this.uploadedProducts
+            ? this.renderGrid(this.uploadedProducts)
+            : html``}
+        </div>
+
+        <sl-button
+          slot="footer"
+          .loading=${this.uploading}
+          .disabled=${!this.uploadedProducts}
+          @click=${() =>
+            this.uploadProducts(producerHash, this.uploadedProducts!)}
+          >${msg("Upload Products")}</sl-button
+        >
+      </sl-dialog>
+    `;
   }
 
   render() {
@@ -261,8 +414,12 @@ export class ProducersPage extends SignalWatcher(LitElement) {
           <span style="flex: 1"></span>
           ${this.routes.currentRoute.get()?.name === msg("All Producers")
             ? html`
-                <sl-button @click=${() => this.routes.goto("create-producer")}
-                  >${msg("Create Producer")}</sl-button
+                <sl-button @click=${() => this.routes.goto("create-producer")}>
+                  <sl-icon
+                    .src=${wrapPathInSvg(mdiPlus)}
+                    slot="prefix"
+                  ></sl-icon>
+                  ${msg("Create Producer")}</sl-button
                 >
               `
             : html``}

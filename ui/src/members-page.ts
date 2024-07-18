@@ -18,6 +18,8 @@ import { consume } from "@lit/context";
 import { RolesStore, rolesStoreContext } from "@darksoil-studio/roles";
 import { adminRoleConfig } from "@darksoil-studio/roles/dist/role-config.js";
 import { bookkeeperRoleConfig, orderManagerRoleConfig } from "./roles.js";
+import { wrapPathInSvg } from "@holochain-open-dev/elements";
+import { mdiAccountSupervisor } from "@mdi/js";
 
 @customElement("members-page")
 export class MembersPage extends SignalWatcher(LitElement) {
@@ -71,6 +73,12 @@ export class MembersPage extends SignalWatcher(LitElement) {
                   .role=${bookkeeperRoleConfig.role}
                 ></role-detail>
               </sl-card>
+              <sl-card>
+                <role-detail
+                  style="flex: 1"
+                  .role=${adminRoleConfig.role}
+                ></role-detail>
+              </sl-card>
             </div>
           </div>
         </div>
@@ -86,8 +94,12 @@ export class MembersPage extends SignalWatcher(LitElement) {
     if (!iAmAdmin) return html``;
 
     return html`
-      <sl-button @click=${() => this.routes.goto("manage-roles")}
-        >${msg("Manage Roles")}</sl-button
+      <sl-button @click=${() => this.routes.goto("manage-roles")}>
+        <sl-icon
+          .src=${wrapPathInSvg(mdiAccountSupervisor)}
+          slot="prefix"
+        ></sl-icon>
+        ${msg("Manage Roles")}</sl-button
       >
     `;
   }

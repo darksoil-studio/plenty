@@ -15,7 +15,7 @@ import {
   sharedStyles,
   wrapPathInSvg,
 } from "@holochain-open-dev/elements";
-import { mdiPencil } from "@mdi/js";
+import { mdiPencil, mdiPlus } from "@mdi/js";
 
 import "./routes-breadcrumbs.js";
 import "./overlay-page.js";
@@ -241,8 +241,12 @@ export class ProducersPage extends SignalWatcher(LitElement) {
           showCreateOrderButton.status === "completed" &&
           showCreateOrderButton.value
             ? html`
-                <sl-button @click=${() => this.routes.goto("create-order")}
-                  >${msg("Create Order")}</sl-button
+                <sl-button @click=${() => this.routes.goto("create-order")}>
+                  <sl-icon
+                    .src=${wrapPathInSvg(mdiPlus)}
+                    slot="prefix"
+                  ></sl-icon>
+                  ${msg("Create Order")}</sl-button
                 >
               `
             : html``}

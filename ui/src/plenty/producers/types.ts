@@ -48,7 +48,12 @@ export interface Producer {
 }
 
 export function renderPackaging(packaging: Packaging) {
-  return `${packaging.amount}${renderPackagingUnit(packaging.unit, packaging.amount !== 1)}`;
+  return `${
+    packaging.number_of_packages === 1 ? `` : `${packaging.number_of_packages}x`
+  }${packaging.amount_per_package}${renderPackagingUnit(
+    packaging.unit,
+    packaging.amount_per_package !== 1
+  )}`;
 }
 
 export function renderPackagingUnit(unit: PackagingUnit, plural: boolean) {
@@ -61,6 +66,8 @@ export function renderPackagingUnit(unit: PackagingUnit, plural: boolean) {
       return msg("g");
     case "Liters":
       return msg("L");
+    case "Milliliters":
+      return msg("mL");
     case "Ounces":
       return msg("oz");
   }
@@ -71,12 +78,14 @@ export type PackagingUnit =
   | "Kilograms"
   | "Grams"
   | "Liters"
+  | "Milliliters"
   | "Pounds"
   | "Ounces";
 
 export interface Packaging {
+  number_of_packages: number;
+  amount_per_package: number;
   unit: PackagingUnit;
-  amount: number;
   estimate: boolean;
 }
 
@@ -84,24 +93,14 @@ export interface Product {
   producer_hash: ActionHash;
 
   name: string;
-
   product_id: string;
-
   description: string;
-
   categories: Array<string>;
-
   packaging: Packaging;
-
   maximum_available: number | undefined;
-
   price: number;
-
   vat_percentage: number;
-
   margin_percentage: number | undefined;
-
   origin: string | undefined;
-
   ingredients: string | undefined;
 }
