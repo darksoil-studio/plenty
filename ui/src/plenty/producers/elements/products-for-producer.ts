@@ -70,7 +70,7 @@ export class ProductsForProducer extends SignalWatcher(LitElement) {
           detail: {
             productHash,
           },
-        }),
+        })
       );
       (this.shadowRoot?.getElementById("delete-product") as SlDialog).hide();
       this.productToDelete = undefined;
@@ -83,7 +83,7 @@ export class ProductsForProducer extends SignalWatcher(LitElement) {
 
   renderList(
     producer: EntryRecord<Producer>,
-    map: ReadonlyMap<ActionHash, EntryRecord<Product>>,
+    map: ReadonlyMap<ActionHash, EntryRecord<Product>>
   ) {
     if (map.size === 0)
       return html` <sl-card class="column" style="flex: 1; height: 250px">
@@ -102,7 +102,9 @@ export class ProductsForProducer extends SignalWatcher(LitElement) {
       <sl-dialog id="delete-product" .label=${msg("Delete Product")}>
         <span
           >${msg(
-            str`Are you sure you want to delete the product "${this.productToDelete ? this.productToDelete[1] : ""}"?`,
+            str`Are you sure you want to delete the product "${
+              this.productToDelete ? this.productToDelete[1] : ""
+            }"?`
           )}</span
         >
 
@@ -166,7 +168,7 @@ export class ProductsForProducer extends SignalWatcher(LitElement) {
           path="maximum_available"
         ></vaadin-grid-sort-column>
         <vaadin-grid-column
-          .header=${msg("VAT")}
+          .header=${msg("VAT (%)")}
           path="vat_percentage"
         ></vaadin-grid-column>
         ${this.producersStore.canIEditProducts(producer)
@@ -184,10 +186,10 @@ export class ProductsForProducer extends SignalWatcher(LitElement) {
                             detail: {
                               productHash: model.item.productHash,
                             },
-                          }),
+                          })
                         )}
                     ></sl-icon-button>`,
-                    root,
+                    root
                   );
                 }}
               ></vaadin-grid-column>
@@ -204,12 +206,12 @@ export class ProductsForProducer extends SignalWatcher(LitElement) {
                         ];
                         (
                           this.shadowRoot?.getElementById(
-                            "delete-product",
+                            "delete-product"
                           ) as SlDialog
                         ).show();
                       }}
                     ></sl-icon-button>`,
-                    root,
+                    root
                   );
                 }}
               ></vaadin-grid-column>`
@@ -230,7 +232,7 @@ export class ProductsForProducer extends SignalWatcher(LitElement) {
       return producerLatestVersion;
 
     const latestVersion = joinAsyncMap(
-      mapValues(map.value, (p) => p.latestVersion.get()),
+      mapValues(map.value, (p) => p.latestVersion.get())
     );
     if (latestVersion.status !== "completed") return latestVersion;
 
@@ -261,7 +263,7 @@ export class ProductsForProducer extends SignalWatcher(LitElement) {
       case "completed":
         return this.renderList(
           products.value.producer,
-          products.value.products,
+          products.value.products
         );
     }
   }

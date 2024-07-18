@@ -1,16 +1,16 @@
 import { AsyncSignal, SignalWatcher } from "@holochain-open-dev/signals";
 import { LitElement, html } from "lit";
 import { customElement, property } from "lit/decorators.js";
+import {
+  PathRouteConfig,
+  URLPatternRouteConfig,
+} from "@holochain-open-dev/elements";
 
 import "@shoelace-style/shoelace/dist/components/breadcrumb/breadcrumb.js";
 import "@shoelace-style/shoelace/dist/components/breadcrumb-item/breadcrumb-item.js";
 
 import { appStyles } from "./app-styles.js";
 import { RouteConfigWithSignalName, Routes } from "./router.js";
-import {
-  PathRouteConfig,
-  URLPatternRouteConfig,
-} from "@holochain-open-dev/elements";
 
 @customElement("routes-breadcrumbs")
 export class RoutesBreadcrumbs extends SignalWatcher(LitElement) {
@@ -31,7 +31,7 @@ export class RoutesBreadcrumbs extends SignalWatcher(LitElement) {
     const split = currentPathname.split("/").filter((s) => !!s);
 
     const possibleRoutes = this.routes.routes.filter(
-      (route) => route.name || (route as RouteConfigWithSignalName).nameSignal,
+      (route) => route.name || (route as RouteConfigWithSignalName).nameSignal
     );
 
     const matchingRoutes: Array<[RouteConfigWithSignalName, string]> = [];
@@ -61,7 +61,7 @@ export class RoutesBreadcrumbs extends SignalWatcher(LitElement) {
           <sl-breadcrumb-item href="${this.routes.link(matchingPathname)}"
             >${this.name(route)}</sl-breadcrumb-item
           >
-        `,
+        `
       )}
     </sl-breadcrumb>`;
   }

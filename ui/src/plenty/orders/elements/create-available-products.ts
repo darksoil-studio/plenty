@@ -223,7 +223,7 @@ export class CreateAvailableProducts extends SignalWatcher(LitElement) {
             path="maximum_available"
           ></vaadin-grid-sort-column>
           <vaadin-grid-column
-            .header=${msg("VAT")}
+            .header=${msg("VAT (%)")}
             path="vat_percentage"
           ></vaadin-grid-column>
          <vaadin-grid-column

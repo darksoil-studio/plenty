@@ -1,5 +1,5 @@
 import { SignalWatcher, pipe } from "@holochain-open-dev/signals";
-import { LitElement, html } from "lit";
+import { css, LitElement, html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { consume } from "@lit/context";
 import "@shoelace-style/shoelace/dist/components/button/button.js";
@@ -16,6 +16,12 @@ import {
   sharedStyles,
   wrapPathInSvg,
 } from "@holochain-open-dev/elements";
+import { EntryRecord } from "@holochain-open-dev/utils";
+
+import "@vaadin/grid/vaadin-grid.js";
+import "@vaadin/grid/vaadin-grid-selection-column.js";
+import "@vaadin/grid/vaadin-grid-sort-column.js";
+import "@vaadin/grid/vaadin-grid-column.js";
 
 import "./plenty/producers/elements/all-producers.js";
 import "./plenty/producers/elements/producer-detail.js";
@@ -33,7 +39,6 @@ import {
 } from "@holochain/client";
 import { producersStoreContext } from "./plenty/producers/context.js";
 import { ProducersStore } from "./plenty/producers/producers-store.js";
-import { EntryRecord } from "@holochain-open-dev/utils";
 import {
   Producer,
   Product,
@@ -148,7 +153,7 @@ export class ProducersPage extends SignalWatcher(LitElement) {
           }}
         >
           <edit-product
-            style="width: 50rem"
+            style="width: 70rem"
             .productHash=${decodeHashFromBase64(
               params.productHash as ActionHashB64
             )}
@@ -168,7 +173,7 @@ export class ProducersPage extends SignalWatcher(LitElement) {
           @close-requested=${() => this.routes.pop()}
         >
           <create-product
-            style="width: 50rem"
+            style="width: 70rem"
             .producerHash=${decodeHashFromBase64(
               params.producerHash as ActionHashB64
             )}
@@ -265,7 +270,12 @@ export class ProducersPage extends SignalWatcher(LitElement) {
                                 producerHash
                               )}/create-product`
                             )}
-                          >${msg("Create Product")}</sl-button
+                        >
+                          <sl-icon
+                            .src=${wrapPathInSvg(mdiPlus)}
+                            slot="prefix"
+                          ></sl-icon>
+                          ${msg("Create Product")}</sl-button
                         >
                       </div>
                       ${this.renderUploadProductsCsvDialog(producerHash)}
@@ -292,7 +302,7 @@ export class ProducersPage extends SignalWatcher(LitElement) {
   }
 
   @state()
-  uploadedProducts: Array<Product> | undefined;
+  uploadedProducts: Array<Omit<Product, "producer_hash">> | undefined;
 
   @state()
   uploading = false;
@@ -306,13 +316,9 @@ export class ProducersPage extends SignalWatcher(LitElement) {
     this.uploading = true;
 
     try {
-      for (const product of products) {
-        const finalProduct: Product = {
-          ...product,
-          producer_hash: producerHash,
-        };
-        await this.producersStore.client.createProduct(finalProduct);
-      }
+      await this.producersStore.client.createProducts(
+        products.map((p) => ({ ...p, producer_hash: producerHash }))
+      );
     } catch (e: any) {
       notifyError(msg(str`Error uploading producers: ${e.message}`));
       console.error(e);
@@ -321,19 +327,23 @@ export class ProducersPage extends SignalWatcher(LitElement) {
     this.uploading = false;
   }
 
-  renderGrid(products: Array<Product>) {
+  renderGrid(products: Array<Omit<Product, "producer_hash">>) {
     return html`
-      <div class="column" style="gap: 12px">
+      <div class="column" style="gap: 12px; flex: 1">
         <span class="title">${msg("Preview")}</span>
         <vaadin-grid
           multi-sort
           .items=${products}
           style="flex: 1; height: 100%"
         >
-          <vaadin-grid-tree-column
+          <vaadin-grid-column
+            .header=${msg("Product ID")}
+            path="product_id"
+          ></vaadin-grid-column>
+          <vaadin-grid-column
             .header=${msg("Product")}
             path="name"
-          ></vaadin-grid-tree-column>
+          ></vaadin-grid-column>
           <vaadin-grid-column
             .header=${msg("Packaging")}
             .renderer=${(root: any, __: any, model: any) => {
@@ -350,7 +360,7 @@ export class ProducersPage extends SignalWatcher(LitElement) {
             path="price"
           ></vaadin-grid-sort-column>
           <vaadin-grid-sort-column
-            .header=${msg("VAT")}
+            .header=${msg("VAT (%)")}
             path="vat_percentage"
           ></vaadin-grid-sort-column>
         </vaadin-grid>
@@ -363,31 +373,80 @@ export class ProducersPage extends SignalWatcher(LitElement) {
       <sl-dialog
         id="upload-products-csv-dialog"
         .label=${msg("Import Products")}
+        @sl-hide=${() => (this.uploadedProducts = undefined)}
+        style="--width: 800px;"
       >
-        <div class="column" style="gap: 12px">
-          <span>${msg("Upload a CSV with this format:")}</span>
-          <input
-            type="file"
-            accept="csv"
-            @change=${async (e: Event) => {
-              try {
-                const file = (e.target as any).files[0];
-                if (!file) {
-                  this.uploadedProducts = undefined;
-                  return;
+        <div class="column" style="gap: 16px; flex: 1">
+          <span
+            >${msg(
+              "Upload a CSV file with the products you want to import."
+            )}</span
+          >
+          <div class="row" style="gap: 12px">
+            <input
+              type="file"
+              accept="csv"
+              @change=${async (event: Event) => {
+                try {
+                  const file = (event.target as any).files[0];
+                  if (!file) {
+                    this.uploadedProducts = undefined;
+                    return;
+                  }
+                  this.uploadedProducts = await processCsvProductsFile(file);
+                } catch (e: any) {
+                  notifyError(
+                    msg(str`Error processing the CSV file: ${e.message}`)
+                  );
+                  console.error(e);
+                  (event.target! as any).value = "";
                 }
-                this.uploadedProducts = await processCsvProductsFile(file);
-              } catch (e: any) {
-                notifyError(
-                  msg(str`Error processing the CSV file: ${e.message}`)
-                );
-                console.error(e);
-              }
-            }}
-          />
+              }}
+            />
+            ${this.uploadedProducts
+              ? html`
+                  <sl-button @click=${() => (this.uploadedProducts = undefined)}
+                    >${msg("Clear")}</sl-button
+                  >
+                `
+              : html``}
+          </div>
           ${this.uploadedProducts
             ? this.renderGrid(this.uploadedProducts)
-            : html``}
+            : html`
+                <div class="column" style="gap: 12px">
+                  <span>${msg("The CSV must have this format:")}</span>
+                  <table style="margin: 16px; width: 600px; align-self: center">
+                    <thead>
+                      <th>Product ID</th>
+                      <th>Name</th>
+                      <th>Description</th>
+                      <th>Category</th>
+                      <th>Packaging</th>
+                      <th>Price</th>
+                      <th>VAT</th>
+                    </thead>
+                    <tbody>
+                      <td>1</td>
+                      <td>Rice</td>
+                      <td>Beautiful rice</td>
+                      <td>rice</td>
+                      <td>1x1Kg</td>
+                      <td>3 €</td>
+                      <td>12%</td>
+                    </tbody>
+                    <tbody>
+                      <td>2</td>
+                      <td>Beans</td>
+                      <td>Delicious beans</td>
+                      <td>bean</td>
+                      <td>4x500g</td>
+                      <td>8 €</td>
+                      <td>15%</td>
+                    </tbody>
+                  </table>
+                </div>
+              `}
         </div>
 
         <sl-button
@@ -396,6 +455,7 @@ export class ProducersPage extends SignalWatcher(LitElement) {
           .disabled=${!this.uploadedProducts}
           @click=${() =>
             this.uploadProducts(producerHash, this.uploadedProducts!)}
+          variant="primary"
           >${msg("Upload Products")}</sl-button
         >
       </sl-dialog>
@@ -430,5 +490,22 @@ export class ProducersPage extends SignalWatcher(LitElement) {
     `;
   }
 
-  static styles = [...appStyles];
+  static styles = [
+    ...appStyles,
+    css`
+      table,
+      th,
+      td {
+        border: 1px solid grey;
+        border-collapse: collapse;
+        padding: 4px;
+      }
+      sl-dialog::part(panel) {
+        height: 800px;
+      }
+      sl-dialog::part(body) {
+        display: flex;
+      }
+    `,
+  ];
 }

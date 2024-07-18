@@ -1,4 +1,8 @@
-import { sharedStyles, wrapPathInSvg } from "@holochain-open-dev/elements";
+import {
+  notifyError,
+  sharedStyles,
+  wrapPathInSvg,
+} from "@holochain-open-dev/elements";
 import "@holochain-open-dev/elements/dist/elements/display-error.js";
 import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
 import {
@@ -7,6 +11,7 @@ import {
   mapValues,
   retype,
 } from "@holochain-open-dev/utils";
+import { core } from "@tauri-apps/api";
 import { ActionHash, Link } from "@holochain/client";
 import { consume } from "@lit/context";
 import { msg, str } from "@lit/localize";
@@ -58,7 +63,7 @@ export class HouseholdPrompt extends SignalWatcher(LitElement) {
   selectedHousehold: ActionHash | undefined;
 
   renderActiveHouseholds(
-    households: ReadonlyMap<ActionHash, EntryRecord<Household>>,
+    households: ReadonlyMap<ActionHash, EntryRecord<Household>>
   ) {
     if (households.size === 0)
       return html` <div class="column center-content" style="gap: 16px;">
@@ -102,7 +107,7 @@ export class HouseholdPrompt extends SignalWatcher(LitElement) {
           ${i === households.size - 1
             ? html``
             : html`<sl-divider></sl-divider>`}
-        `,
+        `
       )}
     </div>`;
   }
@@ -112,8 +117,59 @@ export class HouseholdPrompt extends SignalWatcher(LitElement) {
     if (activeHouseholds.status !== "completed") return activeHouseholds;
 
     return joinAsyncMap(
-      mapValues(activeHouseholds.value, (h) => h.latestVersion.get()),
+      mapValues(activeHouseholds.value, (h) => h.latestVersion.get())
     );
+  }
+
+  /**
+   * @internal
+   */
+  @state()
+  leavingBuyersClub = false;
+
+  renderLeaveBuyersClubDialog() {
+    return html`
+      <sl-dialog
+        id="leave-buyers-club-dialog"
+        .label=${msg("Leave Buyers Club")}
+      >
+        <span>${msg("Are you sure you want to leave this buyers club?")}</span>
+        <sl-button
+          slot="footer"
+          @click=${() => {
+            (
+              this.shadowRoot?.getElementById(
+                "leave-buyers-club-dialog"
+              ) as SlDialog
+            ).hide();
+          }}
+          >${msg("Cancel")}</sl-button
+        >
+        <sl-button
+          slot="footer"
+          variant="danger"
+          .loading=${this.leavingBuyersClub}
+          @click=${async () => {
+            if (this.leavingBuyersClub) return;
+
+            this.leavingBuyersClub = true;
+            try {
+              await core.invoke("leave_buyers_club");
+              this.leavingBuyersClub = false;
+              (
+                this.shadowRoot?.getElementById(
+                  "leave-buyers-club-dialog"
+                ) as SlDialog
+              ).hide();
+            } catch (e) {
+              notifyError(msg("Error leaving this buyers club."));
+              console.error(e);
+            }
+          }}
+          >${msg("Leave Buyers Club")}</sl-button
+        >
+      </sl-dialog>
+    `;
   }
 
   renderPrompt() {
@@ -146,7 +202,7 @@ export class HouseholdPrompt extends SignalWatcher(LitElement) {
                 >
                 <span class="placeholder"
                   >${msg(
-                    "If your household does not exist yet, create it.",
+                    "If your household does not exist yet, create it."
                   )}</span
                 >
 
@@ -170,19 +226,32 @@ export class HouseholdPrompt extends SignalWatcher(LitElement) {
                   variant="primary"
                   @click=${() =>
                     this.householdsStore.client.requestToJoinHousehold(
-                      this.selectedHousehold!,
+                      this.selectedHousehold!
                     )}
                   >${msg("Request To Join Household")}</sl-button
                 >
               </div>
             </sl-card>
+            ${this.renderLeaveBuyersClubDialog()}
+            <sl-button
+              style="position: fixed; bottom: 16px; right: 16px"
+              variant="danger"
+              @click=${() => {
+                (
+                  this.shadowRoot?.getElementById(
+                    "leave-buyers-club-dialog"
+                  ) as SlDialog
+                ).show();
+              }}
+              >${msg("Leave Buyers Club")}</sl-button
+            >
           </div>
         `;
     }
   }
 
   renderRequestedHouseholds(
-    requestedHouseholds: ReadonlyMap<ActionHash, EntryRecord<Household>>,
+    requestedHouseholds: ReadonlyMap<ActionHash, EntryRecord<Household>>
   ) {
     return html`
       <div
@@ -197,7 +266,7 @@ export class HouseholdPrompt extends SignalWatcher(LitElement) {
             >
               <span
                 >${msg(
-                  "Are you sure you want to cancel the join request to the household ",
+                  "Are you sure you want to cancel the join request to the household "
                 )}${household.entry.name}?</span
               >
               <sl-button
@@ -226,7 +295,7 @@ export class HouseholdPrompt extends SignalWatcher(LitElement) {
                 </div>
                 <span style="flex: 1"
                   >${msg(
-                    "Waiting for a member of the household to accept you.",
+                    "Waiting for a member of the household to accept you."
                   )}</span
                 >
                 <sl-button
@@ -234,14 +303,14 @@ export class HouseholdPrompt extends SignalWatcher(LitElement) {
                   @click=${() =>
                     (
                       this.shadowRoot?.getElementById(
-                        `cancel-join-request-${householdHash.toString()}`,
+                        `cancel-join-request-${householdHash.toString()}`
                       ) as SlDialog
                     ).show()}
                   >${msg("Cancel Join Request")}</sl-button
                 >
               </div>
             </sl-card>
-          `,
+          `
         )}
       </div>
     `;
@@ -277,7 +346,7 @@ export class HouseholdPrompt extends SignalWatcher(LitElement) {
       if (
         myMembershipClaims.value.find(
           (claim) =>
-            claim.entry.household_hash.toString() === householdHash.toString(),
+            claim.entry.household_hash.toString() === householdHash.toString()
         )
       ) {
         return {
@@ -295,7 +364,7 @@ export class HouseholdPrompt extends SignalWatcher(LitElement) {
       const myMembershipLink = membersLinks.value.find(
         (l) =>
           retype(l.target, HashType.AGENT).toString() ===
-          this.householdsStore.client.client.myPubKey.toString(),
+          this.householdsStore.client.client.myPubKey.toString()
       );
       if (myMembershipLink && !this.creatingMembershipClaim) {
         this.creatingMembershipClaim = true;
@@ -306,7 +375,7 @@ export class HouseholdPrompt extends SignalWatcher(LitElement) {
               member_create_link_hash: myMembershipLink.create_link_hash,
             }),
           10,
-          1000,
+          1000
         ).finally(() => {
           this.creatingMembershipClaim = false;
         });
@@ -336,7 +405,7 @@ export class HouseholdPrompt extends SignalWatcher(LitElement) {
         };
 
       const requestedHouseholdsLatestVersion = joinAsyncMap(
-        mapValues(requestedHouseholds.value, (h) => h.latestVersion.get()),
+        mapValues(requestedHouseholds.value, (h) => h.latestVersion.get())
       );
       if (requestedHouseholdsLatestVersion.status !== "completed")
         return requestedHouseholdsLatestVersion;
@@ -408,7 +477,7 @@ export class HouseholdPrompt extends SignalWatcher(LitElement) {
               <sl-spinner style="font-size: 2rem"></sl-spinner>
               <span
                 >${msg(
-                  str`You were accepted into the household "${householdsStatus.value.household.entry.name}"! Joining...`,
+                  str`You were accepted into the household "${householdsStatus.value.household.entry.name}"! Joining...`
                 )}</span
               >
             </div>
@@ -416,7 +485,7 @@ export class HouseholdPrompt extends SignalWatcher(LitElement) {
         if (householdsStatus.value.status === "NOT_REQUESTED")
           return this.renderPrompt();
         return this.renderRequestedHouseholds(
-          householdsStatus.value.requestedHouseholds,
+          householdsStatus.value.requestedHouseholds
         );
     }
   }

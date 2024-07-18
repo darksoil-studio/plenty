@@ -4,6 +4,15 @@ use producers_integrity::*;
 use crate::categories::category_path;
 
 #[hdk_extern]
+pub fn create_products(products: Vec<Product>) -> ExternResult<()> {
+    for product in products {
+        create_product(product)?;
+    }
+
+    Ok(())
+}
+
+#[hdk_extern]
 pub fn create_product(product: Product) -> ExternResult<Record> {
     let product_hash = create_entry(&EntryTypes::Product(product.clone()))?;
 

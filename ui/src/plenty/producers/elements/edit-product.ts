@@ -235,9 +235,9 @@ export class EditProduct extends SignalWatcher(LitElement) {
           </div>
 
           <div class="column" style="flex: 1; gap: 12px">
-            <div class="column" style="gap: 12px">
+            <div class="column" style="gap: 4px">
               <span style="font-size: 16px">${msg("Packaging")}</span>
-              <div class="row" style="gap: 12px; align-items: end">
+              <div class="row" style="gap: 12px; align-items: center">
                 <sl-input
                   type="number"
                   name="number_of_packages"
@@ -245,17 +245,17 @@ export class EditProduct extends SignalWatcher(LitElement) {
                   min="1"
                   .defaultValue=${currentRecord.entry.packaging
                     .number_of_packages}
-                  style="width: 3rem"
+                  style="width: 4rem"
                 >
                 </sl-input>
-                <span>${msg("packages of")}</span>
+                <span style="width: 9em">${msg("packages of")}</span>
                 <sl-input
                   type="number"
                   name="amount_per_package"
                   .defaultValue=${currentRecord.entry.packaging
                     .amount_per_package}
                   required
-                  style="width: 3rem"
+                  style="width: 5rem"
                 >
                 </sl-input>
                 <div class="row" style="gap: 12px; align-items: center">

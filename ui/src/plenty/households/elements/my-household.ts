@@ -423,7 +423,9 @@ export class MyHousehold extends SignalWatcher(LitElement) {
         <div class="column" style="gap: 8px">
           <span class="title">${msg("Danger Zone")}</span>
           <sl-divider></sl-divider>
-          <span>${msg("Be careful! These actions cannot be reversed.")}</span>
+          <span style="margin-bottom: 24px"
+            >${msg("Be careful! These actions cannot be reversed.")}</span
+          >
           <div class="row" style="justify-content: end; gap: 12px">
             <sl-button
               variant="danger"

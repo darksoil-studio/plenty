@@ -81,7 +81,7 @@ export class EditAvailableProducts extends SignalWatcher(LitElement) {
 
   get producerAvailable() {
     const checkbox = this.shadowRoot?.getElementById(
-      "producer-available",
+      "producer-available"
     ) as SlCheckbox;
     return checkbox ? checkbox.checked : undefined;
   }
@@ -89,7 +89,7 @@ export class EditAvailableProducts extends SignalWatcher(LitElement) {
   async updateAvailableProducts(
     currentRecord: EntryRecord<AvailableProducts>,
     latestProducerHash: ActionHash,
-    fields: any,
+    fields: any
   ) {
     const available_products: Array<ActionHash> = Object.entries(fields)
       .filter(([key]) => key !== "producer-available")
@@ -118,7 +118,7 @@ export class EditAvailableProducts extends SignalWatcher(LitElement) {
         await this.ordersStore.client.updateAvailableProducts(
           this.availableProductsHash,
           currentRecord.actionHash,
-          availableProducts,
+          availableProducts
         );
 
       this.dispatchEvent(
@@ -130,7 +130,7 @@ export class EditAvailableProducts extends SignalWatcher(LitElement) {
             previousAvailableProductsHash: currentRecord.actionHash,
             updatedAvailableProductsHash: updateRecord.actionHash,
           },
-        }),
+        })
       );
     } catch (e: unknown) {
       console.error(e);
@@ -143,7 +143,7 @@ export class EditAvailableProducts extends SignalWatcher(LitElement) {
   renderProducts(
     availableProducts: EntryRecord<AvailableProducts>,
     producer: EntryRecord<Producer>,
-    map: ReadonlyMap<ActionHash, EntryRecord<Product>>,
+    map: ReadonlyMap<ActionHash, EntryRecord<Product>>
   ) {
     if (map.size === 0)
       return html` <div
@@ -159,7 +159,7 @@ export class EditAvailableProducts extends SignalWatcher(LitElement) {
         >
         <span class="placeholder"
           >${msg(
-            "Create products for this producer to be able to set its availability.",
+            "Create products for this producer to be able to set its availability."
           )}</span
         >
       </div>`;
@@ -173,7 +173,7 @@ export class EditAvailableProducts extends SignalWatcher(LitElement) {
       const availability = availableProducts.entry.producer_availability;
       if (availability.type === "Unavailable") return false;
       return !!availability.available_products.find(
-        (p) => encodeHashToBase64(p) === encodeHashToBase64(productHash),
+        (p) => encodeHashToBase64(p) === encodeHashToBase64(productHash)
       );
     };
 
@@ -228,7 +228,7 @@ export class EditAvailableProducts extends SignalWatcher(LitElement) {
             path="maximum_available"
           ></vaadin-grid-sort-column>
           <vaadin-grid-column
-            .header=${msg("VAT")}
+            .header=${msg("VAT (%)")}
             path="vat_percentage"
           ></vaadin-grid-column>
           <vaadin-grid-column
@@ -241,7 +241,7 @@ export class EditAvailableProducts extends SignalWatcher(LitElement) {
                     .defaultChecked=${productAvailable(model.item.productHash)}
                   ></sl-checkbox>
                 </div>`,
-                root,
+                root
               );
             }}
           ></vaadin-grid-column>
@@ -279,7 +279,7 @@ export class EditAvailableProducts extends SignalWatcher(LitElement) {
       return producerLatestVersion;
 
     const latestVersion = joinAsyncMap(
-      mapValues(map.value, (p) => p.latestVersion.get()),
+      mapValues(map.value, (p) => p.latestVersion.get())
     );
     if (latestVersion.status !== "completed") return latestVersion;
 
@@ -322,7 +322,7 @@ export class EditAvailableProducts extends SignalWatcher(LitElement) {
                 setTimeout(() => {
                   this.resetted = true;
                   (form as HTMLFormElement).reset();
-                }),
+                })
             )}
             class="column"
             style="flex: 1; gap: 24px"
@@ -330,8 +330,8 @@ export class EditAvailableProducts extends SignalWatcher(LitElement) {
               this.updateAvailableProducts(
                 products.value.availableProducts,
                 products.value.producer.actionHash,
-                fields,
-              ),
+                fields
+              )
             )}
           >
             <div class="row" style="align-items: center; gap: 12px; flex: 1">
@@ -362,20 +362,20 @@ export class EditAvailableProducts extends SignalWatcher(LitElement) {
                 this.requestUpdate();
               }}
               >${msg(
-                str`Producer is available for the ${products.value.order.entry.name} order`,
+                str`Producer is available for the ${products.value.order.entry.name} order`
               )}</sl-checkbox
             >
 
             <span class="title"
               >${msg(
-                str`Available Products for the "${products.value.order.entry.name}" order`,
+                str`Available Products for the "${products.value.order.entry.name}" order`
               )}</span
             >
             <sl-card>
               ${this.renderProducts(
                 products.value.availableProducts,
                 products.value.producer,
-                products.value.products,
+                products.value.products
               )}
             </sl-card>
           </form>

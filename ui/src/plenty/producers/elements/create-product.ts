@@ -25,7 +25,7 @@ import {
 } from "@holochain-open-dev/elements";
 import { consume } from "@lit/context";
 import { localized, msg } from "@lit/localize";
-import { mdiAlertCircleOutline, mdiClose, mdiDelete } from "@mdi/js";
+import { mdiAlertCircleOutline, mdiClose, mdiDelete, mdiPlus } from "@mdi/js";
 
 import SlAlert from "@shoelace-style/shoelace/dist/components/alert/alert.js";
 import "@shoelace-style/shoelace/dist/components/input/input.js";
@@ -227,24 +227,24 @@ export class CreateProduct extends SignalWatcher(LitElement) {
             </div>
 
             <div class="column" style="flex: 1; gap: 12px">
-              <div class="column" style="gap: 12px">
-                <span style="font-size: 16px">${msg("Packaging")}</span>
-                <div class="row" style="gap: 12px; align-items: end">
+              <div class="column" style="gap: 4px">
+                <span style="font-size: 16px">${msg("Packaging")}*</span>
+                <div class="row" style="gap: 12px; align-items: center">
                   <sl-input
                     type="number"
                     name="number_of_packages"
                     required
                     min="1"
                     value="1"
-                    style="width: 3rem"
+                    style="width: 4rem"
                   >
                   </sl-input>
-                  <span>${msg("packages of")}</span>
+                  <span style="width: 9em">${msg("packages of")}</span>
                   <sl-input
                     type="number"
                     name="amount_per_package"
                     required
-                    style="width: 3rem"
+                    style="width: 5rem"
                   >
                   </sl-input>
                   <div class="row" style="gap: 12px; align-items: center">
@@ -305,8 +305,13 @@ export class CreateProduct extends SignalWatcher(LitElement) {
             </div>
           </div>
 
-          <sl-button variant="primary" type="submit" .loading=${this.committing}
-            >${msg("Create Product")}</sl-button
+          <sl-button
+            variant="primary"
+            type="submit"
+            .loading=${this.committing}
+          >
+            <sl-icon .src=${wrapPathInSvg(mdiPlus)} slot="prefix"></sl-icon>
+            ${msg("Create Product")}</sl-button
           >
         </form>
       </sl-card>

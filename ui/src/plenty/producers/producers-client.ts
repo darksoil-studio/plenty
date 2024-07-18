@@ -13,6 +13,7 @@ import {
   ActionHash,
   EntryHash,
   AgentPubKey,
+  AppCallZomeRequest,
 } from "@holochain/client";
 import {
   isSignalFromCellWithRole,
@@ -26,7 +27,7 @@ export class ProducersClient extends ZomeClient<ProducersSignal> {
   constructor(
     public client: AppClient,
     public roleName: string,
-    public zomeName = "producers",
+    public zomeName = "producers"
   ) {
     super(client, roleName, zomeName);
   }
@@ -38,31 +39,31 @@ export class ProducersClient extends ZomeClient<ProducersSignal> {
   }
 
   async getLatestProducer(
-    producerHash: ActionHash,
+    producerHash: ActionHash
   ): Promise<EntryRecord<Producer> | undefined> {
     const record: Record = await this.callZome(
       "get_latest_producer",
-      producerHash,
+      producerHash
     );
     return record ? new EntryRecord(record) : undefined;
   }
 
   async getOriginalProducer(
-    producerHash: ActionHash,
+    producerHash: ActionHash
   ): Promise<EntryRecord<Producer> | undefined> {
     const record: Record = await this.callZome(
       "get_original_producer",
-      producerHash,
+      producerHash
     );
     return record ? new EntryRecord(record) : undefined;
   }
 
   async getAllRevisionsForProducer(
-    producerHash: ActionHash,
+    producerHash: ActionHash
   ): Promise<Array<EntryRecord<Producer>>> {
     const records: Record[] = await this.callZome(
       "get_all_revisions_for_producer",
-      producerHash,
+      producerHash
     );
     return records.map((r) => new EntryRecord(r));
   }
@@ -70,7 +71,7 @@ export class ProducersClient extends ZomeClient<ProducersSignal> {
   async updateProducer(
     originalProducerHash: ActionHash,
     previousProducerHash: ActionHash,
-    updatedProducer: Producer,
+    updatedProducer: Producer
   ): Promise<EntryRecord<Producer>> {
     const record: Record = await this.callZome("update_producer", {
       original_producer_hash: originalProducerHash,
@@ -85,17 +86,17 @@ export class ProducersClient extends ZomeClient<ProducersSignal> {
   }
 
   getAllDeletesForProducer(
-    originalProducerHash: ActionHash,
+    originalProducerHash: ActionHash
   ): Promise<Array<SignedActionHashed<Delete>>> {
     return this.callZome("get_all_deletes_for_producer", originalProducerHash);
   }
 
   getOldestDeleteForProducer(
-    originalProducerHash: ActionHash,
+    originalProducerHash: ActionHash
   ): Promise<SignedActionHashed<Delete> | undefined> {
     return this.callZome(
       "get_oldest_delete_for_producer",
-      originalProducerHash,
+      originalProducerHash
     );
   }
 
@@ -104,7 +105,7 @@ export class ProducersClient extends ZomeClient<ProducersSignal> {
   }
 
   async getDeletedProducersForLiason(
-    liason: AgentPubKey,
+    liason: AgentPubKey
   ): Promise<
     Array<[SignedActionHashed<CreateLink>, SignedActionHashed<DeleteLink>[]]>
   > {
@@ -123,32 +124,42 @@ export class ProducersClient extends ZomeClient<ProducersSignal> {
     return new EntryRecord(record);
   }
 
+  async createProducts(products: Array<Product>): Promise<void> {
+    const req: AppCallZomeRequest = {
+      role_name: this.roleName,
+      zome_name: this.zomeName,
+      fn_name: "create_products",
+      payload: products,
+    };
+    await this.client.callZome(req, 280_000);
+  }
+
   async getLatestProduct(
-    productHash: ActionHash,
+    productHash: ActionHash
   ): Promise<EntryRecord<Product> | undefined> {
     const record: Record = await this.callZome(
       "get_latest_product",
-      productHash,
+      productHash
     );
     return record ? new EntryRecord(record) : undefined;
   }
 
   async getOriginalProduct(
-    productHash: ActionHash,
+    productHash: ActionHash
   ): Promise<EntryRecord<Product> | undefined> {
     const record: Record = await this.callZome(
       "get_original_product",
-      productHash,
+      productHash
     );
     return record ? new EntryRecord(record) : undefined;
   }
 
   async getAllRevisionsForProduct(
-    productHash: ActionHash,
+    productHash: ActionHash
   ): Promise<Array<EntryRecord<Product>>> {
     const records: Record[] = await this.callZome(
       "get_all_revisions_for_product",
-      productHash,
+      productHash
     );
     return records.map((r) => new EntryRecord(r));
   }
@@ -156,7 +167,7 @@ export class ProducersClient extends ZomeClient<ProducersSignal> {
   async updateProduct(
     originalProductHash: ActionHash,
     previousProductHash: ActionHash,
-    updatedProduct: Product,
+    updatedProduct: Product
   ): Promise<EntryRecord<Product>> {
     const record: Record = await this.callZome("update_product", {
       original_product_hash: originalProductHash,
@@ -171,13 +182,13 @@ export class ProducersClient extends ZomeClient<ProducersSignal> {
   }
 
   getAllDeletesForProduct(
-    originalProductHash: ActionHash,
+    originalProductHash: ActionHash
   ): Promise<Array<SignedActionHashed<Delete>>> {
     return this.callZome("get_all_deletes_for_product", originalProductHash);
   }
 
   getOldestDeleteForProduct(
-    originalProductHash: ActionHash,
+    originalProductHash: ActionHash
   ): Promise<SignedActionHashed<Delete> | undefined> {
     return this.callZome("get_oldest_delete_for_product", originalProductHash);
   }
@@ -187,7 +198,7 @@ export class ProducersClient extends ZomeClient<ProducersSignal> {
   }
 
   async getDeletedProductsForProducer(
-    producerHash: ActionHash,
+    producerHash: ActionHash
   ): Promise<
     Array<[SignedActionHashed<CreateLink>, SignedActionHashed<DeleteLink>[]]>
   > {
