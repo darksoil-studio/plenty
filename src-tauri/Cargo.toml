@@ -27,8 +27,8 @@ tauri-plugin-single-instance = "2.0.0-beta"
 
 mr_bundle = "0.3"
 holochain_types = { version = "0.3.1" }
-lair_keystore = { version = "0.4.0" }
-holochain_client = { version = "0.5.0-rc" }
+lair_keystore = { version = "0.4" }
+holochain_client = { version = "0.5" }
 log = "0.4"
 url2 = "0.0.6"
 app_dirs2 = "2.5.5"

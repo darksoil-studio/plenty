@@ -100,7 +100,7 @@ jobs:
           override: true
           toolchain: stable
       
-      - name: install aarch64 target
+      - name: install x86_64 target
         if: matrix.args == '--target x86_64-apple-darwin'
         run: rustup target add x86_64-apple-darwin
 

@@ -3340,33 +3340,9 @@ dependencies = [
 
 [[package]]
 name = "holochain_client"
-version = "0.5.0-rc.5"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "749b6cdb1a99d0054b59f88907abb4ca8c2e1b57496e324a368b62179785bb6f"
-dependencies = [
- "again",
- "anyhow",
- "async-trait",
- "ed25519-dalek",
- "event-emitter-rs",
- "holo_hash",
- "holochain_conductor_api",
- "holochain_nonce",
- "holochain_serialized_bytes",
- "holochain_types",
- "holochain_websocket",
- "holochain_zome_types",
- "lair_keystore_api",
- "parking_lot 0.12.3",
- "rand 0.8.5",
- "serde",
- "tokio",
-]
-
-[[package]]
-name = "holochain_client"
-version = "0.5.0-rc.5"
-source = "git+https://github.com/guillemcordoba/holochain-client-rust?branch=main#b6a7d5661e16f42b872f31e1b1c5d5b920c69f9e"
+checksum = "c7d6dcf32ba4296867568fb46dc7971590b8ebfd7a1b09fefe9e986e8abe5fb1"
 dependencies = [
  "again",
  "anyhow",
@@ -6483,7 +6459,7 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "app_dirs2",
- "holochain_client 0.5.0-rc.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "holochain_client",
  "holochain_types",
  "lair_keystore",
  "log",
@@ -7592,7 +7568,7 @@ dependencies = [
 [[package]]
 name = "roles_types"
 version = "0.0.1"
-source = "git+https://github.com/darksoil-studio/roles?branch=main#9d79a72c1d1102c195d7132440ed95ddeff3b1a4"
+source = "git+https://github.com/darksoil-studio/roles?branch=main#4ed443e86c578fc50803ebd8e0fa2171fe4c1b72"
 dependencies = [
  "hdi",
  "holo_hash",
@@ -9056,7 +9032,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-holochain"
 version = "0.0.0"
-source = "git+https://github.com/darksoil-studio/tauri-plugin-holochain?branch=main#c8516b7af5d03eb08a88579f133f1dd9428e4397"
+source = "git+https://github.com/darksoil-studio/tauri-plugin-holochain?branch=main#7726bfb32cfe24256db16b7f91480aa42dd1fc20"
 dependencies = [
  "async-std",
  "base64 0.22.1",
@@ -9065,7 +9041,7 @@ dependencies = [
  "futures",
  "hc_seed_bundle",
  "holochain",
- "holochain_client 0.5.0-rc.5 (git+https://github.com/guillemcordoba/holochain-client-rust?branch=main)",
+ "holochain_client",
  "holochain_conductor_api",
  "holochain_keystore",
  "holochain_types",
