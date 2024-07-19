@@ -55,6 +55,8 @@ async fn internal_create_plenty_instance(
         .web_happ_window_builder(String::from(APP_ID), None)
         .await?
         .enable_clipboard_access()
+        .title(String::from("Plenty"))
+        .inner_size(1000.0, 700.0)
         .build()?;
 
     window.close()?;
@@ -88,6 +90,8 @@ async fn internal_join_plenty_instance(
     app.holochain()?
         .web_happ_window_builder(String::from(APP_ID), None)
         .await?
+        .title(String::from("Plenty"))
+        .inner_size(1000.0, 700.0)
         .build()?;
 
     window.close()?;
@@ -182,6 +186,8 @@ pub async fn internal_leave_buyers_club(
     app.holochain()?
         .main_window_builder(String::from("lobby"), false, None, None)
         .await?
+        .title(String::from("Plenty"))
+        .inner_size(1000.0, 700.0)
         .build()?;
 
     Ok(())

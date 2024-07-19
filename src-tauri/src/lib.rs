@@ -61,11 +61,16 @@ pub fn run() {
                     app.holochain()?
                         .main_window_builder(String::from("lobby"), false, None, None)
                         .await?
+                        .title(String::from("Plenty"))
+                        .inner_size(1000.0, 700.0)
+                        .enable_clipboard_access()
                         .build()?;
                 } else {
                     app.holochain()?
                         .web_happ_window_builder(String::from(APP_ID), None)
                         .await?
+                        .title(String::from("Plenty"))
+                        .inner_size(1000.0, 700.0)
                         .enable_clipboard_access()
                         .build()?;
                 }

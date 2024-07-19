@@ -40,6 +40,13 @@ export default defineConfig({
           ),
           dest: path.resolve(__dirname, "dist/shoelace"),
         },
+        {
+          src: path.resolve(
+            __dirname,
+            "icon.png",
+          ),
+          dest: path.resolve(__dirname, "dist/"),
+        },
       ],
     }),
   ],
