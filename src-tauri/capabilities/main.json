@@ -2,7 +2,7 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "main-capability",
   "description": "Capability for the main window",
-  "windows": ["lobby", "plenty"],
+  "windows": ["*"],
   "permissions": [
     "path:default",
     "event:default",
@@ -13,6 +13,6 @@
     "tray:default",
     "deep-link:allow-get-current",
     "window:allow-set-title",
-    "clipboard-manager:allow-write"
+    "clipboard-manager:allow-write-text"
   ]
 }
