@@ -13,6 +13,6 @@
     "tray:default",
     "deep-link:allow-get-current",
     "window:allow-set-title",
-    "clipboard-manager:allow-write-text"
+    "clipboard-manager:allow-write"
   ]
 }
