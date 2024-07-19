@@ -12908,15 +12908,16 @@
         "versions": "versions_11"
       },
       "locked": {
-        "lastModified": 1721378076,
-        "narHash": "sha256-BIId+2t8/wNFW+tCs5ulVsC0vGqOtHnlngHYwBkfaaQ=",
+        "lastModified": 1721379946,
+        "narHash": "sha256-AUz5Vfrm4rhPqFNF9M3y11hWU3o/yEEtdMOm4MaN8dQ=",
         "owner": "darksoil-studio",
         "repo": "p2p-shipyard",
-        "rev": "7726bfb32cfe24256db16b7f91480aa42dd1fc20",
+        "rev": "01914b71218498aee79c91acf6fd07244684600d",
         "type": "github"
       },
       "original": {
         "owner": "darksoil-studio",
+        "ref": "develop",
         "repo": "p2p-shipyard",
         "type": "github"
       }
