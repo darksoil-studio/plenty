@@ -91,6 +91,7 @@ async fn internal_join_plenty_instance(
         .web_happ_window_builder(String::from(APP_ID), None)
         .await?
         .title(String::from("Plenty"))
+        .enable_clipboard_access()
         .inner_size(1000.0, 700.0)
         .build()?;
 
@@ -188,6 +189,7 @@ pub async fn internal_leave_buyers_club(
         .await?
         .title(String::from("Plenty"))
         .inner_size(1000.0, 700.0)
+        .enable_clipboard_access()
         .build()?;
 
     Ok(())

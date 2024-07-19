@@ -16,6 +16,7 @@ import { EntryRecord } from "@holochain-open-dev/utils";
 import { consume } from "@lit/context";
 import { msg } from "@lit/localize";
 import { mdiAccountPlus, mdiBasket, mdiCarrot, mdiHomeGroup } from "@mdi/js";
+import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 
 import "./producers-page.js";
 import "./orders-page.js";
@@ -127,7 +128,7 @@ export class HomePage extends SignalWatcher(LitElement) {
                 const props: any = decode(cell.dna_modifiers.properties);
                 const progenitor = props.progenitors[0];
 
-                navigator.clipboard.writeText(`plenty://${progenitor}`);
+                await writeText(`plenty://${progenitor}`);
                 notify(
                   msg(
                     "Invite link copied! Send it to the person you want to invite to this buyers club.",

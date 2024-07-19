@@ -222,6 +222,9 @@ importers:
       '@tauri-apps/api':
         specifier: ^2.0.0-beta.15
         version: 2.0.0-beta.15
+      '@tauri-apps/plugin-clipboard-manager':
+        specifier: 2.1.0-beta.5
+        version: 2.1.0-beta.5
       '@vaadin/grid':
         specifier: ^24.4.0
         version: 24.4.3
@@ -948,6 +951,9 @@ packages:
     resolution: {integrity: sha512-OAuiDdSRKxNmr/dseQKKMoZZxIhQ6aAxmXJctGYJxCnkd62tQ8xeq87roVXGNS5Qkuv7WpySAyR0ntiMjvNLUA==}
     engines: {node: '>= 10'}
     hasBin: true
+
+  '@tauri-apps/plugin-clipboard-manager@2.1.0-beta.5':
+    resolution: {integrity: sha512-7YQEXRHXn5dIr/YcE7RtkoAhc6XwpqI7Qz0I3FcHn5vMbVvQ5OxKnGqEa8ZGRud6R3G9pNdnEKglLXLgUXK8tA==}
 
   '@tauri-apps/plugin-deep-link@2.0.0-beta.9':
     resolution: {integrity: sha512-phYfWEv3wOzswCUYumQCFiQDddUGeNVRpbtgF/658SCweFzgye09o/Qkq98XjjzE1qDswO9EofdUkrQ4QIG+Tw==}
@@ -3538,6 +3544,10 @@ snapshots:
       '@tauri-apps/cli-win32-arm64-msvc': 2.0.0-beta.22
       '@tauri-apps/cli-win32-ia32-msvc': 2.0.0-beta.22
       '@tauri-apps/cli-win32-x64-msvc': 2.0.0-beta.22
+
+  '@tauri-apps/plugin-clipboard-manager@2.1.0-beta.5':
+    dependencies:
+      '@tauri-apps/api': 2.0.0-beta.15
 
   '@tauri-apps/plugin-deep-link@2.0.0-beta.9':
     dependencies:

@@ -23,6 +23,7 @@ tauri-plugin-holochain = { git = "https://github.com/darksoil-studio/tauri-plugi
 tauri-plugin-deep-link = "2.0.0-beta"
 tauri-plugin-log = "2.0.0-beta"
 tauri-plugin-single-instance = "2.0.0-beta"
+tauri-plugin-clipboard-manager = "2.0.0-beta"
 
 mr_bundle = "0.3"
 holochain_types = { version = "0.3.1" }

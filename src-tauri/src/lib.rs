@@ -29,6 +29,7 @@ pub fn run() {
             // app.emit("single-instance", Payload { args: argv, cwd })
             //     .unwrap();
         }))
+        .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_deep_link::init())
         .plugin(tauri_plugin_holochain::init(
             vec_to_locked(vec![]).expect("Can't build passphrase"),
