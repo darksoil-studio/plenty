@@ -247,6 +247,7 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
                 )?.amount || 0
               : 0;
           return {
+            id: encodeHashToBase64(productHash),
             ...p.entry,
             productHash,
             actionHash: p.actionHash,

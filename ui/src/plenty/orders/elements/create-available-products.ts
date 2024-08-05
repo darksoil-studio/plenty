@@ -1,4 +1,5 @@
-import { LitElement, html, render } from "lit";
+import { css, LitElement, html, render } from "lit";
+import { keyed } from "lit/directives/keyed.js";
 import { repeat } from "lit/directives/repeat.js";
 import { state, property, query, customElement } from "lit/decorators.js";
 import {
@@ -10,7 +11,7 @@ import {
   encodeHashToBase64,
   decodeHashFromBase64,
 } from "@holochain/client";
-import { EntryRecord, mapValues } from "@holochain-open-dev/utils";
+import { EntryRecord, HoloHashMap, mapValues } from "@holochain-open-dev/utils";
 import { SignalWatcher, joinAsyncMap } from "@holochain-open-dev/signals";
 import {
   hashProperty,
@@ -46,6 +47,7 @@ import { ProducersStore } from "../../producers/producers-store.js";
 import { Producer, Product, renderPackaging } from "../../producers/types.js";
 import SlCheckbox from "@shoelace-style/shoelace/dist/components/checkbox/checkbox.js";
 import { styleMap } from "lit/directives/style-map.js";
+import { GridDataProviderCallback } from "@vaadin/grid";
 
 /**
  * @element create-available-products
@@ -84,19 +86,25 @@ export class CreateAvailableProducts extends SignalWatcher(LitElement) {
   @query("#create-form")
   form!: HTMLFormElement;
 
-  async createAvailableProducts(latestProducerHash: ActionHash, fields: any) {
+  async createAvailableProducts(
+    latestProducerHash: ActionHash,
+    allProducts: Array<ActionHash>,
+  ) {
     if (this.orderHash === undefined)
       throw new Error(
-        "Cannot create a new Available Products without its order_hash field"
+        "Cannot create a new Available Products without its order_hash field",
       );
     if (this.producerHash === undefined)
       throw new Error(
-        "Cannot create a new Available Products without its order_hash field"
+        "Cannot create a new Available Products without its order_hash field",
       );
 
-    const available_products: Array<ActionHash> = Object.entries(fields)
-      .filter(([_, value]) => value === "on")
-      .map(([key]) => decodeHashFromBase64(key));
+    const available_products: Array<ActionHash> = allProducts.filter(
+      (productHash) =>
+        this.availableProducts.has(productHash)
+          ? this.availableProducts.get(productHash)
+          : true,
+    );
 
     const producer_availability: ProducerAvailability = this.producerAvailable
       ? {
@@ -118,7 +126,7 @@ export class CreateAvailableProducts extends SignalWatcher(LitElement) {
       this.committing = true;
       const record: EntryRecord<AvailableProducts> =
         await this.ordersStore.client.createAvailableProducts(
-          availableProducts
+          availableProducts,
         );
 
       this.dispatchEvent(
@@ -128,7 +136,7 @@ export class CreateAvailableProducts extends SignalWatcher(LitElement) {
           detail: {
             availableProductsHash: record.actionHash,
           },
-        })
+        }),
       );
     } catch (e: unknown) {
       console.error(e);
@@ -146,9 +154,12 @@ export class CreateAvailableProducts extends SignalWatcher(LitElement) {
   @state()
   producerAvailable = true;
 
+  @state()
+  availableProducts = new HoloHashMap<ActionHash, boolean>();
+
   renderProducts(
     producer: EntryRecord<Producer>,
-    map: ReadonlyMap<ActionHash, EntryRecord<Product>>
+    map: ReadonlyMap<ActionHash, EntryRecord<Product>>,
   ) {
     if (map.size === 0)
       return html` <div
@@ -164,16 +175,25 @@ export class CreateAvailableProducts extends SignalWatcher(LitElement) {
         >
         <span class="placeholder"
           >${msg(
-            "Create products for this producer to be able to set its availability."
+            "Create products for this producer to be able to set its availability.",
           )}</span
         >
       </div>`;
+    const items = Array.from(map.entries()).map(([productHash, p]) => ({
+      ...p.entry,
+      productHash,
+      id: encodeHashToBase64(productHash),
+    }));
+
+    const dataProvider: GridDataProviderCallback<any> = (
+      params: any,
+      callback: any,
+    ) => {
+      callback(items, items.length);
+    };
 
     return html`
-      <form id="create-form" class="column" style="flex: 1; gap: 16px;"
-      ${onSubmit((fields) =>
-        this.createAvailableProducts(producer.actionHash, fields)
-      )}>
+      <div class="column" style="flex: 1; gap: 16px;">
         <span class="title" style="margin-bottom: 8px"
           >${msg("Set Available Products")}</span
         >
@@ -182,11 +202,9 @@ export class CreateAvailableProducts extends SignalWatcher(LitElement) {
             opacity: this.producerAvailable ? "1" : "0.4",
             "pointer-events": this.producerAvailable ? "auto" : "none",
           })}
+          .dataProvider=${dataProvider}
           multi-sort
-          .items=${Array.from(map.entries()).map(([productHash, p]) => ({
-            ...p.entry,
-            productHash,
-          }))}
+          .itemIdPath="id"
         >
           <vaadin-grid-sort-column
             .header=${msg("Product ID")}
@@ -226,29 +244,54 @@ export class CreateAvailableProducts extends SignalWatcher(LitElement) {
             .header=${msg("VAT (%)")}
             path="vat_percentage"
           ></vaadin-grid-column>
-         <vaadin-grid-column
+          <vaadin-grid-column
             .header=${msg("Available")}
             .renderer=${(root: any, _: any, model: any) => {
               render(
-                html` <div class="column" style="flex: 1; align-items: center">
-                  <sl-checkbox
-                    name="${encodeHashToBase64(model.item.productHash)}"
-                    checked
-                  ></sl-checkbox>
-                </div>`,
-                root
+                keyed(
+                  encodeHashToBase64(model.item.productHash),
+                  html` <div
+                    class="column"
+                    style="flex: 1; align-items: center"
+                  >
+                    <sl-checkbox
+                      @sl-change=${(e: CustomEvent) => {
+                        const available = (e.target as SlCheckbox).checked;
+                        this.availableProducts.set(
+                          model.item.productHash,
+                          available,
+                        );
+                      }}
+                      .checked=${this.availableProducts.has(
+                        model.item.productHash,
+                      )
+                        ? this.availableProducts.get(model.item.productHash)
+                        : true}
+                    ></sl-checkbox>
+                  </div>`,
+                ),
+                root,
               );
             }}
           ></vaadin-grid-column>
         </vaadin-grid>
-        <sl-button style="align-self: end" variant="primary" type="submit" .loading=${
-          this.committing
-        }
+        <sl-button
+          style="align-self: end"
+          variant="primary"
+          type="submit"
+          .loading=${this.committing}
+          @click=${() =>
+            this.createAvailableProducts(
+              producer.actionHash,
+              Array.from(map.keys()),
+            )}
           >${msg("Set Available Products")}</sl-button
         >
       </div>
     `;
   }
+
+  rendered = new HoloHashMap();
 
   productsLatestVersion() {
     const map = this.producersStore.producers
@@ -266,7 +309,7 @@ export class CreateAvailableProducts extends SignalWatcher(LitElement) {
       return producerLatestVersion;
 
     const latestVersion = joinAsyncMap(
-      mapValues(map.value, (p) => p.latestVersion.get())
+      mapValues(map.value, (p) => p.latestVersion.get()),
     );
     if (latestVersion.status !== "completed") return latestVersion;
 
@@ -324,19 +367,19 @@ export class CreateAvailableProducts extends SignalWatcher(LitElement) {
                 this.producerAvailable = (e.target as SlCheckbox).checked;
               }}
               >${msg(
-                str`Producer is available for the ${products.value.order.entry.name} order`
+                str`Producer is available for the ${products.value.order.entry.name} order`,
               )}</sl-checkbox
             >
 
             <span class="title"
               >${msg(
-                str`Available Products for the "${products.value.order.entry.name}" order`
+                str`Available Products for the "${products.value.order.entry.name}" order`,
               )}</span
             >
             <sl-card>
               ${this.renderProducts(
                 products.value.producer,
-                products.value.products
+                products.value.products,
               )}
             </sl-card>
           </div>
@@ -344,5 +387,12 @@ export class CreateAvailableProducts extends SignalWatcher(LitElement) {
     }
   }
 
-  static styles = appStyles;
+  static styles = [
+    ...appStyles,
+    css`
+      :host {
+        display: flex;
+      }
+    `,
+  ];
 }

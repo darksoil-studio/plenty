@@ -3,7 +3,7 @@ import {
   joinAsync,
   joinAsyncMap,
 } from "@holochain-open-dev/signals";
-import { LitElement, html } from "lit";
+import { LitElement, html, css } from "lit";
 import { customElement } from "lit/decorators.js";
 import { consume } from "@lit/context";
 import { EntryRecord, mapValues } from "@holochain-open-dev/utils";
@@ -55,7 +55,7 @@ export class AllMembers extends SignalWatcher(LitElement) {
         <div class="column" style="flex: 1; gap: 16px">
           ${members.map(
             (member) =>
-              html` <div class="row" style="align-items: center; gap: 12px">
+              html` <div class="row" style="align-items: start; gap: 12px">
                 <profile-list-item .agentPubKey=${member}></profile-list-item>
                 <span style="flex: 1"></span>
 
@@ -98,5 +98,13 @@ export class AllMembers extends SignalWatcher(LitElement) {
     }
   }
 
-  static styles = appStyles;
+  static styles = [
+    ...appStyles,
+    css`
+      roles-for-agent::part(body) {
+        flex-wrap: wrap;
+        justify-content: end;
+      }
+    `,
+  ];
 }

@@ -14,21 +14,21 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-tauri-build = { version = "2.0.0-beta.19", default-features = false, features = [
+tauri-build = { version = "2.0.0-rc", default-features = false, features = [
 ] }
 
 [dependencies]
-tauri = { version = "2.0.0-beta.24", features = [] }
-tauri-plugin-holochain = { git = "https://github.com/darksoil-studio/tauri-plugin-holochain", branch = "main" }
-tauri-plugin-deep-link = "2.0.0-beta"
-tauri-plugin-log = "2.0.0-beta"
-tauri-plugin-single-instance = "2.0.0-beta"
-tauri-plugin-clipboard-manager = "2.1.0-beta.6"
+tauri = { version = "2.0.0-rc", features = [] }
+tauri-plugin-holochain = { git = "https://github.com/darksoil-studio/tauri-plugin-holochain", branch = "develop" }
+tauri-plugin-deep-link = "2.0.0-rc"
+tauri-plugin-log = "2.0.0-rc"
+tauri-plugin-single-instance = "2.0.0-rc"
+tauri-plugin-clipboard-manager = "2.0.0-rc"
 
 mr_bundle = "0.3"
-holochain_types = { version = "0.3.1" }
-lair_keystore = { version = "0.4" }
-holochain_client = { version = "0.5" }
+holochain_types = { version = "0.3.2" }
+lair_keystore = { version = "0.4.5" }
+holochain_client = { version = "0.5.1" }
 log = "0.4"
 url2 = "0.0.6"
 app_dirs2 = "2.5.5"

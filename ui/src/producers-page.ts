@@ -319,6 +319,12 @@ export class ProducersPage extends SignalWatcher(LitElement) {
       await this.producersStore.client.createProducts(
         products.map((p) => ({ ...p, producer_hash: producerHash })),
       );
+      (
+        this.shadowRoot?.getElementById(
+          "upload-products-csv-dialog",
+        ) as SlDialog
+      ).hide();
+      this.uploadedProducts = undefined;
     } catch (e: any) {
       notifyError(msg(str`Error uploading producers: ${e.message}`));
       console.error(e);

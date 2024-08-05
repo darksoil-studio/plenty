@@ -103,7 +103,7 @@ export class OrderDetail extends SignalWatcher(LitElement) {
           detail: {
             orderHash: this.orderHash,
           },
-        })
+        }),
       );
     } catch (e: unknown) {
       console.error(e);
@@ -123,7 +123,7 @@ export class OrderDetail extends SignalWatcher(LitElement) {
             available_products,
             deadline: Date.now(), // TODO
           },
-        }
+        },
       );
 
       this.dispatchEvent(
@@ -133,7 +133,7 @@ export class OrderDetail extends SignalWatcher(LitElement) {
           detail: {
             orderHash: this.orderHash,
           },
-        })
+        }),
       );
     } catch (e: unknown) {
       console.error(e);
@@ -149,11 +149,11 @@ export class OrderDetail extends SignalWatcher(LitElement) {
     if (producers.status !== "completed") return producers;
 
     const producersLatestVersion = joinAsyncMap(
-      mapValues(producers.value, (p) => p.latestVersion.get())
+      mapValues(producers.value, (p) => p.latestVersion.get()),
     );
     if (availableProducts.status !== "completed") return availableProducts;
     const availableProductsLatestVersion = joinAsyncMap(
-      mapValues(availableProducts.value, (p) => p.latestVersion.get())
+      mapValues(availableProducts.value, (p) => p.latestVersion.get()),
     );
     if (availableProductsLatestVersion.status !== "completed")
       return availableProductsLatestVersion;
@@ -162,15 +162,15 @@ export class OrderDetail extends SignalWatcher(LitElement) {
 
     const producersForWhichAvailabilityWasSet = uniquify(
       Array.from(availableProductsLatestVersion.value.values()).map(
-        (ap) => ap.entry.original_producer_hash
-      )
+        (ap) => ap.entry.original_producer_hash,
+      ),
     ).map(encodeHashToBase64);
 
     const canOrderBeOpen = Array.from(producers.value.keys()).every(
       (producerHash) =>
         producersForWhichAvailabilityWasSet.includes(
-          encodeHashToBase64(producerHash)
-        )
+          encodeHashToBase64(producerHash),
+        ),
     );
     const availableProductsByProducer: Record<
       ActionHashB64,
@@ -178,7 +178,7 @@ export class OrderDetail extends SignalWatcher(LitElement) {
     > = {};
 
     for (const availableProducts of Array.from(
-      availableProductsLatestVersion.value.values()
+      availableProductsLatestVersion.value.values(),
     )) {
       if (availableProducts.entry.producer_availability.type === "Available") {
         availableProductsByProducer[
@@ -192,7 +192,7 @@ export class OrderDetail extends SignalWatcher(LitElement) {
       value: {
         canOrderBeOpen,
         availableProducts: Array.from(
-          availableProductsLatestVersion.value.keys()
+          availableProductsLatestVersion.value.keys(),
         ),
       },
     };
@@ -324,6 +324,7 @@ export class OrderDetail extends SignalWatcher(LitElement) {
     css`
       :host {
         display: flex;
+        justify-content: center;
       }
     `,
   ];

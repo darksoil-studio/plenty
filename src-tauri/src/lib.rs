@@ -1,3 +1,4 @@
+use commands::plenty_happ_bundle;
 use lair_keystore::dependencies::sodoken::{BufRead, BufWrite};
 use std::path::PathBuf;
 use tauri::Emitter;
@@ -63,15 +64,19 @@ pub fn run() {
                         .main_window_builder(String::from("lobby"), false, None, None)
                         .await?
                         .title(String::from("Plenty"))
-                        .inner_size(1000.0, 700.0)
+                        .inner_size(1200.0, 900.0)
                         .enable_clipboard_access()
                         .build()?;
                 } else {
                     app.holochain()?
+                        .update_web_app_if_necessary(String::from(APP_ID), plenty_happ_bundle())
+                        .await?;
+
+                    app.holochain()?
                         .web_happ_window_builder(String::from(APP_ID), None)
                         .await?
                         .title(String::from("Plenty"))
-                        .inner_size(1000.0, 700.0)
+                        .inner_size(1200.0, 900.0)
                         .enable_clipboard_access()
                         .build()?;
                 }
@@ -103,19 +108,11 @@ pub fn vec_to_locked(mut pass_tmp: Vec<u8>) -> std::io::Result<BufRead> {
     }
 }
 
-fn internal_ip() -> String {
-    std::option_env!("INTERNAL_IP")
-        .expect("Environment variable INTERNAL_IP was not set")
-        .to_string()
-}
-
 fn bootstrap_url() -> Url2 {
     // Resolved at compile time to be able to point to local services
     if tauri::is_dev() {
-        let internal_ip = internal_ip();
-        let port = std::option_env!("BOOTSTRAP_PORT")
-            .expect("Environment variable BOOTSTRAP_PORT was not set");
-        url2::url2!("http://{internal_ip}:{port}")
+        // Invalid URL: switch to mDNS
+        url2::url2!("http://127.0.0.1:8888")
     } else {
         url2::url2!("https://bootstrap.holo.host")
     }
@@ -124,10 +121,8 @@ fn bootstrap_url() -> Url2 {
 fn signal_url() -> Url2 {
     // Resolved at compile time to be able to point to local services
     if tauri::is_dev() {
-        let internal_ip = internal_ip();
-        let signal_port =
-            std::option_env!("SIGNAL_PORT").expect("Environment variable INTERNAL_IP was not set");
-        url2::url2!("ws://{internal_ip}:{signal_port}")
+        // Invalid URL: switch to mDNS
+        url2::url2!("ws://127.0.0.1:8888")
     } else {
         url2::url2!("wss://signal.holo.host")
     }

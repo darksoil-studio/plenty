@@ -36,16 +36,16 @@ export class OrdersStore {
 
   orders = new LazyHoloHashMap((orderHash: ActionHash) => ({
     latestVersion: latestVersionOfEntrySignal(this.client, () =>
-      this.client.getLatestOrder(orderHash)
+      this.client.getLatestOrder(orderHash),
     ),
     original: immutableEntrySignal(() =>
-      this.client.getOriginalOrder(orderHash)
+      this.client.getOriginalOrder(orderHash),
     ),
     allRevisions: allRevisionsOfEntrySignal(this.client, () =>
-      this.client.getAllRevisionsForOrder(orderHash)
+      this.client.getAllRevisionsForOrder(orderHash),
     ),
     deletes: deletesForEntrySignal(this.client, orderHash, () =>
-      this.client.getAllDeletesForOrder(orderHash)
+      this.client.getAllDeletesForOrder(orderHash),
     ),
     householdOrders: {
       live: pipe(
@@ -53,26 +53,26 @@ export class OrdersStore {
           this.client,
           orderHash,
           () => this.client.getHouseholdOrdersForOrder(orderHash),
-          "OrderToHouseholdOrders"
+          "OrderToHouseholdOrders",
         ),
         (links) =>
           slice(
             this.householdOrders,
-            links.map((l) => l.target)
-          )
+            links.map((l) => l.target),
+          ),
       ),
       deleted: pipe(
         deletedLinksSignal(
           this.client,
           orderHash,
           () => this.client.getDeletedHouseholdOrdersForOrder(orderHash),
-          "OrderToHouseholdOrders"
+          "OrderToHouseholdOrders",
         ),
         (links) =>
           slice(
             this.householdOrders,
-            links.map((l) => l[0].hashed.content.target_address)
-          )
+            links.map((l) => l[0].hashed.content.target_address),
+          ),
       ),
     },
     producerDeliveries: {
@@ -81,26 +81,26 @@ export class OrdersStore {
           this.client,
           orderHash,
           () => this.client.getProducerDeliveriesForOrder(orderHash),
-          "OrderToProducerDeliveries"
+          "OrderToProducerDeliveries",
         ),
         (links) =>
           slice(
             this.producerDeliveries,
-            links.map((l) => l.target)
-          )
+            links.map((l) => l.target),
+          ),
       ),
       deleted: pipe(
         deletedLinksSignal(
           this.client,
           orderHash,
           () => this.client.getDeletedProducerDeliveriesForOrder(orderHash),
-          "OrderToProducerDeliveries"
+          "OrderToProducerDeliveries",
         ),
         (links) =>
           slice(
             this.producerDeliveries,
-            links.map((l) => l[0].hashed.content.target_address)
-          )
+            links.map((l) => l[0].hashed.content.target_address),
+          ),
       ),
     },
     producerInvoices: {
@@ -109,26 +109,26 @@ export class OrdersStore {
           this.client,
           orderHash,
           () => this.client.getProducerInvoicesForOrder(orderHash),
-          "OrderToProducerInvoices"
+          "OrderToProducerInvoices",
         ),
         (links) =>
           slice(
             this.producerInvoices,
-            links.map((l) => l.target)
-          )
+            links.map((l) => l.target),
+          ),
       ),
       deleted: pipe(
         deletedLinksSignal(
           this.client,
           orderHash,
           () => this.client.getDeletedProducerInvoicesForOrder(orderHash),
-          "OrderToProducerInvoices"
+          "OrderToProducerInvoices",
         ),
         (links) =>
           slice(
             this.producerInvoices,
-            links.map((l) => l[0].hashed.content.target_address)
-          )
+            links.map((l) => l[0].hashed.content.target_address),
+          ),
       ),
     },
     availableProducts: {
@@ -137,26 +137,26 @@ export class OrdersStore {
           this.client,
           orderHash,
           () => this.client.getAvailableProductsForOrder(orderHash),
-          "OrderToAvailableProducts"
+          "OrderToAvailableProducts",
         ),
         (links) =>
           slice(
             this.availableProducts,
-            links.map((l) => l.target)
-          )
+            links.map((l) => l.target),
+          ),
       ),
       deleted: pipe(
         deletedLinksSignal(
           this.client,
           orderHash,
           () => this.client.getDeletedAvailableProductsForOrder(orderHash),
-          "OrderToAvailableProducts"
+          "OrderToAvailableProducts",
         ),
         (links) =>
           slice(
             this.availableProducts,
-            links.map((l) => l[0].hashed.content.target_address)
-          )
+            links.map((l) => l[0].hashed.content.target_address),
+          ),
       ),
     },
   }));
@@ -167,16 +167,16 @@ export class OrdersStore {
     latestVersion: latestVersionOfEntrySignal(
       this.client,
       () => this.client.getLatestHouseholdOrder(householdOrderHash),
-      3000
+      3000,
     ),
     original: immutableEntrySignal(() =>
-      this.client.getOriginalHouseholdOrder(householdOrderHash)
+      this.client.getOriginalHouseholdOrder(householdOrderHash),
     ),
     allRevisions: allRevisionsOfEntrySignal(this.client, () =>
-      this.client.getAllRevisionsForHouseholdOrder(householdOrderHash)
+      this.client.getAllRevisionsForHouseholdOrder(householdOrderHash),
     ),
     deletes: deletesForEntrySignal(this.client, householdOrderHash, () =>
-      this.client.getAllDeletesForHouseholdOrder(householdOrderHash)
+      this.client.getAllDeletesForHouseholdOrder(householdOrderHash),
     ),
   }));
 
@@ -187,14 +187,14 @@ export class OrdersStore {
         householdHash,
         () => this.client.getHouseholdOrdersForHousehold(householdHash),
         "HouseholdToHouseholdOrders",
-        3000
+        3000,
       ),
       (links) =>
         slice(
           this.householdOrders,
-          links.map((l) => l.target)
-        )
-    )
+          links.map((l) => l.target),
+        ),
+    ),
   );
 
   /** Producer Delivery */
@@ -202,34 +202,34 @@ export class OrdersStore {
   producerDeliveries = new LazyHoloHashMap(
     (producerDeliveryHash: ActionHash) => ({
       latestVersion: latestVersionOfEntrySignal(this.client, () =>
-        this.client.getLatestProducerDelivery(producerDeliveryHash)
+        this.client.getLatestProducerDelivery(producerDeliveryHash),
       ),
       original: immutableEntrySignal(() =>
-        this.client.getOriginalProducerDelivery(producerDeliveryHash)
+        this.client.getOriginalProducerDelivery(producerDeliveryHash),
       ),
       allRevisions: allRevisionsOfEntrySignal(this.client, () =>
-        this.client.getAllRevisionsForProducerDelivery(producerDeliveryHash)
+        this.client.getAllRevisionsForProducerDelivery(producerDeliveryHash),
       ),
       deletes: deletesForEntrySignal(this.client, producerDeliveryHash, () =>
-        this.client.getAllDeletesForProducerDelivery(producerDeliveryHash)
+        this.client.getAllDeletesForProducerDelivery(producerDeliveryHash),
       ),
-    })
+    }),
   );
 
   /** Producer Invoice */
 
   producerInvoices = new LazyHoloHashMap((producerInvoiceHash: ActionHash) => ({
     latestVersion: latestVersionOfEntrySignal(this.client, () =>
-      this.client.getLatestProducerInvoice(producerInvoiceHash)
+      this.client.getLatestProducerInvoice(producerInvoiceHash),
     ),
     original: immutableEntrySignal(() =>
-      this.client.getOriginalProducerInvoice(producerInvoiceHash)
+      this.client.getOriginalProducerInvoice(producerInvoiceHash),
     ),
     allRevisions: allRevisionsOfEntrySignal(this.client, () =>
-      this.client.getAllRevisionsForProducerInvoice(producerInvoiceHash)
+      this.client.getAllRevisionsForProducerInvoice(producerInvoiceHash),
     ),
     deletes: deletesForEntrySignal(this.client, producerInvoiceHash, () =>
-      this.client.getAllDeletesForProducerInvoice(producerInvoiceHash)
+      this.client.getAllDeletesForProducerInvoice(producerInvoiceHash),
     ),
   }));
 
@@ -239,30 +239,32 @@ export class OrdersStore {
     collectionSignal(
       this.client,
       () => this.client.getAllOrders(),
-      "AllOrders"
+      "AllOrders",
     ),
     (allOrders) =>
       slice(
         this.orders,
-        allOrders.map((l) => l.target)
-      )
+        allOrders
+          .sort((l1, l2) => l2.timestamp - l1.timestamp)
+          .map((l) => l.target),
+      ),
   );
   /** Available Products */
 
   availableProducts = new LazyHoloHashMap(
     (availableProductsHash: ActionHash) => ({
       latestVersion: latestVersionOfEntrySignal(this.client, () =>
-        this.client.getLatestAvailableProducts(availableProductsHash)
+        this.client.getLatestAvailableProducts(availableProductsHash),
       ),
       original: immutableEntrySignal(() =>
-        this.client.getOriginalAvailableProducts(availableProductsHash)
+        this.client.getOriginalAvailableProducts(availableProductsHash),
       ),
       allRevisions: allRevisionsOfEntrySignal(this.client, () =>
-        this.client.getAllRevisionsForAvailableProducts(availableProductsHash)
+        this.client.getAllRevisionsForAvailableProducts(availableProductsHash),
       ),
       deletes: deletesForEntrySignal(this.client, availableProductsHash, () =>
-        this.client.getAllDeletesForAvailableProducts(availableProductsHash)
+        this.client.getAllDeletesForAvailableProducts(availableProductsHash),
       ),
-    })
+    }),
   );
 }

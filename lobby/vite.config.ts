@@ -2,25 +2,23 @@ import path from "path";
 import { defineConfig } from "vite";
 import checker from "vite-plugin-checker";
 import { viteStaticCopy } from "vite-plugin-static-copy";
-import { internalIpV4Sync } from "internal-ip";
 
 // @ts-ignore
-const mobile = !!/android|ios/.exec(process.env.TAURI_ENV_PLATFORM);
-// const mobile = true
+const host = process.env.TAURI_DEV_HOST;
 
 export default defineConfig({
   // prevent vite from obscuring rust errors
   clearScreen: false,
   // tauri expects a fixed port, fail if that port is not available
   server: {
-    host: mobile ? "0.0.0.0" : false,
     port: 1420,
     strictPort: true,
-    hmr: mobile
+    host: host || false,
+    hmr: host
       ? {
           protocol: "ws",
-          host: internalIpV4Sync(),
-          port: 1421,
+          host: host,
+          port: 1430,
         }
       : undefined,
   },
@@ -41,10 +39,7 @@ export default defineConfig({
           dest: path.resolve(__dirname, "dist/shoelace"),
         },
         {
-          src: path.resolve(
-            __dirname,
-            "icon.png",
-          ),
+          src: path.resolve(__dirname, "icon.png"),
           dest: path.resolve(__dirname, "dist/"),
         },
       ],
