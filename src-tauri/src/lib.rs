@@ -64,7 +64,7 @@ pub fn run() {
                         .main_window_builder(String::from("lobby"), false, None, None)
                         .await?
                         .title(String::from("Plenty"))
-                        .inner_size(1200.0, 900.0)
+                        .inner_size(1400.0, 1000.0)
                         .enable_clipboard_access()
                         .build()?;
                 } else {
@@ -76,7 +76,7 @@ pub fn run() {
                         .web_happ_window_builder(String::from(APP_ID), None)
                         .await?
                         .title(String::from("Plenty"))
-                        .inner_size(1200.0, 900.0)
+                        .inner_size(1400.0, 1000.0)
                         .enable_clipboard_access()
                         .build()?;
                 }
