@@ -179,13 +179,20 @@ export class EditAvailableProducts extends SignalWatcher(LitElement) {
         : this.producerAvailable;
 
     const productAvailable = (productHash: ActionHash) => {
-      const availability = availableProducts.entry.producer_availability;
-      if (availability.type === "Unavailable") return false;
+      const previousAvailability =
+        availableProducts.entry.producer_availability;
+      const producerAvailable =
+        this.producerAvailable !== this.producerAvailable
+          ? this.producerAvailable
+          : previousAvailability.type === "Available";
+      if (!producerAvailable) return false;
       return this.availableProducts.has(productHash)
         ? this.availableProducts.get(productHash)
-        : !!availability.available_products.find(
-            (p) => encodeHashToBase64(p) === encodeHashToBase64(productHash),
-          );
+        : previousAvailability.type === "Unavailable"
+          ? false
+          : !!previousAvailability.available_products.find(
+              (p) => encodeHashToBase64(p) === encodeHashToBase64(productHash),
+            );
     };
 
     return html`

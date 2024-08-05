@@ -133,7 +133,7 @@ export class ProducersPage extends SignalWatcher(LitElement) {
           }}
         >
           <create-available-products
-            style="width: 70rem; flex: 1"
+            style="width: 70rem;"
             .orderHash=${decodeHashFromBase64(
               params.orderHash as ActionHashB64,
             )}
@@ -158,7 +158,7 @@ export class ProducersPage extends SignalWatcher(LitElement) {
           }}
         >
           <edit-available-products
-            style="width: 70rem; flex: 1"
+            style="width: 70rem;"
             .availableProductsHash=${decodeHashFromBase64(
               params.availableProductsHash as ActionHashB64,
             )}
