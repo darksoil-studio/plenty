@@ -4,6 +4,7 @@ use std::path::PathBuf;
 use tauri::Emitter;
 use tauri_plugin_deep_link::DeepLinkExt;
 use tauri_plugin_holochain::{HolochainExt, HolochainPluginConfig};
+use tauri_plugin_log::Target;
 use url2::Url2;
 
 mod commands;
@@ -21,6 +22,9 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(
             tauri_plugin_log::Builder::default()
+                .target(Target::new(tauri_plugin_log::TargetKind::LogDir {
+                    file_name: None,
+                }))
                 .level(log::LevelFilter::Warn)
                 .build(),
         )
