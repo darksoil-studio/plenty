@@ -73,7 +73,9 @@ export class ProductSummary extends SignalWatcher(LitElement) {
 
         <div class="column" style="gap: 8px">
           <span><strong>${msg("Price")}</strong></span>
-          <span style="white-space: pre-line">${entryRecord.entry.price}</span>
+          <span style="white-space: pre-line"
+            >${entryRecord.entry.price_cents}</span
+          >
         </div>
 
         <div class="column" style="gap: 8px">

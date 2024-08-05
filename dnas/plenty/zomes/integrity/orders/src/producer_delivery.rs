@@ -19,11 +19,11 @@ pub struct EstimatedProductDeliveryForHouseholds {
 pub enum DeliveredAmount {
     FixedAmountProduct {
         delivered_products: Vec<FixedProductDeliveryForHouseholds>,
-        price_per_unit_changed: Option<f32>,
+        price_cents_per_unit_changed: Option<u32>,
     },
     EstimatedAmountjProduct {
         delivered_products_by_household: Vec<EstimatedProductDeliveryForHouseholds>,
-        price_per_unit_changed: Option<f32>,
+        price_cents_per_unit_changed: Option<u32>,
     },
 }
 

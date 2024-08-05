@@ -206,9 +206,9 @@ export class ProducersPage extends SignalWatcher(LitElement) {
 
       case "completed":
         return html`
-          <div class="column" style="align-items: center">
-            <div class="column" style="gap: 16px; width: 1000px;">
-              <div class="row" style="align-items: center; gap: 12px; flex: 1">
+          <div class="column" style="align-items: center; flex: 1">
+            <div class="column" style="gap: 16px; width: 1000px; flex: 1">
+              <div class="row" style="align-items: center; gap: 12px; ">
                 <show-image
                   .imageHash=${producer.value.entry.photo}
                   style="height: 100px; width: 100px"
@@ -284,7 +284,7 @@ export class ProducersPage extends SignalWatcher(LitElement) {
               </div>
 
               <products-for-producer
-                style="flex: 1"
+                style="flex: 1; margin-bottom: 16px"
                 .producerHash=${producerHash}
                 @edit-product-requested=${(e: CustomEvent) =>
                   this.routes.goto(
@@ -339,7 +339,10 @@ export class ProducersPage extends SignalWatcher(LitElement) {
         <span class="title">${msg("Preview")}</span>
         <vaadin-grid
           multi-sort
-          .items=${products}
+          .items=${products.map((p) => ({
+            ...p,
+            price: p.price_cents / 100,
+          }))}
           style="flex: 1; height: 100%"
         >
           <vaadin-grid-column
@@ -470,7 +473,7 @@ export class ProducersPage extends SignalWatcher(LitElement) {
 
   render() {
     return html`
-      <div class="column" style="margin: 12px 0">
+      <div class="column" style="margin: 12px 0; flex: 1">
         <div class="row" style="align-items: center; height: 38px">
           <span class="title">${msg("Producers")}</span>
           <routes-breadcrumbs
@@ -510,6 +513,9 @@ export class ProducersPage extends SignalWatcher(LitElement) {
         height: 800px;
       }
       sl-dialog::part(body) {
+        display: flex;
+      }
+      :host {
         display: flex;
       }
     `,

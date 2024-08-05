@@ -143,7 +143,7 @@ export class ProductDetail extends SignalWatcher(LitElement) {
           <div class="column" style="gap: 8px;">
             <span><strong>${msg("Price")}</strong></span>
             <span style="white-space: pre-line"
-              >${entryRecord.entry.price}</span
+              >${entryRecord.entry.price_cents}</span
             >
           </div>
 

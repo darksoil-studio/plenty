@@ -9,7 +9,7 @@ import {
 export async function tryAndRetry<T>(
   task: () => Promise<T>,
   maxRetries: number,
-  retryIntervalMs: number
+  retryIntervalMs: number,
 ): Promise<T> {
   let numRetries = 0;
   while (true) {
@@ -18,7 +18,7 @@ export async function tryAndRetry<T>(
       return result;
     } catch (e) {
       console.warn(
-        `Failed task with error: ${e}. Retrying in ${retryIntervalMs}ms`
+        `Failed task with error: ${e}. Retrying in ${retryIntervalMs}ms`,
       );
       if (numRetries < maxRetries) {
         throw e;
@@ -32,7 +32,7 @@ export const sleep = (ms: number) =>
   new Promise((resolve) => setTimeout(() => resolve(undefined), ms));
 
 export async function processCsvProductsFile(
-  file: File
+  file: File,
 ): Promise<Array<Omit<Product, "producer_hash">>> {
   const contents = await readAsText(file);
   if (contents.length === 0) throw new Error(msg("File is empty"));
@@ -44,23 +44,23 @@ export async function processCsvProductsFile(
   const headers = lines.slice(0, 1)[0];
 
   const nameIndex = headers.findIndex((header) =>
-    header.toLocaleLowerCase().includes("name")
+    header.toLocaleLowerCase().includes("name"),
   );
   if (nameIndex === -1) throw new Error(msg('There is no "name" column'));
 
   const productIdIndex = headers.findIndex((header) =>
-    header.toLocaleLowerCase().includes("product id")
+    header.toLocaleLowerCase().includes("product id"),
   );
   if (productIdIndex === -1)
     throw new Error(msg('There is no "Product ID" column'));
 
   const priceIndex = headers.findIndex((header) =>
-    header.toLocaleLowerCase().includes("price")
+    header.toLocaleLowerCase().includes("price"),
   );
   if (priceIndex === -1) throw new Error(msg('There is no "Price" column'));
 
   const vatIndex = headers.findIndex((header) =>
-    header.toLocaleLowerCase().includes("vat")
+    header.toLocaleLowerCase().includes("vat"),
   );
   if (vatIndex === -1) throw new Error(msg('There is no "VAT" column'));
   if (
@@ -70,27 +70,27 @@ export async function processCsvProductsFile(
     throw new Error(msg(`Multiple columns contain "VAT" in their header`));
 
   const descriptionIndex = headers.findIndex((header) =>
-    header.toLocaleLowerCase().includes("description")
+    header.toLocaleLowerCase().includes("description"),
   );
 
   const categoriesIndex = headers.findIndex((header) =>
-    header.toLocaleLowerCase().includes("categor")
+    header.toLocaleLowerCase().includes("categor"),
   );
 
   const packagingIndex = headers.findIndex((header) =>
-    header.toLocaleLowerCase().includes("packaging")
+    header.toLocaleLowerCase().includes("packaging"),
   );
   const marginPercentageIndex = headers.findIndex((header) =>
-    header.toLocaleLowerCase().includes("margin")
+    header.toLocaleLowerCase().includes("margin"),
   );
   const originIndex = headers.findIndex((header) =>
-    header.toLocaleLowerCase().includes("ingredients")
+    header.toLocaleLowerCase().includes("ingredients"),
   );
   const ingredientsIndex = headers.findIndex((header) =>
-    header.toLocaleLowerCase().includes("ingredients")
+    header.toLocaleLowerCase().includes("ingredients"),
   );
   const multiplierIndex = headers.findIndex(
-    (header) => header.toLocaleLowerCase() === "x"
+    (header) => header.toLocaleLowerCase() === "x",
   );
 
   const productLines = lines.slice(1);
@@ -104,8 +104,8 @@ export async function processCsvProductsFile(
               i + 1
             } does not have the correct number of columns: there are ${
               headers.length
-            } columns in the file and this line has ${fields.length} columns`
-          )
+            } columns in the file and this line has ${fields.length} columns`,
+          ),
         );
 
       const name = fields[nameIndex];
@@ -114,25 +114,25 @@ export async function processCsvProductsFile(
       const priceMatches = fields[priceIndex].match(/([\d\,\.]+)/g);
       if (!priceMatches)
         throw new Error(
-          msg(str`Unrecognized price field: ${fields[priceIndex]}`)
+          msg(str`Unrecognized price field: ${fields[priceIndex]}`),
         );
-      let price = parseFloat(priceMatches[0]);
+      let price = parseFloat(priceMatches[0].replace(",", "."));
       if (isNaN(price))
         throw new Error(
-          msg(str`Unrecognized price field: ${fields[priceIndex]}`)
+          msg(str`Unrecognized price field: ${fields[priceIndex]}`),
         );
 
       if (multiplierIndex !== -1) {
         const multiplier = parseFloat(fields[multiplierIndex]);
         if (isNaN(multiplier))
           throw new Error(
-            msg(str`Unrecognized multiplier field: ${fields[multiplierIndex]}`)
+            msg(str`Unrecognized multiplier field: ${fields[multiplierIndex]}`),
           );
         price = multiplier * price;
       }
 
       const vat = fields[vatIndex].split("%")[0];
-      const vat_percentage = parseFloat(vat);
+      const vat_percentage = parseFloat(vat.replace(",", "."));
       if (isNaN(vat_percentage))
         throw new Error(msg(str`Unrecognized VAT field: ${fields[vatIndex]}`));
 
@@ -146,10 +146,12 @@ export async function processCsvProductsFile(
       const margin_percentage =
         marginPercentageIndex === -1
           ? undefined
-          : parseFloat(fields[marginPercentageIndex].split("%")[0]);
+          : parseFloat(
+              fields[marginPercentageIndex].split("%")[0].replace(",", "."),
+            );
       if (margin_percentage && isNaN(margin_percentage))
         throw new Error(
-          msg(str`Unrecognized margin field: ${fields[marginPercentageIndex]}`)
+          msg(str`Unrecognized margin field: ${fields[marginPercentageIndex]}`),
         );
       const origin = originIndex === -1 ? undefined : fields[originIndex];
       const ingredients =
@@ -160,7 +162,7 @@ export async function processCsvProductsFile(
         description,
         categories,
         product_id,
-        price,
+        price_cents: Math.round(price * 100),
         vat_percentage,
         margin_percentage,
         origin,
@@ -168,7 +170,7 @@ export async function processCsvProductsFile(
         packaging,
         maximum_available: undefined,
       };
-    }
+    },
   );
 
   return products;
@@ -181,7 +183,7 @@ const csvStringToArray = (data: string) => {
   while ((matches = re.exec(data))) {
     if (matches[1].length && matches[1] !== ",") result.push([]);
     result[result.length - 1].push(
-      matches[2] !== undefined ? matches[2].replace(/""/g, '"') : matches[3]
+      matches[2] !== undefined ? matches[2].replace(/""/g, '"') : matches[3],
     );
   }
   return result;
@@ -189,15 +191,15 @@ const csvStringToArray = (data: string) => {
 
 export function parsePackagingField(
   packagingStr: string,
-  lineNumber: number
+  lineNumber: number,
 ): Packaging {
   if (packagingStr.includes("x")) {
     const split = packagingStr.split("x").map((s) => s.trim());
     if (split.length > 2)
       throw new Error(
         msg(
-          str`Unrecognized packaging field (more than one 'x' characters found) "${packagingStr}" in line number ${lineNumber}`
-        )
+          str`Unrecognized packaging field (more than one 'x' characters found) "${packagingStr}" in line number ${lineNumber}`,
+        ),
       );
 
     const isNumberOfPackagesFirst = split[0].match(/^[\d]+$/);
@@ -210,13 +212,13 @@ export function parsePackagingField(
     if (isNaN(number_of_packages))
       throw new Error(
         msg(
-          str`Unrecognized packaging field "${packagingStr}" in line number ${lineNumber}`
-        )
+          str`Unrecognized packaging field "${packagingStr}" in line number ${lineNumber}`,
+        ),
       );
 
     const [unit, amount_per_package] = parsePackagingWithoutNumberOfPackages(
       split[amountPerPackageIndex],
-      lineNumber
+      lineNumber,
     );
 
     return {
@@ -229,7 +231,7 @@ export function parsePackagingField(
     const number_of_packages = 1;
     const [unit, amount_per_package] = parsePackagingWithoutNumberOfPackages(
       packagingStr,
-      lineNumber
+      lineNumber,
     );
 
     return {
@@ -249,15 +251,15 @@ export function parsePackagingField(
 // - 5liters
 function parsePackagingWithoutNumberOfPackages(
   packagingStr: string,
-  lineNumber: number
+  lineNumber: number,
 ): [PackagingUnit, number] {
   const matches = [...packagingStr.matchAll(/([\d\,\.]+)\s*(.+)$/g)];
 
   if (matches.length === 0)
     throw new Error(
       msg(
-        str`Unrecognized packaging field "${packagingStr}" in line number ${lineNumber}`
-      )
+        str`Unrecognized packaging field "${packagingStr}" in line number ${lineNumber}`,
+      ),
     );
 
   const numberStr = matches[0][1];
@@ -265,8 +267,8 @@ function parsePackagingWithoutNumberOfPackages(
   if (isNaN(amount_per_package))
     throw new Error(
       msg(
-        str`Unrecognized packaging field "${packagingStr}" in line number ${lineNumber}`
-      )
+        str`Unrecognized packaging field "${packagingStr}" in line number ${lineNumber}`,
+      ),
     );
 
   const unit = parseUnit(matches[0][2], lineNumber);
@@ -308,8 +310,8 @@ function parseUnit(unitStr: string, lineNumber: number): PackagingUnit {
     default:
       throw new Error(
         msg(
-          str`Unrecognized packaging unit "${unitStr}" in line number ${lineNumber} `
-        )
+          str`Unrecognized packaging unit "${unitStr}" in line number ${lineNumber} `,
+        ),
       );
   }
 }

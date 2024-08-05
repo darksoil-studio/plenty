@@ -52,7 +52,7 @@ export function renderPackaging(packaging: Packaging) {
     packaging.number_of_packages === 1 ? `` : `${packaging.number_of_packages}x`
   }${packaging.amount_per_package}${renderPackagingUnit(
     packaging.unit,
-    packaging.amount_per_package !== 1
+    packaging.amount_per_package !== 1,
   )}`;
 }
 
@@ -98,7 +98,7 @@ export interface Product {
   categories: Array<string>;
   packaging: Packaging;
   maximum_available: number | undefined;
-  price: number;
+  price_cents: number;
   vat_percentage: number;
   margin_percentage: number | undefined;
   origin: string | undefined;

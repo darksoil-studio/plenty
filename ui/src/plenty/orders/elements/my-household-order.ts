@@ -73,6 +73,7 @@ import { ProducersStore } from "../../producers/producers-store.js";
 import { producersStoreContext } from "../../producers/context.js";
 import { sleep } from "../../../utils.js";
 import { orderManagerRoleConfig } from "../../../roles.js";
+import { keyed } from "lit/directives/keyed.js";
 
 const productsRandom = new LazyHoloHashMap(() => Math.random() * 1000);
 
@@ -233,10 +234,13 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
   ) {
     return html`
       <vaadin-grid
+        class="order-grid"
         multi-sort
         .items=${Array.from(products.entries()).map(([productHash, p]) => {
+          const price = p.entry.price_cents / 100;
           const price_with_vat =
-            p.entry.price + (p.entry.price * p.entry.vat_percentage) / 100;
+            Math.round((price + (price * p.entry.vat_percentage) / 100) * 100) /
+            100;
           const amount = this.productOrdersQueue.has(productHash)
             ? this.productOrdersQueue.get(productHash).amount
             : myHouseholdOrder
@@ -286,7 +290,7 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
             render(
               html`<sl-progress-ring
                 .value=${model.value}
-                style="--track-width: 6px; --indicator-width: 6px; --size: 24px"
+                style="padding-top: 6px; --track-width: 6px; --indicator-width: 6px; --size: 24px; --indicator-transition-duration: 0"
               ></sl-progress-ring>`,
               root,
             );
@@ -311,14 +315,15 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
                 value = thisProduct.amount;
               }
             }
-            if (!this.inputs.has(model.item.productHash)) {
-              const div = document.createElement("div");
-              render(
+            render(
+              keyed(
+                model.item.productHash,
                 html`
                   <sl-input
                     type="number"
                     style="width: 5rem"
                     min="0"
+                    no-spin-buttons
                     .value=${value}
                     @sl-change=${(e: CustomEvent) => {
                       const amount = parseInt((e.target as SlInput).value);
@@ -327,7 +332,7 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
                         original_product_hash: model.item.productHash,
                         ordered_product_hash: model.item.actionHash,
                       });
-                      this.requestUpdate();
+                      // this.requestUpdate();
                       this.setHouseholdProductOrder(
                         myHouseholdHash,
                         myHouseholdOrder,
@@ -335,13 +340,9 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
                     }}
                   ></sl-input>
                 `,
-                div,
-              );
-              this.inputs.set(model.item.productHash, div);
-            }
-            const div = this.inputs.get(model.item.productHash);
-            (div.querySelector("sl-input") as SlInput).value = value.toString();
-            root.appendChild(div);
+              ),
+              root,
+            );
           }}
         ></vaadin-grid-column>
         <vaadin-grid-column
@@ -355,8 +356,6 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
   renderOrderSummary() {
     return html`<households-orders-summary style="flex: 1" .orderHash=${this.orderHash}></household-orders-summary>`;
   }
-
-  inputs = new HoloHashMap<ActionHash, HTMLDivElement>();
 
   renderMyHouseholdOrderSummary(
     availableProducers: ReadonlyMap<
@@ -428,11 +427,12 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
         ),
       ).map((productOrder) => {
         const productInfo = products.get(productOrder.original_product_hash)!;
+        const price = productInfo.product.entry.price_cents / 100;
         const price_with_vat =
-          productInfo.product.entry.price +
-          (productInfo.product.entry.price *
-            productInfo.product.entry.vat_percentage) /
-            100;
+          Math.round(
+            (price + (price * productInfo.product.entry.vat_percentage) / 100) *
+              100,
+          ) / 100;
         const price_with_vat_rounded = (
           Math.round(price_with_vat * 100) / 100
         ).toFixed(2);
@@ -503,7 +503,7 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
           .footerRenderer=${(root: any) =>
             render(
               html`<span style="font-weight: bold"
-                >${msg("Total")}: ${totalAmount}</span
+                >${msg("Total")}: ${totalAmount.toFixed(2)}</span
               >`,
               root,
             )}
@@ -708,6 +708,12 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
 
       sl-tab-panel::part(base) {
         padding: 0;
+      }
+      .order-grid::part(row) {
+        height: 48px;
+      }
+      .order-grid::part(first-row) {
+        padding-top: 4px;
       }
     `,
   ];

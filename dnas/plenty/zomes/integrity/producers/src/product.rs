@@ -13,7 +13,7 @@ pub enum PackagingUnit {
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct Packaging {
     pub unit: PackagingUnit,
-    pub number_of_packages: f32,
+    pub number_of_packages: u32,
     pub amount_per_package: f32,
     pub estimate: bool,
 }
@@ -27,9 +27,9 @@ pub struct Product {
     pub categories: Vec<String>,
     pub packaging: Packaging,
     pub maximum_available: Option<u32>,
-    pub price: f32,
-    pub vat_percentage: u32,
-    pub margin_percentage: Option<u32>,
+    pub price_cents: u32,
+    pub vat_percentage: f32,
+    pub margin_percentage: Option<f32>,
     pub origin: Option<String>,
     pub ingredients: Option<String>,
 }

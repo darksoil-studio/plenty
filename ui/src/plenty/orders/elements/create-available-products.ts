@@ -181,6 +181,7 @@ export class CreateAvailableProducts extends SignalWatcher(LitElement) {
       </div>`;
     const items = Array.from(map.entries()).map(([productHash, p]) => ({
       ...p.entry,
+      price: p.entry.price_cents / 100,
       productHash,
       id: encodeHashToBase64(productHash),
     }));

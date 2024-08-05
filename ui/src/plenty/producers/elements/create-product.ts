@@ -106,6 +106,10 @@ export class CreateProduct extends SignalWatcher(LitElement) {
       estimate: (fields as any).estimate === "on",
     };
 
+    const price_cents: number = Math.round(
+      parseFloat((fields as any).price) * 100,
+    );
+
     const product: Product = {
       producer_hash: this.producerHash!,
       name: fields.name!,
@@ -121,7 +125,7 @@ export class CreateProduct extends SignalWatcher(LitElement) {
       maximum_available: fields.maximum_available
         ? parseInt(fields.maximum_available as any)
         : undefined,
-      price: parseInt(fields.price as any),
+      price_cents,
       vat_percentage: parseInt(fields.vat_percentage as any),
       margin_percentage: fields.margin_percentage
         ? parseInt(fields.margin_percentage as any)
@@ -276,6 +280,7 @@ export class CreateProduct extends SignalWatcher(LitElement) {
                   name="price"
                   .label=${msg("Price (Excluding VAT)")}
                   required
+                  .step=${0.01}
                   no-spin-buttons
                   style="flex: 1"
                 ></sl-input>

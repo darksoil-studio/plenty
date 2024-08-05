@@ -7758,7 +7758,7 @@ dependencies = [
 [[package]]
 name = "roles_types"
 version = "0.0.1"
-source = "git+https://github.com/darksoil-studio/roles?branch=main#a621757fd8863c73cff3e7306398b5b7fc62af88"
+source = "git+https://github.com/darksoil-studio/roles?branch=main#8befa890b4ac77ea6420e06bf639f770f1e300e5"
 dependencies = [
  "hdi",
  "holo_hash",
@@ -9220,7 +9220,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-holochain"
 version = "0.0.0"
-source = "git+https://github.com/darksoil-studio/tauri-plugin-holochain?branch=develop#be370dcc3a1253e20d9205497decda71016fb26f"
+source = "git+https://github.com/darksoil-studio/tauri-plugin-holochain?branch=main#4950bd68dd63b9d95a8697d2c4a8cf92cf28eb98"
 dependencies = [
  "anyhow",
  "async-std",

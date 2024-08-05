@@ -43,6 +43,7 @@ export const appStyles = [
       height: 100%;
     }
     sl-tab-panel {
+      height: 100%;
       width: 100%;
     }
   `,

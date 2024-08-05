@@ -210,6 +210,7 @@ export class EditAvailableProducts extends SignalWatcher(LitElement) {
             ([productHash, p]) => ({
               ...p.entry,
               productHash,
+              price: p.entry.price_cents / 100,
             }),
           )}
         >

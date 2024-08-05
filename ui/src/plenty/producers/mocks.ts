@@ -54,7 +54,7 @@ export class ProducersZomeMock extends ZomeMock implements AppClient {
     const entryHash = hash(producer, HashType.ENTRY);
     const record = await fakeRecord(
       await fakeCreateAction(entryHash),
-      fakeEntry(producer)
+      fakeEntry(producer),
     );
 
     this.producers.set(record.signed_action.hashed.hash, {
@@ -81,7 +81,7 @@ export class ProducersZomeMock extends ZomeMock implements AppClient {
   }
 
   async get_latest_producer(
-    producerHash: ActionHash
+    producerHash: ActionHash,
   ): Promise<Record | undefined> {
     const producer = this.producers.get(producerHash);
     return producer
@@ -90,37 +90,37 @@ export class ProducersZomeMock extends ZomeMock implements AppClient {
   }
 
   async get_all_revisions_for_producer(
-    producerHash: ActionHash
+    producerHash: ActionHash,
   ): Promise<Record[] | undefined> {
     const producer = this.producers.get(producerHash);
     return producer ? producer.revisions : undefined;
   }
 
   async get_original_producer(
-    producerHash: ActionHash
+    producerHash: ActionHash,
   ): Promise<Record | undefined> {
     const producer = this.producers.get(producerHash);
     return producer ? producer.revisions[0] : undefined;
   }
 
   async get_all_deletes_for_producer(
-    producerHash: ActionHash
+    producerHash: ActionHash,
   ): Promise<Array<SignedActionHashed<Delete>> | undefined> {
     const producer = this.producers.get(producerHash);
     return producer ? producer.deletes : undefined;
   }
 
   async get_oldest_delete_for_producer(
-    producerHash: ActionHash
+    producerHash: ActionHash,
   ): Promise<SignedActionHashed<Delete> | undefined> {
     const producer = this.producers.get(producerHash);
     return producer ? producer.deletes[0] : undefined;
   }
   async delete_producer(
-    original_producer_hash: ActionHash
+    original_producer_hash: ActionHash,
   ): Promise<ActionHash> {
     const record = await fakeRecord(
-      await fakeDeleteEntry(original_producer_hash)
+      await fakeDeleteEntry(original_producer_hash),
     );
 
     this.producers
@@ -140,9 +140,9 @@ export class ProducersZomeMock extends ZomeMock implements AppClient {
         input.previous_producer_hash,
         undefined,
         undefined,
-        fakeEntry(input.updated_producer)
+        fakeEntry(input.updated_producer),
       ),
-      fakeEntry(input.updated_producer)
+      fakeEntry(input.updated_producer),
     );
 
     this.producers.get(input.original_producer_hash).revisions.push(record);
@@ -173,7 +173,7 @@ export class ProducersZomeMock extends ZomeMock implements AppClient {
 
   async get_all_producers(): Promise<Array<Link>> {
     const records: Record[] = Array.from(this.producers.values()).map(
-      (r) => r.revisions[r.revisions.length - 1]
+      (r) => r.revisions[r.revisions.length - 1],
     );
     return Promise.all(
       records.map(async (record) => ({
@@ -185,7 +185,7 @@ export class ProducersZomeMock extends ZomeMock implements AppClient {
         link_type: 0,
         tag: new Uint8Array(),
         create_link_hash: await fakeActionHash(),
-      }))
+      })),
     );
   }
   /** Product */
@@ -202,7 +202,7 @@ export class ProducersZomeMock extends ZomeMock implements AppClient {
     const entryHash = hash(product, HashType.ENTRY);
     const record = await fakeRecord(
       await fakeCreateAction(entryHash),
-      fakeEntry(product)
+      fakeEntry(product),
     );
 
     this.products.set(record.signed_action.hashed.hash, {
@@ -230,7 +230,7 @@ export class ProducersZomeMock extends ZomeMock implements AppClient {
   }
 
   async get_latest_product(
-    productHash: ActionHash
+    productHash: ActionHash,
   ): Promise<Record | undefined> {
     const product = this.products.get(productHash);
     return product
@@ -239,35 +239,35 @@ export class ProducersZomeMock extends ZomeMock implements AppClient {
   }
 
   async get_all_revisions_for_product(
-    productHash: ActionHash
+    productHash: ActionHash,
   ): Promise<Record[] | undefined> {
     const product = this.products.get(productHash);
     return product ? product.revisions : undefined;
   }
 
   async get_original_product(
-    productHash: ActionHash
+    productHash: ActionHash,
   ): Promise<Record | undefined> {
     const product = this.products.get(productHash);
     return product ? product.revisions[0] : undefined;
   }
 
   async get_all_deletes_for_product(
-    productHash: ActionHash
+    productHash: ActionHash,
   ): Promise<Array<SignedActionHashed<Delete>> | undefined> {
     const product = this.products.get(productHash);
     return product ? product.deletes : undefined;
   }
 
   async get_oldest_delete_for_product(
-    productHash: ActionHash
+    productHash: ActionHash,
   ): Promise<SignedActionHashed<Delete> | undefined> {
     const product = this.products.get(productHash);
     return product ? product.deletes[0] : undefined;
   }
   async delete_product(original_product_hash: ActionHash): Promise<ActionHash> {
     const record = await fakeRecord(
-      await fakeDeleteEntry(original_product_hash)
+      await fakeDeleteEntry(original_product_hash),
     );
 
     this.products
@@ -287,9 +287,9 @@ export class ProducersZomeMock extends ZomeMock implements AppClient {
         input.previous_product_hash,
         undefined,
         undefined,
-        fakeEntry(input.updated_product)
+        fakeEntry(input.updated_product),
       ),
-      fakeEntry(input.updated_product)
+      fakeEntry(input.updated_product),
     );
 
     this.products.get(input.original_product_hash).revisions.push(record);
@@ -316,7 +316,7 @@ export class ProducersZomeMock extends ZomeMock implements AppClient {
   }
 
   async get_products_for_producer(
-    producerHash: ActionHash
+    producerHash: ActionHash,
   ): Promise<Array<Link>> {
     return this.productsForProducer.get(producerHash) || [];
   }
@@ -324,7 +324,7 @@ export class ProducersZomeMock extends ZomeMock implements AppClient {
 
 export async function sampleProducer(
   client: ProducersClient,
-  partialProducer: Partial<Producer> = {}
+  partialProducer: Partial<Producer> = {},
 ): Promise<Producer> {
   return {
     ...{
@@ -343,7 +343,7 @@ export async function sampleProducer(
 
 export async function sampleProduct(
   client: ProducersClient,
-  partialProduct: Partial<Product> = {}
+  partialProduct: Partial<Product> = {},
 ): Promise<Product> {
   return {
     ...{
@@ -361,7 +361,7 @@ export async function sampleProduct(
         estimate: false,
       },
       maximum_available: 3,
-      price: 3,
+      price_cents: 3,
       vat_percentage: 3,
       margin_percentage: 3,
       origin: "Lorem ipsum 2",

@@ -777,7 +777,7 @@ export async function sampleProducerDelivery(
           products: [1],
         },
       ],
-      price_per_unit_changed: undefined,
+      price_cents_per_unit_changed: undefined,
     },
   });
   return {

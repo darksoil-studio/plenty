@@ -108,12 +108,12 @@ export type DeliveredAmount =
   | {
       type: "FixedAmountProduct";
       delivered_products: Array<FixedProductDeliveryForHouseholds>;
-      price_per_unit_changed: number | undefined;
+      price_cents_per_unit_changed: number | undefined;
     }
   | {
       type: "EstimatedAmountProduct";
       delivered_products: Array<FixedProductDeliveryForHouseholds>;
-      price_per_unit_changed: number | undefined;
+      price_cents_per_unit_changed: number | undefined;
     };
 
 export type ProductDelivery =

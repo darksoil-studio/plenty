@@ -70,7 +70,7 @@ export class ProductsForProducer extends SignalWatcher(LitElement) {
           detail: {
             productHash,
           },
-        })
+        }),
       );
       (this.shadowRoot?.getElementById("delete-product") as SlDialog).hide();
       this.productToDelete = undefined;
@@ -83,7 +83,7 @@ export class ProductsForProducer extends SignalWatcher(LitElement) {
 
   renderList(
     producer: EntryRecord<Producer>,
-    map: ReadonlyMap<ActionHash, EntryRecord<Product>>
+    map: ReadonlyMap<ActionHash, EntryRecord<Product>>,
   ) {
     if (map.size === 0)
       return html` <sl-card class="column" style="flex: 1; height: 250px">
@@ -104,7 +104,7 @@ export class ProductsForProducer extends SignalWatcher(LitElement) {
           >${msg(
             str`Are you sure you want to delete the product "${
               this.productToDelete ? this.productToDelete[1] : ""
-            }"?`
+            }"?`,
           )}</span
         >
 
@@ -131,7 +131,9 @@ export class ProductsForProducer extends SignalWatcher(LitElement) {
         .items=${Array.from(map.entries()).map(([productHash, p]) => ({
           ...p.entry,
           productHash,
+          price: p.entry.price_cents / 100,
         }))}
+        style="height: 100%"
       >
         <vaadin-grid-sort-column
           .header=${msg("Product ID")}
@@ -140,10 +142,7 @@ export class ProductsForProducer extends SignalWatcher(LitElement) {
         <vaadin-grid-column
           .header=${msg("Name")}
           path="name"
-        ></vaadin-grid-column>
-        <vaadin-grid-column
-          .header=${msg("Description")}
-          path="description"
+          width="300px"
         ></vaadin-grid-column>
         <vaadin-grid-column
           .header=${msg("Categories")}
@@ -186,10 +185,10 @@ export class ProductsForProducer extends SignalWatcher(LitElement) {
                             detail: {
                               productHash: model.item.productHash,
                             },
-                          })
+                          }),
                         )}
                     ></sl-icon-button>`,
-                    root
+                    root,
                   );
                 }}
               ></vaadin-grid-column>
@@ -206,12 +205,12 @@ export class ProductsForProducer extends SignalWatcher(LitElement) {
                         ];
                         (
                           this.shadowRoot?.getElementById(
-                            "delete-product"
+                            "delete-product",
                           ) as SlDialog
                         ).show();
                       }}
                     ></sl-icon-button>`,
-                    root
+                    root,
                   );
                 }}
               ></vaadin-grid-column>`
@@ -232,7 +231,7 @@ export class ProductsForProducer extends SignalWatcher(LitElement) {
       return producerLatestVersion;
 
     const latestVersion = joinAsyncMap(
-      mapValues(map.value, (p) => p.latestVersion.get())
+      mapValues(map.value, (p) => p.latestVersion.get()),
     );
     if (latestVersion.status !== "completed") return latestVersion;
 
@@ -263,7 +262,7 @@ export class ProductsForProducer extends SignalWatcher(LitElement) {
       case "completed":
         return this.renderList(
           products.value.producer,
-          products.value.products
+          products.value.products,
         );
     }
   }

@@ -84,9 +84,10 @@ export class HouseholdsOrdersSummary extends SignalWatcher(LitElement) {
             }
           }
 
+          const price = product.entry.price_cents / 100;
+
           const price_with_vat =
-            product.entry.price +
-            (product.entry.price * product.entry.vat_percentage) / 100;
+            price + (price * product.entry.vat_percentage) / 100;
           const price_with_vat_rounded = (
             Math.round(price_with_vat * 100) / 100
           ).toFixed(2);
@@ -172,7 +173,7 @@ export class HouseholdsOrdersSummary extends SignalWatcher(LitElement) {
           .footerRenderer=${(root: any) =>
             render(
               html`<span style="font-weight: bold"
-                >${msg("Total")}: ${totalAmount}</span
+                >${msg("Total")}: ${totalAmount.toFixed(2)}</span
               >`,
               root,
             )}
@@ -200,8 +201,8 @@ export class HouseholdsOrdersSummary extends SignalWatcher(LitElement) {
         )!;
 
         const totalPrice =
-          product.entry.price +
-          (product.entry.vat_percentage * product.entry.price) / 100;
+          product.entry.price_cents +
+          (product.entry.vat_percentage * product.entry.price_cents) / 100;
         return totalPrice * p.amount;
       })
       .reduce((acc, next) => acc + next);
