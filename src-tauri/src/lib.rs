@@ -95,6 +95,7 @@ pub fn run() {
         .run(context)
         .expect("error while running tauri application");
 }
+
 pub fn vec_to_locked(mut pass_tmp: Vec<u8>) -> std::io::Result<BufRead> {
     match BufWrite::new_mem_locked(pass_tmp.len()) {
         Err(e) => {
@@ -151,6 +152,5 @@ fn holochain_dir() -> PathBuf {
         )
         .expect("Could not get app root")
         .join(std::env!("CARGO_PKG_VERSION"))
-        .join("holochain")
     }
 }
