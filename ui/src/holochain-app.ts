@@ -64,7 +64,11 @@ import { HouseholdsClient } from "./plenty/households/households-client.js";
 import { HouseholdsStore } from "./plenty/households/households-store.js";
 import { routerContext } from "./context.js";
 import { appStyles } from "./app-styles.js";
-import { bookkeeperRoleConfig, orderManagerRoleConfig } from "./roles.js";
+import {
+  bookkeeperRoleConfig,
+  orderManagerRoleConfig,
+  rolesConfig,
+} from "./roles.js";
 
 @localized()
 @customElement("holochain-app")
@@ -163,9 +167,7 @@ export class HolochainApp extends SignalWatcher(LitElement) {
     );
     this._rolesStore = new RolesStore(
       new RolesClient(appClient, "plenty"),
-      {
-        roles_config: [orderManagerRoleConfig, bookkeeperRoleConfig],
-      },
+      rolesConfig,
       this._notificationsStore,
     );
     this._ordersStore = new OrdersStore(new OrdersClient(appClient, "plenty"));

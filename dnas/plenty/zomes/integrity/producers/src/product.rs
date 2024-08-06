@@ -48,12 +48,14 @@ pub fn validate_create_product(
         ))))?;
     Ok(ValidateCallbackResult::Valid)
 }
+
 pub fn validate_update_product(
     _action: Update,
     _product: Product,
     _original_action: EntryCreationAction,
     _original_product: Product,
 ) -> ExternResult<ValidateCallbackResult> {
+    // TODO: check all possible attacks
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_delete_product(

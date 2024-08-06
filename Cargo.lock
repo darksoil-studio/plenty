@@ -6270,7 +6270,9 @@ dependencies = [
  "futures",
  "hdk",
  "holochain",
+ "households_types",
  "orders_integrity",
+ "producers_types",
  "serde",
  "tokio",
 ]

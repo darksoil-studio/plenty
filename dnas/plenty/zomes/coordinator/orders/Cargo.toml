@@ -22,3 +22,5 @@ hdk = { workspace = true, features = ["encoding", "test_utils"] }
 holochain = { workspace = true }
 tokio = { version = "1.3", features = ["full"] }
 
+households_types = { path = "../../../../../crates/households_types" }
+producers_types = { path = "../../../../../crates/producers_types" }

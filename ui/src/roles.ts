@@ -1,3 +1,4 @@
+import { RolesStoreConfig } from "@darksoil-studio/roles";
 import { RoleConfig } from "@darksoil-studio/roles/dist/role-config.js";
 import { msg } from "@lit/localize";
 
@@ -15,4 +16,8 @@ export const orderManagerRoleConfig: RoleConfig = {
   description: msg(
     "The order manager can create and manage new orders for the whole group.",
   ),
+};
+
+export const rolesConfig: RolesStoreConfig = {
+  roles_config: [orderManagerRoleConfig, bookkeeperRoleConfig],
 };

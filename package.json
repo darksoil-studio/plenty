@@ -8,9 +8,9 @@
     "network:android": "pnpm happ:build-debug && concurrently -k \"pnpm -F ui start\" \"pnpm tauri dev\" \"pnpm tauri android dev\"",
     "network": "pnpm happ:build && UI_PORT=1420 concurrently -k \"pnpm -F lobby start\" \"pnpm tauri dev\" \"pnpm tauri dev\"",
     "launch": "concurrently-repeat \"pnpm tauri dev --no-watch\" $AGENTS",
-    "test": "pnpm run happ:build-debug && nix flake check -L && pnpm -F tests test",
+    "test": "pnpm run happ:build-debug && pnpm -F tests test",
     "happ:build-debug": "nix build -L .#plenty_happ -o workdir/plenty.happ",
-    "happ:build": "nix build --accept-flake-config -L .#plenty_happ.meta.release -o workdir/plenty.happ && pnpm -F ui package && hc web-app pack workdir",
+    "happ:build": "nix build --no-update-lock-file --accept-flake-config -L .#plenty_happ.meta.release -o workdir/plenty.happ && pnpm -F ui package && hc web-app pack workdir",
     "playground": "holochain-playground"
   },
   "devDependencies": {

@@ -9,6 +9,7 @@ import { AppClient } from "@holochain/client";
 import { appPath } from "../../app-path.js";
 import { HouseholdsClient } from "../../../../ui/src/plenty/households/households-client.js";
 import { HouseholdsStore } from "../../../../ui/src/plenty/households/households-store.js";
+import { setupPlayers } from "../../setup.js";
 
 function setupStore(appClient: AppClient): HouseholdsStore {
   const profilesStore = new ProfilesStore(
@@ -36,12 +37,7 @@ function setupStore(appClient: AppClient): HouseholdsStore {
 }
 
 export async function setup(scenario: Scenario) {
-  // Add 2 players with the test hApp to the Scenario. The returned players
-  // can be destructured.
-  const [alice, bob] = await scenario.addPlayersWithApps([
-    { appBundleSource: { path: appPath } },
-    { appBundleSource: { path: appPath } },
-  ]);
+  const [alice, bob] = await setupPlayers(scenario);
 
   // Shortcut peer discovery through gossip and register all agents in every
   // conductor of the scenario.
@@ -76,13 +72,7 @@ export async function setup(scenario: Scenario) {
 export async function setup4(scenario: Scenario) {
   // Add 2 players with the test hApp to the Scenario. The returned players
   // can be destructured.
-  const [alice, bob, carol, dave] = await scenario.addPlayersWithApps([
-    { appBundleSource: { path: appPath } },
-    { appBundleSource: { path: appPath } },
-    { appBundleSource: { path: appPath } },
-    { appBundleSource: { path: appPath } },
-  ]);
-
+  const [alice, bob, carol, dave] = await setupPlayers(scenario, 4);
   // Shortcut peer discovery through gossip and register all agents in every
   // conductor of the scenario.
   await scenario.shareAllAgents();

@@ -16,7 +16,7 @@ export default defineConfig({
           enabled: true,
           //@ts-ignore
           include: Object.keys(pkg.dependencies),
-          exclude: ["@holochain/client"],
+          exclude: ["@holochain/client", "fflate"],
         },
       },
     },
