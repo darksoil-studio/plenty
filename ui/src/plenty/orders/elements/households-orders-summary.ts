@@ -4,7 +4,7 @@ import {
   uniquify,
 } from "@holochain-open-dev/signals";
 import { LitElement, html, render } from "lit";
-import { customElement, property } from "lit/decorators.js";
+import { customElement, property, state } from "lit/decorators.js";
 import { ActionHash, encodeHashToBase64 } from "@holochain/client";
 import { consume } from "@lit/context";
 import { msg } from "@lit/localize";
@@ -25,7 +25,7 @@ import "@vaadin/grid/vaadin-grid-sort-column.js";
 import { appStyles } from "../../../app-styles.js";
 import { ordersStoreContext } from "../context.js";
 import { OrdersStore } from "../orders-store.js";
-import { HouseholdOrder, ProductOrder } from "../types.js";
+import { HouseholdOrder, Order, ProductOrder } from "../types.js";
 import { Household } from "../../households/types.js";
 import { HouseholdsStore } from "../../households/households-store.js";
 import { householdsStoreContext } from "../../households/context.js";
@@ -33,6 +33,8 @@ import { producersStoreContext } from "../../producers/context.js";
 import { ProducersStore } from "../../producers/producers-store.js";
 import { Producer, Product, renderPackaging } from "../../producers/types.js";
 import { GridDataProviderCallback } from "@vaadin/grid/vaadin-grid.js";
+import { SlDialog } from "@shoelace-style/shoelace";
+import { notifyError } from "@holochain-open-dev/elements";
 
 @customElement("households-orders-summary")
 export class HouseholdsOrdersSummary extends SignalWatcher(LitElement) {
@@ -48,7 +50,11 @@ export class HouseholdsOrdersSummary extends SignalWatcher(LitElement) {
   @consume({ context: householdsStoreContext, subscribe: true })
   householdsStore!: HouseholdsStore;
 
+  @state()
+  closingOrder = false;
+
   renderSummary(
+    order: EntryRecord<Order>,
     households: ReadonlyMap<ActionHash, EntryRecord<Household>>,
     householdOrders: ReadonlyMap<ActionHash, EntryRecord<HouseholdOrder>>,
     products: ReadonlyMap<ActionHash, EntryRecord<Product>>,
@@ -138,47 +144,110 @@ export class HouseholdsOrdersSummary extends SignalWatcher(LitElement) {
       )
       .reduce((acc, next) => acc + next);
     return html`
-      <vaadin-grid
-        multi-sort
-        .dataProvider=${dataProvider}
-        .expandedItems=${expandedItems}
-        style="flex: 1; height: 100%"
-      >
-        <vaadin-grid-tree-column
-          .header=${msg("Product")}
-          path="name"
-        ></vaadin-grid-tree-column>
-        <vaadin-grid-column
-          .header=${msg("Packaging")}
-          .renderer=${(root: any, __: any, model: any) => {
-            const product: Product = model.item;
-            if (product.packaging) {
-              root.textContent = renderPackaging(product.packaging);
-            } else {
-              root.textContent = "";
-            }
-          }}
-        ></vaadin-grid-column>
-        <vaadin-grid-sort-column
-          .header=${msg("Price")}
-          path="price_with_vat"
-        ></vaadin-grid-sort-column>
-        <vaadin-grid-column
-          .header=${msg("Amount")}
-          path="amount"
-        ></vaadin-grid-column>
-        <vaadin-grid-column
-          .header=${msg("Total")}
-          path="total_price"
-          .footerRenderer=${(root: any) =>
-            render(
-              html`<span style="font-weight: bold"
-                >${msg("Total")}: ${totalAmount.toFixed(2)}</span
-              >`,
-              root,
-            )}
-        ></vaadin-grid-column>
-      </vaadin-grid>
+      <div class="column" style="flex: 1; height: 100%">
+        <div class="row" style="margin: 16px; align-items: center">
+          <span class="title">${order.entry.name}</span>
+          <span style="flex: 1"></span>
+          <sl-button
+            variant="primary"
+            @click=${() => {
+              (
+                this.shadowRoot?.getElementById(
+                  "close-order-dialog",
+                ) as SlDialog
+              ).show();
+            }}
+            >${msg("Close Order")}</sl-button
+          >
+          <sl-dialog id="close-order-dialog" .label=${msg("Close Order")}>
+            <span
+              >${msg(
+                "Are you sure you want to close the order? If you do, the households won't be able to create or edit their order.",
+              )}</span
+            >
+            <sl-button
+              slot="footer"
+              @click=${() => {
+                (
+                  this.shadowRoot?.getElementById(
+                    "close-order-dialog",
+                  ) as SlDialog
+                ).hide();
+              }}
+              >${msg("Close Order")}</sl-button
+            >
+            <sl-button
+              .loading=${this.closingOrder}
+              variant="primary"
+              slot="footer"
+              @click=${async () => {
+                if (this.closingOrder) return;
+                this.closingOrder = true;
+                try {
+                  await this.ordersStore.client.updateOrder(
+                    this.orderHash,
+                    order.actionHash,
+                    {
+                      name: order.entry.name,
+                      status: {
+                        type: "Closed",
+                        household_orders: Array.from(householdOrders.keys()),
+                      },
+                    },
+                  );
+                } catch (e) {
+                  console.error(e);
+                  notifyError(msg("Error closing the order."));
+                }
+
+                this.closingOrder = false;
+              }}
+              >${msg("Close Order")}</sl-button
+            >
+          </sl-dialog>
+        </div>
+        <vaadin-grid
+          multi-sort
+          .dataProvider=${dataProvider}
+          .expandedItems=${expandedItems}
+          style="flex: 1; height: 100%"
+        >
+          <vaadin-grid-tree-column
+            .header=${msg("Product")}
+            path="name"
+          ></vaadin-grid-tree-column>
+          <vaadin-grid-column
+            .header=${msg("Packaging")}
+            .renderer=${(root: any, __: any, model: any) => {
+              const product: Product = model.item;
+              if (product.packaging) {
+                root.textContent = renderPackaging(product.packaging);
+              } else {
+                root.textContent = "";
+              }
+            }}
+          ></vaadin-grid-column>
+          <vaadin-grid-sort-column
+            .header=${msg("Price")}
+            path="price_with_vat"
+          ></vaadin-grid-sort-column>
+          <vaadin-grid-column
+            .header=${msg("Amount")}
+            path="amount"
+          ></vaadin-grid-column>
+          <vaadin-grid-column
+            .header=${msg("Total")}
+            path="total_price"
+            .footerRenderer=${(root: any) =>
+              render(
+                html`<span style="font-weight: bold"
+                  >${msg("Total")}: ${totalAmount.toFixed(2)}</span
+                >`,
+                root,
+              )}
+          ></vaadin-grid-column>
+        </vaadin-grid>
+      </div>
     `;
   }
 
@@ -217,6 +286,9 @@ export class HouseholdsOrdersSummary extends SignalWatcher(LitElement) {
     const householdOrders = this.ordersStore.orders
       .get(this.orderHash)
       .householdOrders.live.get();
+    const order = this.ordersStore.orders
+      .get(this.orderHash)
+      .latestVersion.get();
     if (householdOrders.status !== "completed") return householdOrders;
 
     const householdOrdersLatestVersion = joinAsyncMap(
@@ -265,10 +337,12 @@ export class HouseholdsOrdersSummary extends SignalWatcher(LitElement) {
     );
     if (allProducersLatestVersion.status !== "completed")
       return allProducersLatestVersion;
+    if (order.status !== "completed") return order;
 
     return {
       status: "completed" as const,
       value: {
+        order: order.value,
         households: householdsLatestVersion.value,
         householdsOrders: householdOrdersLatestVersion.value,
         products: allProductsLatestVersion.value,
@@ -293,6 +367,7 @@ export class HouseholdsOrdersSummary extends SignalWatcher(LitElement) {
         ></display-error>`;
       case "completed":
         return this.renderSummary(
+          householdOrders.value.order,
           householdOrders.value.households,
           householdOrders.value.householdsOrders,
           householdOrders.value.products,

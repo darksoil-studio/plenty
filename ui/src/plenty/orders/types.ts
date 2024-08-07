@@ -99,7 +99,7 @@ export interface FixedProductDeliveryForHouseholds {
   households_hashes: Array<ActionHash>;
 }
 
-export interface FixedProductDeliveryForHouseholds {
+export interface EstimatedProductDeliveryForHouseholds {
   products: Array<number>;
   households_hashes: Array<ActionHash>;
 }
@@ -112,17 +112,17 @@ export type DeliveredAmount =
     }
   | {
       type: "EstimatedAmountProduct";
-      delivered_products: Array<FixedProductDeliveryForHouseholds>;
+      delivered_products: Array<EstimatedProductDeliveryForHouseholds>;
       price_cents_per_unit_changed: number | undefined;
     };
 
 export type ProductDelivery =
   | {
-      type: "NotAvailable";
+      type: "Missing";
     }
   | {
-      type: "Missing";
-      reason: string;
+      type: "Problem";
+      problem: string;
     }
   | {
       type: "Delivered";

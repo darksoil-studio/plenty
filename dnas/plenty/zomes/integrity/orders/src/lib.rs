@@ -314,6 +314,7 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                     )
                 }
                 EntryTypes::Order(original_order) => validate_delete_order(
+                    action_hash(&op),
                     delete_entry.clone().action,
                     original_action,
                     original_order,
@@ -766,9 +767,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                     }
                 };
                 match original_app_entry {
-                    EntryTypes::Order(original_order) => {
-                        validate_delete_order(action, original_action, original_order)
-                    }
+                    EntryTypes::Order(original_order) => validate_delete_order(
+                        action_hash(&op),
+                        action,
+                        original_action,
+                        original_order,
+                    ),
                     EntryTypes::HouseholdOrder(original_household_order) => {
                         validate_delete_household_order(
                             action_hash(&op).clone(),

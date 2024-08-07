@@ -16,12 +16,13 @@ pub struct EstimatedProductDeliveryForHouseholds {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
+#[serde(tag = "type")]
 pub enum DeliveredAmount {
     FixedAmountProduct {
         delivered_products: Vec<FixedProductDeliveryForHouseholds>,
         price_cents_per_unit_changed: Option<u32>,
     },
-    EstimatedAmountjProduct {
+    EstimatedAmountProduct {
         delivered_products_by_household: Vec<EstimatedProductDeliveryForHouseholds>,
         price_cents_per_unit_changed: Option<u32>,
     },
@@ -30,8 +31,8 @@ pub enum DeliveredAmount {
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 #[serde(tag = "type")]
 pub enum ProductDelivery {
-    NotAvailable,
-    Missing { reason: String },
+    Missing,
+    Problem { problem: String },
     Delivered { delivered_amount: DeliveredAmount },
 }
 

@@ -40,6 +40,7 @@ import { appStyles } from "../../../app-styles.js";
 import "./edit-order.js";
 import "./available-products-for-order.js";
 import "./my-household-order.js";
+import "./closed-order-detail.js";
 
 import { OrdersStore } from "../orders-store.js";
 import { ordersStoreContext } from "../context.js";
@@ -242,10 +243,10 @@ export class OrderDetail extends SignalWatcher(LitElement) {
     `;
   }
 
-  renderDetail(entryRecord: EntryRecord<Order>) {
-    switch (entryRecord.entry.status.type) {
+  renderDetail(order: EntryRecord<Order>) {
+    switch (order.entry.status.type) {
       case "Preparing":
-        return this.renderPreparing(entryRecord);
+        return this.renderPreparing(order);
       case "Open":
         return html`
           <my-household-order
@@ -254,6 +255,14 @@ export class OrderDetail extends SignalWatcher(LitElement) {
           ></my-household-order>
         `;
       case "Closed":
+        return html`
+          <closed-order-detail
+            style="flex: 1"
+            .orderHash=${this.orderHash}
+            .order=${order}
+            .householdOrdersHashes=${order.entry.status.household_orders}
+          ></closed-order-detail>
+        `;
       case "Processed":
       case "Finished":
     }
@@ -277,7 +286,7 @@ export class OrderDetail extends SignalWatcher(LitElement) {
         <div class="column" style="gap: 16px;">
           <div class="column" style="gap: 8px;">
             <span><strong>${msg("Name")}</strong></span>
-            <span style="white-space: pre-line">${entryRecord.entry.name}</span>
+            <span style="white-space: pre-line">${order.entry.name}</span>
           </div>
         </div>
       </sl-card>

@@ -334,3 +334,7 @@ export async function readAsText(file: File): Promise<string> {
     reader.readAsText(file);
   });
 }
+
+export function flatten<T>(array: Array<Array<T>>): Array<T> {
+  return ([] as Array<T>).concat(...array);
+}

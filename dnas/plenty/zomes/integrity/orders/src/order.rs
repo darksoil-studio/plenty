@@ -57,10 +57,20 @@ pub fn validate_update_order(
 }
 
 pub fn validate_delete_order(
-    _action: Delete,
+    action_hash: &ActionHash,
+    action: Delete,
     _original_action: EntryCreationAction,
     _original_order: Order,
 ) -> ExternResult<ValidateCallbackResult> {
+    let validate = validate_agent_had_undeleted_role_claim_at_the_time(
+        &action.author,
+        action_hash,
+        &String::from(ORDER_MANAGER),
+        &ZomeName::from(ROLES_INTEGRITY_ZOME_NAME),
+    )?;
+    let ValidateCallbackResult::Valid = validate else {
+        return Ok(validate);
+    };
     Ok(ValidateCallbackResult::Valid)
 }
 

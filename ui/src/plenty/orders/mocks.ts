@@ -774,7 +774,6 @@ export async function sampleProducerDelivery(
         {
           amount: 1,
           households_hashes: [],
-          products: [1],
         },
       ],
       price_cents_per_unit_changed: undefined,

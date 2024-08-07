@@ -553,7 +553,7 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
         <sl-tab-panel name="order_summary">
           ${this.renderOrderSummary()}
         </sl-tab-panel>
-        <sl-tab style="flex: 1" slot="nav"></sl-tab>
+        <sl-tab style="flex: 1; pointer-events:none" slot="nav"></sl-tab>
         <sl-tab slot="nav" variant="primary" panel="my_household_order_summary"
           >${iAmOrderManager
             ? msg("My Household Order Summary")
