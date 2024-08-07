@@ -4,7 +4,7 @@ import {
   uniquify,
 } from "@holochain-open-dev/signals";
 import { css, html, LitElement } from "lit";
-import { customElement, property } from "lit/decorators.js";
+import { customElement, property, state } from "lit/decorators.js";
 import { consume } from "@lit/context";
 import {
   EntryRecord,
@@ -31,7 +31,13 @@ import "@vaadin/grid/vaadin-grid-column.js";
 import "@vaadin/grid/vaadin-grid-sort-column.js";
 
 import { appStyles } from "../../../app-styles.js";
-import { HouseholdOrder, Order, ProductOrder } from "../types.js";
+import {
+  HouseholdOrder,
+  Order,
+  ProducerDelivery,
+  ProducerInvoice,
+  ProductOrder,
+} from "../types.js";
 import { ActionHash, encodeHashToBase64 } from "@holochain/client";
 import { Producer, Product, renderPackaging } from "../../producers/types.js";
 import { ordersStoreContext } from "../context.js";
@@ -43,6 +49,9 @@ import { GridDataProviderCallback } from "@vaadin/grid";
 import { Household } from "../../households/types.js";
 import { HouseholdsStore } from "../../households/households-store.js";
 import { householdsStoreContext } from "../../households/context.js";
+import { styleMap } from "lit/directives/style-map.js";
+import { showOverlayPage } from "../../../overlay-page.js";
+import { notifyError } from "@holochain-open-dev/elements";
 
 @customElement("closed-order-detail")
 export class ClosedOrderDetail extends SignalWatcher(LitElement) {
@@ -73,12 +82,23 @@ export class ClosedOrderDetail extends SignalWatcher(LitElement) {
   @consume({ context: householdsStoreContext, subscribe: true })
   householdsStore!: HouseholdsStore;
 
+  @state()
+  creatingProducerDelivery = false;
+
   renderProducerTab(
     producerHash: ActionHash,
     orderedProducts: ReadonlyMap<ActionHash, EntryRecord<Product>>,
     households: ReadonlyMap<ActionHash, EntryRecord<Household>>,
     allHouseholdsOrders: ReadonlyMap<ActionHash, EntryRecord<HouseholdOrder>>,
+    producerDeliveries: ReadonlyMap<ActionHash, EntryRecord<ProducerDelivery>>,
   ) {
+    const deliveriesForThisProducer = pickBy(
+      producerDeliveries,
+      (v) =>
+        encodeHashToBase64(v.entry.producer_hash) ===
+        encodeHashToBase64(producerHash),
+    );
+
     const productsForThisProducer = pickBy(
       orderedProducts,
       (v) =>
@@ -149,38 +169,133 @@ export class ClosedOrderDetail extends SignalWatcher(LitElement) {
       callback(items, items.length);
     };
 
-    return html`<vaadin-grid
-      style="flex: 1; height: 100%"
-      .dataProvider=${dataProvider}
-    >
-      <vaadin-grid-tree-column
-        .header=${msg("Product")}
-        path="name"
-      ></vaadin-grid-tree-column>
-      <vaadin-grid-column
-        .header=${msg("Packaging")}
-        .renderer=${(root: any, __: any, model: any) => {
-          const product: Product = model.item;
-          if (product.packaging) {
-            root.textContent = renderPackaging(product.packaging);
-          } else {
-            root.textContent = "";
-          }
-        }}
-      ></vaadin-grid-column>
-      <vaadin-grid-sort-column
-        .header=${msg("Price")}
-        path="price_with_vat"
-      ></vaadin-grid-sort-column>
-      <vaadin-grid-column
-        .header=${msg("Amount")}
-        path="amount"
-      ></vaadin-grid-column>
-      <vaadin-grid-column
-        .header=${msg("Total")}
-        path="total_price"
-      ></vaadin-grid-column>
-    </vaadin-grid>`;
+    return html` <div class="column" style="flex: 1">
+      <div class="row" style="margin: 16px; align-items: center; gap: 12px">
+        <span>${msg("Ordered Products")}</span>
+        <span style="flex: 1"></span>
+        ${deliveriesForThisProducer.size === 0
+          ? html`<sl-tag>${msg("Not Processed")}</sl-tag
+              ><sl-button
+                variant="primary"
+                @click=${() =>
+                  showOverlayPage(
+                    msg("Process Delivery"),
+                    (closePage) => html`
+                      <div
+                        style="display: flex; flex-direction: column; width: 1200px; padding: 16px"
+                      >
+                        <sl-card style="width: 100%">
+                          <div
+                            style="display: flex; flex-direction: column; margin: -20px"
+                          >
+                            <vaadin-grid .dataProvider=${dataProvider}>
+                              <vaadin-grid-tree-column
+                                .header=${msg("Product")}
+                                path="name"
+                              ></vaadin-grid-tree-column>
+                              <vaadin-grid-column
+                                .header=${msg("Packaging")}
+                                .renderer=${(
+                                  root: any,
+                                  __: any,
+                                  model: any,
+                                ) => {
+                                  const product: Product = model.item;
+                                  if (product.packaging) {
+                                    root.textContent = renderPackaging(
+                                      product.packaging,
+                                    );
+                                  } else {
+                                    root.textContent = "";
+                                  }
+                                }}
+                              ></vaadin-grid-column>
+                              <vaadin-grid-sort-column
+                                .header=${msg("Price")}
+                                path="price_with_vat"
+                              ></vaadin-grid-sort-column>
+                              <vaadin-grid-column
+                                .header=${msg("Amount")}
+                                path="amount"
+                              ></vaadin-grid-column>
+                              <vaadin-grid-column
+                                .header=${msg("Total")}
+                                path="total_price"
+                              ></vaadin-grid-column>
+                            </vaadin-grid>
+                            <div
+                              style="display: flex; flex-direction: row; padding: 16px"
+                            >
+                              <span style="flex: 1"></span>
+                              <sl-button
+                                .loading=${this.creatingProducerDelivery}
+                                variant="primary"
+                                @click=${async () => {
+                                  if (this.creatingProducerDelivery) return;
+                                  this.creatingProducerDelivery = true;
+
+                                  try {
+                                    await this.ordersStore.client.createProducerDelivery(
+                                      {
+                                        order_hash: this.orderHash,
+                                        producer_hash: producerHash,
+                                        products: {},
+                                      },
+                                    );
+                                  } catch (e) {
+                                    console.error(e);
+                                    notifyError(
+                                      msg(
+                                        "Error creating the producer delivery.",
+                                      ),
+                                    );
+                                  }
+
+                                  this.creatingProducerDelivery = false;
+                                  closePage();
+                                }}
+                                >${msg("Process Delivery")}</sl-button
+                              >
+                            </div>
+                          </div>
+                        </sl-card>
+                      </div>
+                    `,
+                  )}
+                >${msg("Process Delivery")}</sl-button
+              > `
+          : html`<sl-tag variant="success">${msg("Processed")}</sl-tag>`}
+      </div>
+      <vaadin-grid style="flex: 1; height: 100%" .dataProvider=${dataProvider}>
+        <vaadin-grid-tree-column
+          .header=${msg("Product")}
+          path="name"
+        ></vaadin-grid-tree-column>
+        <vaadin-grid-column
+          .header=${msg("Packaging")}
+          .renderer=${(root: any, __: any, model: any) => {
+            const product: Product = model.item;
+            if (product.packaging) {
+              root.textContent = renderPackaging(product.packaging);
+            } else {
+              root.textContent = "";
+            }
+          }}
+        ></vaadin-grid-column>
+        <vaadin-grid-sort-column
+          .header=${msg("Price")}
+          path="price_with_vat"
+        ></vaadin-grid-sort-column>
+        <vaadin-grid-column
+          .header=${msg("Amount")}
+          path="amount"
+        ></vaadin-grid-column>
+        <vaadin-grid-column
+          .header=${msg("Total")}
+          path="total_price"
+        ></vaadin-grid-column>
+      </vaadin-grid>
+    </div>`;
   }
 
   renderProducersTabs(
@@ -188,7 +303,11 @@ export class ClosedOrderDetail extends SignalWatcher(LitElement) {
     orderedProducts: ReadonlyMap<ActionHash, EntryRecord<Product>>,
     households: ReadonlyMap<ActionHash, EntryRecord<Household>>,
     allHouseholdsOrders: ReadonlyMap<ActionHash, EntryRecord<HouseholdOrder>>,
+    producerDeliveries: ReadonlyMap<ActionHash, EntryRecord<ProducerDelivery>>,
   ) {
+    const processedProducers = uniquify(
+      Array.from(producerDeliveries.values()).map((p) => p.entry.producer_hash),
+    ).map(encodeHashToBase64);
     return html` <sl-card style="flex: 1;">
       <sl-tab-group placement="bottom" style="flex: 1">
         ${Array.from(producers.entries()).map(
@@ -199,9 +318,19 @@ export class ClosedOrderDetail extends SignalWatcher(LitElement) {
                 orderedProducts,
                 households,
                 allHouseholdsOrders,
+                producerDeliveries,
               )}</sl-tab-panel
             >
-            <sl-tab panel="${encodeHashToBase64(producerHash)}" slot="nav"
+            <sl-tab
+              panel="${encodeHashToBase64(producerHash)}"
+              slot="nav"
+              style=${styleMap({
+                "background-color": processedProducers.includes(
+                  encodeHashToBase64(producerHash),
+                )
+                  ? "lightgreen"
+                  : "auto",
+              })}
               >${producer.entry.name}</sl-tab
             >
           `,
@@ -217,7 +346,16 @@ export class ClosedOrderDetail extends SignalWatcher(LitElement) {
         (h) => h.latestVersion.get(),
       ),
     );
+
+    const producerDeliveries = this.ordersStore.orders
+      .get(this.orderHash)
+      .producerDeliveries.live.get();
     if (householdOrders.status !== "completed") return householdOrders;
+    if (producerDeliveries.status !== "completed") return producerDeliveries;
+
+    const producerDeliveriesLatest = joinAsyncMap(
+      mapValues(producerDeliveries.value, (h) => h.latestVersion.get()),
+    );
 
     const allHouseholdsHashes = uniquify(
       Array.from(householdOrders.value.values()).map(
@@ -258,6 +396,8 @@ export class ClosedOrderDetail extends SignalWatcher(LitElement) {
       ),
     );
     if (producers.status !== "completed") return producers;
+    if (producerDeliveriesLatest.status !== "completed")
+      return producerDeliveriesLatest;
 
     return {
       status: "completed" as const,
@@ -266,6 +406,7 @@ export class ClosedOrderDetail extends SignalWatcher(LitElement) {
         products: products.value,
         householdOrders: householdOrders.value,
         households: households.value,
+        producerDeliveries: producerDeliveriesLatest.value,
       },
     };
   }
@@ -291,6 +432,7 @@ export class ClosedOrderDetail extends SignalWatcher(LitElement) {
           details.value.products,
           details.value.households,
           details.value.householdOrders,
+          details.value.producerDeliveries,
         );
     }
   }

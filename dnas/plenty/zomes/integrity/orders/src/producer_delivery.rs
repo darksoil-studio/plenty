@@ -41,7 +41,7 @@ pub enum ProductDelivery {
 pub struct ProducerDelivery {
     pub order_hash: ActionHash,
     pub producer_hash: ActionHash,
-    pub products: BTreeMap<ActionHash, ProductDelivery>,
+    pub products: BTreeMap<ActionHashB64, ProductDelivery>,
 }
 
 pub fn validate_create_producer_delivery(

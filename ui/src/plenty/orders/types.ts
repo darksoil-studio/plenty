@@ -1,5 +1,4 @@
 import {
-  Record,
   ActionHash,
   DnaHash,
   SignedActionHashed,
@@ -132,7 +131,7 @@ export type ProductDelivery =
 export interface ProducerDelivery {
   order_hash: ActionHash;
   producer_hash: ActionHash;
-  products: HoloHashMap<ActionHash, ProductDelivery>;
+  products: Record<ActionHashB64, ProductDelivery>;
 }
 
 export interface ProducerInvoice {

@@ -94,6 +94,10 @@ test("create and update ProducerDelivery", async () => {
     let contentUpdate = await sampleProducerDelivery(
       alice.orders.client,
       producer.actionHash,
+      {
+        order_hash: producerDelivery.entry.order_hash,
+        producer_hash: producerDelivery.entry.producer_hash,
+      },
     );
 
     let updatedProducerDelivery: EntryRecord<ProducerDelivery> =
@@ -120,6 +124,10 @@ test("create and update ProducerDelivery", async () => {
     contentUpdate = await sampleProducerDelivery(
       alice.orders.client,
       producer.actionHash,
+      {
+        order_hash: producerDelivery.entry.order_hash,
+        producer_hash: producerDelivery.entry.producer_hash,
+      },
     );
 
     updatedProducerDelivery = await alice.orders.client.updateProducerDelivery(

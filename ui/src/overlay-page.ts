@@ -1,9 +1,28 @@
 import { SignalWatcher } from "@holochain-open-dev/signals";
-import { LitElement, html, css } from "lit";
+import { LitElement, html, css, TemplateResult, render } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { appStyles } from "./app-styles";
 import { wrapPathInSvg } from "@holochain-open-dev/elements";
 import { mdiClose } from "@mdi/js";
+
+export function showOverlayPage(
+  title: string,
+  body: (closePage: () => void) => TemplateResult,
+) {
+  const div = document.createElement("div");
+  const closePage = () => {
+    document.body.removeChild(div);
+  };
+  render(
+    html`
+      <overlay-page .title=${title} @close-requested=${() => closePage()}>
+        ${body(closePage)}
+      </overlay-page>
+    `,
+    div,
+  );
+  document.body.appendChild(div);
+}
 
 @customElement("overlay-page")
 export class OverlayPage extends SignalWatcher(LitElement) {

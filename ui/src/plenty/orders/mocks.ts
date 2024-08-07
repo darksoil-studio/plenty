@@ -39,6 +39,7 @@ import {
   SignedActionHashed,
   fakeEntryHash,
   Record,
+  encodeHashToBase64,
 } from "@holochain/client";
 import { OrdersClient } from "./orders-client.js";
 
@@ -765,27 +766,27 @@ export async function sampleProducerDelivery(
   partialProducerDelivery: Partial<ProducerDelivery> = {},
 ): Promise<ProducerDelivery> {
   const productHash = await fakeActionHash();
-  const products: HoloHashMap<ActionHash, ProductDelivery> = new HoloHashMap();
-  products.set(productHash, {
-    type: "Delivered",
-    delivered_amount: {
-      type: "FixedAmountProduct",
-      delivered_products: [
-        {
-          amount: 1,
-          households_hashes: [],
-        },
-      ],
-      price_cents_per_unit_changed: undefined,
-    },
-  });
   return {
     ...{
       order_hash:
         partialProducerDelivery.order_hash ||
         (await client.createOrder(await sampleOrder(client))).actionHash,
       producer_hash,
-      products,
+      products: {
+        [encodeHashToBase64(productHash)]: {
+          type: "Delivered",
+          delivered_amount: {
+            type: "FixedAmountProduct",
+            delivered_products: [
+              {
+                amount: 1,
+                households_hashes: [],
+              },
+            ],
+            price_cents_per_unit_changed: undefined,
+          },
+        },
+      },
     },
     ...partialProducerDelivery,
   };
