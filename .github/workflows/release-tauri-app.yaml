@@ -39,7 +39,7 @@ jobs:
 
       - name: Build .webhapp
         run: |
-          nix develop --accept-flake-config --command bash -c "pnpm install && pnpm happ:build"
+          nix develop --no-update-lock-file --accept-flake-config --command bash -c "pnpm install && pnpm happ:build"
 
       - name: Retrieve version
         run: |
