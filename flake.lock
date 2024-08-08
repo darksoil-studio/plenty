@@ -12884,11 +12884,11 @@
         "versions": "versions_11"
       },
       "locked": {
-        "lastModified": 1722937290,
-        "narHash": "sha256-TtjtdQ4p5o0a/pNpcEigG2tOttz9sSIG378Kop/ZULE=",
+        "lastModified": 1723110617,
+        "narHash": "sha256-abwGBzF840w/C3Fexn5Xr1zFLVxOJkqPP2idqCqbctA=",
         "owner": "darksoil-studio",
         "repo": "p2p-shipyard",
-        "rev": "14b663ff3494df68a105837d186beb42e11fa47c",
+        "rev": "e4d96a86c59547383bf680554366c708c08594ab",
         "type": "github"
       },
       "original": {
