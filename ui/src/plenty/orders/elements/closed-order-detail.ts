@@ -38,6 +38,7 @@ import {
   Order,
   ProducerDelivery,
   ProducerInvoice,
+  ProductDelivery,
   ProductOrder,
 } from "../types.js";
 import { ActionHash, encodeHashToBase64 } from "@holochain/client";
@@ -53,8 +54,7 @@ import { HouseholdsStore } from "../../households/households-store.js";
 import { householdsStoreContext } from "../../households/context.js";
 import { styleMap } from "lit/directives/style-map.js";
 import { showOverlayPage } from "../../../overlay-page.js";
-import { notifyError } from "@holochain-open-dev/elements";
-import { SlCheckbox } from "@shoelace-style/shoelace";
+import "./create-producer-delivery.js";
 
 @customElement("closed-order-detail")
 export class ClosedOrderDetail extends SignalWatcher(LitElement) {
@@ -142,24 +142,22 @@ export class ClosedOrderDetail extends SignalWatcher(LitElement) {
           householdProductOrdersForThisProduct.entries(),
         ).map(([householdHash, productOrder]) => ({
           name: households.get(householdHash)!.entry.name,
-          amount: productOrder.amount,
+          amount_ordered: productOrder.amount,
           // total_price: (
           //   Math.round(productOrder.amount * price_with_vat * 100) / 100
           // ).toFixed(2),
         }));
 
-        const amount = Array.from(
+        const amount_ordered = Array.from(
           householdProductOrdersForThisProduct.values(),
         ).reduce((acc, next) => acc + next.amount, 0);
         return {
+          productHash,
           name: product.entry.name,
           packaging: product.entry.packaging,
-          amount,
+          amount_ordered,
           children,
           price_with_vat: price_with_vat_rounded,
-          total_price: (
-            Math.round(amount * price_with_vat * 100) / 100
-          ).toFixed(2),
         };
       },
     );
@@ -179,108 +177,15 @@ export class ClosedOrderDetail extends SignalWatcher(LitElement) {
         ${deliveriesForThisProducer.size === 0
           ? html`<sl-tag>${msg("Not Processed")}</sl-tag
               ><sl-button
-                style="display: none"
                 variant="primary"
                 @click=${() =>
                   showOverlayPage(
                     msg("Process Delivery"),
-                    (closePage) => html`
-                      <div
-                        style="display: flex; flex-direction: column; width: 1200px; padding: 16px"
-                      >
-                        <sl-card style="width: 100%">
-                          <div
-                            style="display: flex; flex-direction: column; margin: -20px"
-                          >
-                            <vaadin-grid .dataProvider=${dataProvider}>
-                              <vaadin-grid-tree-column
-                                .header=${msg("Product")}
-                                path="name"
-                              ></vaadin-grid-tree-column>
-                              <vaadin-grid-column
-                                .header=${msg("Packaging")}
-                                .renderer=${(
-                                  root: any,
-                                  __: any,
-                                  model: any,
-                                ) => {
-                                  const product: Product = model.item;
-                                  if (product.packaging) {
-                                    root.textContent = renderPackaging(
-                                      product.packaging,
-                                    );
-                                  } else {
-                                    root.textContent = "";
-                                  }
-                                }}
-                              ></vaadin-grid-column>
-                              <vaadin-grid-sort-column
-                                .header=${msg("Price")}
-                                path="price_with_vat"
-                              ></vaadin-grid-sort-column>
-                              <vaadin-grid-column
-                                .header=${msg("Amount")}
-                                path="amount"
-                              ></vaadin-grid-column>
-                              <vaadin-grid-column
-                                .header=${msg("Total")}
-                                path="total_price"
-                              ></vaadin-grid-column>
-                              <vaadin-grid-form-field-column
-                                .header=${msg("Delivered")}
-                                .templateRenderer=${(
-                                  model: any,
-                                  setValue: (value: any) => void,
-                                ) =>
-                                  html`<sl-checkbox
-                                    checked
-                                    @sl-change=${(e: CustomEvent) => {
-                                      setValue(
-                                        (e.target as SlCheckbox).checked,
-                                      );
-                                    }}
-                                  ></sl-checkbox>`}
-                              >
-                              </vaadin-grid-form-field-column>
-                            </vaadin-grid>
-                            <div
-                              style="display: flex; flex-direction: row; padding: 16px"
-                            >
-                              <span style="flex: 1"></span>
-                              <sl-button
-                                .loading=${this.creatingProducerDelivery}
-                                variant="primary"
-                                @click=${async () => {
-                                  if (this.creatingProducerDelivery) return;
-                                  this.creatingProducerDelivery = true;
-
-                                  try {
-                                    await this.ordersStore.client.createProducerDelivery(
-                                      {
-                                        order_hash: this.orderHash,
-                                        producer_hash: producerHash,
-                                        products: {},
-                                      },
-                                    );
-                                  } catch (e) {
-                                    console.error(e);
-                                    notifyError(
-                                      msg(
-                                        "Error creating the producer delivery.",
-                                      ),
-                                    );
-                                  }
-
-                                  this.creatingProducerDelivery = false;
-                                  closePage();
-                                }}
-                                >${msg("Process Delivery")}</sl-button
-                              >
-                            </div>
-                          </div>
-                        </sl-card>
-                      </div>
-                    `,
+                    (closePage) =>
+                      html`<create-producer-delivery
+                        .dataProvider=${dataProvider}
+                        @producer-delivery-created=${() => closePage()}
+                      ></create-producer-delivery>`,
                   )}
                 >${msg("Process Delivery")}</sl-button
               > `
@@ -307,12 +212,8 @@ export class ClosedOrderDetail extends SignalWatcher(LitElement) {
           path="price_with_vat"
         ></vaadin-grid-sort-column>
         <vaadin-grid-column
-          .header=${msg("Amount")}
-          path="amount"
-        ></vaadin-grid-column>
-        <vaadin-grid-column
-          .header=${msg("Total")}
-          path="total_price"
+          .header=${msg("Amount Ordered")}
+          path="amount_ordered"
         ></vaadin-grid-column>
       </vaadin-grid>
     </div>`;
