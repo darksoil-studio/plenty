@@ -1,6 +1,6 @@
 {
   "productName": "plenty",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "identifier": "studio.darksoil.plenty",
   "build": {
     "beforeBuildCommand": "pnpm -F lobby build",

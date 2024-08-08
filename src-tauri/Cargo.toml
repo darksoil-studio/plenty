@@ -1,6 +1,6 @@
 [package]
 name = "plenty"
-version = "0.0.2"
+version = "0.0.3"
 description = "Plenty"
 authors = ["guillem@darksoil.studio"]
 license = ""
