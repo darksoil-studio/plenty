@@ -8,6 +8,7 @@ import {
   AgentPubKey,
   EntryHash,
   encodeHashToBase64,
+  decodeHashFromBase64,
 } from "@holochain/client";
 import {
   EntryRecord,
@@ -74,6 +75,7 @@ import { producersStoreContext } from "../../producers/context.js";
 import { sleep } from "../../../utils.js";
 import { orderManagerRoleConfig } from "../../../roles.js";
 import { keyed } from "lit/directives/keyed.js";
+import { VaadinGridFormFieldColumn } from "../../../vaadin-grid-form-field-column.js";
 
 const productsRandom = new LazyHoloHashMap(() => Math.random() * 1000);
 
@@ -126,11 +128,11 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
   @query("#create-form")
   form!: HTMLFormElement;
 
-  productOrdersQueue = new HoloHashMap<ActionHash, ProductOrder>();
-
   async setHouseholdProductOrder(
     householdHash: ActionHash,
     previousOrder: [ActionHash, EntryRecord<HouseholdOrder>] | undefined,
+    producerHash: ActionHash,
+    productsForThisProducer: ReadonlyMap<ActionHash, EntryRecord<Product>>,
   ) {
     if (this.committing) return;
     this.committing = true;
@@ -141,12 +143,31 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
         "Cannot create a new Household Order without its order_hash field",
       );
 
+    const orderValue: {
+      [key: string]: { amount: number; ordered_product_hash: ActionHash };
+    } = (
+      this.shadowRoot?.getElementById(
+        `order-column-${encodeHashToBase64(producerHash)}`,
+      ) as any as VaadinGridFormFieldColumn
+    ).values;
+    this.committing = false;
+
+    const orderedProductsForThisProducer: Array<ProductOrder> = Object.entries(
+      orderValue,
+    )
+      .map(([productHashB64, { amount, ordered_product_hash }]) => ({
+        original_product_hash: decodeHashFromBase64(productHashB64),
+        amount,
+        ordered_product_hash,
+      }))
+      .filter((po) => po.amount > 0);
+
     try {
       if (!previousOrder) {
         const householdOrder: HouseholdOrder = {
           household_hash: householdHash,
           order_hash: this.orderHash,
-          products: Array.from(this.productOrdersQueue.values()),
+          products: orderedProductsForThisProducer,
         };
         const record: EntryRecord<HouseholdOrder> =
           await this.ordersStore.client.createHouseholdOrder(householdOrder);
@@ -161,23 +182,16 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
           }),
         );
       } else {
-        const queuedProducts = Array.from(this.productOrdersQueue.values()).map(
-          (p) => encodeHashToBase64(p.original_product_hash),
+        let otherProducersProducts = previousOrder[1].entry.products.filter(
+          (p) => !productsForThisProducer.get(p.original_product_hash),
         );
-        let products = previousOrder[1].entry.products.filter(
-          (p) =>
-            !queuedProducts.includes(
-              encodeHashToBase64(p.original_product_hash),
-            ),
-        );
-        products = [
-          ...products,
-          ...Array.from(this.productOrdersQueue.values()),
-        ];
         const householdOrder: HouseholdOrder = {
           order_hash: this.orderHash!,
           household_hash: householdHash!,
-          products,
+          products: [
+            ...orderedProductsForThisProducer,
+            ...otherProducersProducts,
+          ],
         };
         const record: EntryRecord<HouseholdOrder> =
           await this.ordersStore.client.updateHouseholdOrder(
@@ -200,11 +214,16 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
       console.warn(e);
       // notifyError(msg("Error updating the household order"));
       setTimeout(
-        () => this.setHouseholdProductOrder(householdHash, previousOrder),
+        () =>
+          this.setHouseholdProductOrder(
+            householdHash,
+            previousOrder,
+            producerHash,
+            productsForThisProducer,
+          ),
         100,
       );
     }
-    this.committing = false;
   }
 
   getProductsLatestVersion(availableProducts: EntryRecord<AvailableProducts>) {
@@ -232,24 +251,59 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
     availableProducts: EntryRecord<AvailableProducts>,
     products: ReadonlyMap<ActionHash, EntryRecord<Product>>,
   ) {
+    const orderValues: {
+      [key: string]: { amount: number; ordered_product_hash: ActionHash };
+    } = {};
+    if (myHouseholdOrder) {
+      for (const productOrder of myHouseholdOrder[1].entry.products) {
+        const product = products.get(productOrder.original_product_hash);
+        if (!product) continue;
+        if (
+          encodeHashToBase64(product.entry.producer_hash) ===
+          encodeHashToBase64(producerHash)
+        ) {
+          orderValues[encodeHashToBase64(productOrder.original_product_hash)] =
+            {
+              amount: productOrder.amount,
+              ordered_product_hash: product.actionHash,
+            };
+        }
+      }
+    }
     return html`
       <vaadin-grid
         class="order-grid"
         multi-sort
+        .size=${products.size}
         .items=${Array.from(products.entries()).map(([productHash, p]) => {
           const price = p.entry.price_cents / 100;
           const price_with_vat =
             Math.round((price + (price * p.entry.vat_percentage) / 100) * 100) /
             100;
-          const amount = this.productOrdersQueue.has(productHash)
-            ? this.productOrdersQueue.get(productHash).amount
-            : myHouseholdOrder
-              ? myHouseholdOrder[1].entry.products.find(
-                  (p) =>
-                    encodeHashToBase64(p.original_product_hash) ===
-                    encodeHashToBase64(productHash),
-                )?.amount || 0
-              : 0;
+          const orderValue: {
+            [key: string]: {
+              value: { amount: number; ordered_product_hash: ActionHash };
+              timestamp: number;
+            };
+          } = (
+            this.shadowRoot?.getElementById(
+              `order-column-${encodeHashToBase64(producerHash)}`,
+            ) as any as VaadinGridFormFieldColumn
+          )?._values;
+          const amount =
+            orderValue &&
+            orderValue[encodeHashToBase64(productHash)] &&
+            (!myHouseholdOrder ||
+              orderValue[encodeHashToBase64(productHash)].timestamp >
+                myHouseholdOrder[1].action.timestamp)
+              ? orderValue[encodeHashToBase64(productHash)].value.amount
+              : myHouseholdOrder
+                ? myHouseholdOrder[1].entry.products.find(
+                    (p) =>
+                      encodeHashToBase64(p.original_product_hash) ===
+                      encodeHashToBase64(productHash),
+                  )?.amount || 0
+                : 0;
           return {
             id: encodeHashToBase64(productHash),
             ...p.entry,
@@ -296,55 +350,45 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
             );
           }}
         ></vaadin-grid-column>
-        <vaadin-grid-column
+        <vaadin-grid-form-field-column
+          id="order-column-${encodeHashToBase64(producerHash)}"
           .header=${msg("Order")}
-          .renderer=${(root: any, __: any, model: any) => {
-            let value = 0;
-            const thisProduct = this.productOrdersQueue.get(
-              model.item.productHash,
-            );
-            if (thisProduct) {
-              value = thisProduct.amount;
-            } else if (myHouseholdOrder) {
-              const thisProduct = myHouseholdOrder[1].entry.products.find(
-                (p) =>
-                  encodeHashToBase64(p.original_product_hash) ===
-                  encodeHashToBase64(model.item.productHash),
-              );
-              if (thisProduct) {
-                value = thisProduct.amount;
-              }
-            }
-            render(
-              keyed(
-                model.item.productHash,
-                html`
-                  <sl-input
-                    type="number"
-                    style="width: 5rem"
-                    min="0"
-                    no-spin-buttons
-                    .value=${value}
-                    @sl-change=${(e: CustomEvent) => {
-                      const amount = parseInt((e.target as SlInput).value);
-                      this.productOrdersQueue.set(model.item.productHash, {
-                        amount,
-                        original_product_hash: model.item.productHash,
-                        ordered_product_hash: model.item.actionHash,
-                      });
-                      // this.requestUpdate();
-                      this.setHouseholdProductOrder(
-                        myHouseholdHash,
-                        myHouseholdOrder,
-                      );
-                    }}
-                  ></sl-input>
-                `,
-              ),
-              root,
-            );
-          }}
-        ></vaadin-grid-column>
+          .getId=${(model: any) => encodeHashToBase64(model.item.productHash)}
+          .values=${orderValues}
+          .lastUpdated=${myHouseholdOrder
+            ? myHouseholdOrder[1].action.timestamp
+            : undefined}
+          .templateRenderer=${(
+            id: string,
+            value: { amount: number; ordered_product_hash: ActionHash },
+            setValue: (value: {
+              amount: number;
+              ordered_product_hash: ActionHash;
+            }) => void,
+          ) => html`
+            <sl-input
+              type="number"
+              style="width: 5rem"
+              min="0"
+              .value=${value?.amount || 0}
+              @sl-change=${(e: CustomEvent) => {
+                const amount = parseInt((e.target as SlInput).value);
+                setValue({
+                  amount,
+                  ordered_product_hash: products.get(decodeHashFromBase64(id))!
+                    .actionHash,
+                });
+                this.requestUpdate();
+                this.setHouseholdProductOrder(
+                  myHouseholdHash,
+                  myHouseholdOrder,
+                  producerHash,
+                  products,
+                );
+              }}
+            ></sl-input>
+          `}
+        ></vaadin-grid-form-field-column>
         <vaadin-grid-column
           .header=${msg("Total")}
           path="total_price"
@@ -583,35 +627,26 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
       mapValues(availableProducts.value, (p) => p.latestVersion.get()),
     );
 
-    const myOrders = this.ordersStore.ordersForHousehold
-      .get(myHousehold.value!.householdHash)
-      .get();
-    if (myOrders.status !== "completed") return myOrders;
+    const householdOrders = this.ordersStore.orders
+      .get(this.orderHash)
+      .householdOrders.live.get();
+
+    if (householdOrders.status !== "completed") return householdOrders;
+
+    const myOrders = householdOrders.value.byHousehold.get(
+      myHousehold.value!.householdHash,
+    );
 
     let myHouseholdOrder: [ActionHash, EntryRecord<HouseholdOrder>] | undefined;
 
     // TODO: what about conflict here???
-    if (myOrders.value.size > 0) {
-      const order = Array.from(myOrders.value.entries())[0];
+    if (myOrders && myOrders.size > 0) {
+      const order = Array.from(myOrders.entries())[0];
 
       const latestMyHouseholdOrder = order[1].latestVersion.get();
       if (latestMyHouseholdOrder.status !== "completed")
         return latestMyHouseholdOrder;
       myHouseholdOrder = [order[0], latestMyHouseholdOrder.value];
-
-      for (const [productHash, queuedProduct] of Array.from(
-        this.productOrdersQueue.entries(),
-      )) {
-        for (const product of latestMyHouseholdOrder.value.entry.products) {
-          if (
-            encodeHashToBase64(product.original_product_hash) ===
-              encodeHashToBase64(productHash) &&
-            product.amount === queuedProduct.amount
-          ) {
-            this.productOrdersQueue.delete(productHash);
-          }
-        }
-      }
     }
     if (availableProductsLatestVersion.status !== "completed")
       return availableProductsLatestVersion;

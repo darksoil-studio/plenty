@@ -3,7 +3,7 @@ import {
   joinAsyncMap,
   uniquify,
 } from "@holochain-open-dev/signals";
-import { LitElement, html, render } from "lit";
+import { LitElement, css, html, render } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { ActionHash, encodeHashToBase64 } from "@holochain/client";
 import { consume } from "@lit/context";
@@ -25,7 +25,7 @@ import "@vaadin/grid/vaadin-grid-sort-column.js";
 import { appStyles } from "../../../app-styles.js";
 import { ordersStoreContext } from "../context.js";
 import { OrdersStore } from "../orders-store.js";
-import { HouseholdOrder, Order, ProductOrder } from "../types.js";
+import { HouseholdOrder, Order, OrderStatus, ProductOrder } from "../types.js";
 import { Household } from "../../households/types.js";
 import { HouseholdsStore } from "../../households/households-store.js";
 import { householdsStoreContext } from "../../households/context.js";
@@ -142,7 +142,7 @@ export class HouseholdsOrdersSummary extends SignalWatcher(LitElement) {
           pi.children.map((product) => parseFloat(product.total_price)),
         ),
       )
-      .reduce((acc, next) => acc + next);
+      .reduce((acc, next) => acc + next, 0);
     return html`
       <div class="column" style="flex: 1; height: 100%">
         <div class="row" style="margin: 16px; align-items: center">
@@ -184,15 +184,25 @@ export class HouseholdsOrdersSummary extends SignalWatcher(LitElement) {
                 if (this.closingOrder) return;
                 this.closingOrder = true;
                 try {
+                  let status: OrderStatus = {
+                    type: "Closed",
+                    household_orders: Array.from(householdOrders.keys()),
+                  };
+
+                  if (status.household_orders.length === 0) {
+                    status = {
+                      type: "Finished",
+                      household_payments: [],
+                      producers_invoices: [],
+                    };
+                  }
+
                   await this.ordersStore.client.updateOrder(
                     this.orderHash,
                     order.actionHash,
                     {
                       name: order.entry.name,
-                      status: {
-                        type: "Closed",
-                        household_orders: Array.from(householdOrders.keys()),
-                      },
+                      status,
                     },
                   );
                 } catch (e) {
@@ -274,7 +284,7 @@ export class HouseholdsOrdersSummary extends SignalWatcher(LitElement) {
           (product.entry.vat_percentage * product.entry.price_cents) / 100;
         return totalPrice * p.amount;
       })
-      .reduce((acc, next) => acc + next);
+      .reduce((acc, next) => acc + next, 0);
 
     return {
       status: "completed" as const,
@@ -292,7 +302,7 @@ export class HouseholdsOrdersSummary extends SignalWatcher(LitElement) {
     if (householdOrders.status !== "completed") return householdOrders;
 
     const householdOrdersLatestVersion = joinAsyncMap(
-      mapValues(householdOrders.value, (ho) => ho.latestVersion.get()),
+      mapValues(householdOrders.value.all, (ho) => ho.latestVersion.get()),
     );
     if (householdOrdersLatestVersion.status !== "completed")
       return householdOrdersLatestVersion;
@@ -376,5 +386,12 @@ export class HouseholdsOrdersSummary extends SignalWatcher(LitElement) {
     }
   }
 
-  static styles = appStyles;
+  static styles = [
+    ...appStyles,
+    css`
+      :host {
+        display: flex;
+      }
+    `,
+  ];
 }

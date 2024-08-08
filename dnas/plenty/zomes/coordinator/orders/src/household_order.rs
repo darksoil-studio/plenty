@@ -8,7 +8,7 @@ pub fn create_household_order(household_order: HouseholdOrder) -> ExternResult<R
         household_order.order_hash.clone(),
         household_order_hash.clone(),
         LinkTypes::OrderToHouseholdOrders,
-        (),
+        household_order.household_hash.clone().into_inner(),
     )?;
     create_link(
         household_order.household_hash.clone(),

@@ -11,6 +11,7 @@ import {
   pipe,
   AsyncComputed,
   mapCompleted,
+  uniquify,
 } from "@holochain-open-dev/signals";
 import {
   slice,
@@ -18,6 +19,7 @@ import {
   retype,
   EntryRecord,
   LazyHoloHashMap,
+  HoloHashMap,
 } from "@holochain-open-dev/utils";
 import {
   NewEntryAction,
@@ -25,6 +27,7 @@ import {
   ActionHash,
   EntryHash,
   AgentPubKey,
+  encodeHashToBase64,
 } from "@holochain/client";
 
 import { OrdersClient } from "./orders-client.js";
@@ -48,18 +51,41 @@ export class OrdersStore {
       this.client.getAllDeletesForOrder(orderHash),
     ),
     householdOrders: {
-      live: pipe(
+      live: mapCompleted(
         liveLinksSignal(
           this.client,
           orderHash,
           () => this.client.getHouseholdOrdersForOrder(orderHash),
           "OrderToHouseholdOrders",
         ),
-        (links) =>
-          slice(
+        (links) => {
+          const all = slice(
             this.householdOrders,
             links.map((l) => l.target),
-          ),
+          );
+
+          const householdHashes = uniquify(links.map((link) => link.tag));
+          const byHousehold = new HoloHashMap(
+            householdHashes.map((householdHash) => [
+              householdHash,
+              slice(
+                this.householdOrders,
+                links
+                  .filter(
+                    (link) =>
+                      encodeHashToBase64(link.tag) ===
+                      encodeHashToBase64(householdHash),
+                  )
+                  .map((link) => link.target),
+              ),
+            ]),
+          );
+
+          return {
+            all,
+            byHousehold,
+          };
+        },
       ),
       deleted: pipe(
         deletedLinksSignal(

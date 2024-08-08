@@ -94,7 +94,7 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
     const producerDelivery: ProducerDelivery = {
       order_hash: this.orderHash!,
       producer_hash: this.producerHash!,
-      products: new HoloHashMap(), // TODO: here
+      products: {},
     };
 
     try {

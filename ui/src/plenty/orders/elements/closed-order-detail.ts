@@ -30,6 +30,8 @@ import "@vaadin/grid/vaadin-grid.js";
 import "@vaadin/grid/vaadin-grid-column.js";
 import "@vaadin/grid/vaadin-grid-sort-column.js";
 
+import "../../../vaadin-grid-form-field-column.js";
+
 import { appStyles } from "../../../app-styles.js";
 import {
   HouseholdOrder,
@@ -52,6 +54,7 @@ import { householdsStoreContext } from "../../households/context.js";
 import { styleMap } from "lit/directives/style-map.js";
 import { showOverlayPage } from "../../../overlay-page.js";
 import { notifyError } from "@holochain-open-dev/elements";
+import { SlCheckbox } from "@shoelace-style/shoelace";
 
 @customElement("closed-order-detail")
 export class ClosedOrderDetail extends SignalWatcher(LitElement) {
@@ -176,6 +179,7 @@ export class ClosedOrderDetail extends SignalWatcher(LitElement) {
         ${deliveriesForThisProducer.size === 0
           ? html`<sl-tag>${msg("Not Processed")}</sl-tag
               ><sl-button
+                style="display: none"
                 variant="primary"
                 @click=${() =>
                   showOverlayPage(
@@ -222,6 +226,22 @@ export class ClosedOrderDetail extends SignalWatcher(LitElement) {
                                 .header=${msg("Total")}
                                 path="total_price"
                               ></vaadin-grid-column>
+                              <vaadin-grid-form-field-column
+                                .header=${msg("Delivered")}
+                                .templateRenderer=${(
+                                  model: any,
+                                  setValue: (value: any) => void,
+                                ) =>
+                                  html`<sl-checkbox
+                                    checked
+                                    @sl-change=${(e: CustomEvent) => {
+                                      setValue(
+                                        (e.target as SlCheckbox).checked,
+                                      );
+                                    }}
+                                  ></sl-checkbox>`}
+                              >
+                              </vaadin-grid-form-field-column>
                             </vaadin-grid>
                             <div
                               style="display: flex; flex-direction: row; padding: 16px"

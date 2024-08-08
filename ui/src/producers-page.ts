@@ -19,7 +19,6 @@ import {
 import { EntryRecord } from "@holochain-open-dev/utils";
 
 import "@vaadin/grid/vaadin-grid.js";
-import "@vaadin/grid/vaadin-grid-selection-column.js";
 import "@vaadin/grid/vaadin-grid-sort-column.js";
 import "@vaadin/grid/vaadin-grid-column.js";
 
@@ -382,6 +381,9 @@ export class ProducersPage extends SignalWatcher(LitElement) {
       <sl-dialog
         id="upload-products-csv-dialog"
         .label=${msg("Import Products")}
+        @sl-request-close=${(e: CustomEvent) => {
+          if (this.uploading) e.preventDefault();
+        }}
         @sl-hide=${() => (this.uploadedProducts = undefined)}
         style="--width: 800px;"
       >

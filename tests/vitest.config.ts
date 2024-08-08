@@ -10,6 +10,7 @@ export default defineConfig({
       },
     },
     testTimeout: 60 * 1000 * 3, // 3  mins
+    teardownTimeout: 3_000,
     deps: {
       optimizer: {
         ssr: {
