@@ -1,4 +1,4 @@
-import { LitElement, html } from "lit";
+import { LitElement, css, html } from "lit";
 import { repeat } from "lit/directives/repeat.js";
 import { state, property, query, customElement } from "lit/decorators.js";
 import {
@@ -21,8 +21,12 @@ import {
 import { consume } from "@lit/context";
 import { localized, msg } from "@lit/localize";
 import { mdiAlertCircleOutline, mdiDelete } from "@mdi/js";
+import { GridDataProviderCallback } from "@vaadin/grid";
+import { Grid } from "@vaadin/grid/vaadin-grid.js";
+import { SlInput, SlSelect } from "@shoelace-style/shoelace";
 
 import "@shoelace-style/shoelace/dist/components/alert/alert.js";
+import "@shoelace-style/shoelace/dist/components/select/select.js";
 
 import "@holochain-open-dev/elements/dist/elements/display-error.js";
 import SlAlert from "@shoelace-style/shoelace/dist/components/alert/alert.js";
@@ -34,9 +38,8 @@ import { appStyles } from "../../../app-styles.js";
 import { OrdersStore } from "../orders-store.js";
 import { ordersStoreContext } from "../context.js";
 import { ProducerDelivery, ProductDelivery } from "../types.js";
-import { GridDataProviderCallback } from "@vaadin/grid";
 import { Product, renderPackaging } from "../../producers/types.js";
-import { SlInput, SlSelect } from "@shoelace-style/shoelace";
+import { ref } from "lit/directives/ref.js";
 
 /**
  * @element create-producer-delivery
@@ -83,7 +86,28 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
       <div class="column" style="width: 1200px; padding: 16px">
         <sl-card style="flex: 1">
           <div class="column" style="flex: 1; margin: -20px">
-            <vaadin-grid .dataProvider=${this.dataProvider}>
+            <vaadin-grid
+              .dataProvider=${this.dataProvider}
+              ${ref((el) => {
+                // Workaround https://github.com/shoelace-style/shoelace/issues/418
+                if (!el) return;
+                const grid = el as Grid;
+                const fixZindex = () => {
+                  const trs = grid.shadowRoot?.querySelectorAll("tr");
+                  if (!trs) return;
+                  const trsArray = Array.from(trs);
+                  for (let i = 0; i < trs.length; i++) {
+                    trsArray[i].style.zIndex = `${trs.length - i}`;
+                  }
+                };
+                setInterval(() => {
+                  fixZindex();
+                }, 1000);
+                setTimeout(() => {
+                  fixZindex();
+                });
+              })}
+            >
               <vaadin-grid-tree-column
                 .header=${msg("Product")}
                 path="name"
@@ -119,7 +143,7 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
                 ) => {
                   const type = value?.type || "Delivered";
                   return html`
-                    <div style="display: flex; flex-direction: row; gap: 8px">
+                    <div style="display: flex; flex-direction: row; gap: 8px;">
                       <sl-select
                         hoist
                         .value=${type}
@@ -227,5 +251,21 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
     `;
   }
 
-  static styles = appStyles;
+  static styles = [
+    ...appStyles,
+    css`
+      vaadin-grid::part(row):nth-of-type(1) {
+        margin-top: 200px;
+      }
+      vaadin-grid::part(row):nth-of-type(2) {
+        z-index: 999999998 !important;
+      }
+      vaadin-grid::part(row):nth-of-type(3) {
+        z-index: 999999997 !important;
+      }
+      vaadin-grid::part(row):nth-of-type(4) {
+        z-index: 999999996 !important;
+      }
+    `,
+  ];
 }
