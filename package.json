@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "start": "UI_PORT=8888 concurrently -k \"nix run -L .#network\" \"pnpm -F ui start\"",
-    "network:mobile": "pnpm happ:build-debug && concurrently -k \"pnpm local-services\" \"pnpm -F ui start\" \"pnpm tauri ios dev\" \"pnpm tauri dev\"",
+    "network:mobile": "pnpm happ:build-debug && concurrently -k \"pnpm -F ui start\" \"pnpm tauri ios dev\" \"pnpm tauri dev\"",
     "network:android": "pnpm happ:build-debug && concurrently -k \"pnpm -F ui start\" \"pnpm tauri dev\" \"pnpm tauri android dev\"",
     "network": "pnpm happ:build && UI_PORT=1420 concurrently -k \"pnpm -F lobby start\" \"pnpm tauri dev\" \"pnpm tauri dev\"",
     "launch": "concurrently-repeat \"pnpm tauri dev --no-watch\" $AGENTS",

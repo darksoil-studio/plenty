@@ -384,7 +384,13 @@ export class ProducersPage extends SignalWatcher(LitElement) {
         @sl-request-close=${(e: CustomEvent) => {
           if (this.uploading) e.preventDefault();
         }}
-        @sl-hide=${() => (this.uploadedProducts = undefined)}
+        @sl-hide=${() => {
+          const input = this.shadowRoot?.getElementById(
+            "file-input",
+          ) as HTMLInputElement;
+          input.value = "";
+          this.uploadedProducts = undefined;
+        }}
         style="--width: 800px;"
       >
         <div class="column" style="gap: 16px; flex: 1">
@@ -393,10 +399,11 @@ export class ProducersPage extends SignalWatcher(LitElement) {
               "Upload a CSV file with the products you want to import.",
             )}</span
           >
-          <div class="row" style="gap: 12px">
+          <div class="row" style="gap: 12px; align-items: center">
             <input
               type="file"
               accept="csv"
+              id="file-input"
               @change=${async (event: Event) => {
                 try {
                   const file = (event.target as any).files[0];
@@ -416,7 +423,14 @@ export class ProducersPage extends SignalWatcher(LitElement) {
             />
             ${this.uploadedProducts
               ? html`
-                  <sl-button @click=${() => (this.uploadedProducts = undefined)}
+                  <sl-button
+                    @click=${() => {
+                      const input = this.shadowRoot?.getElementById(
+                        "file-input",
+                      ) as HTMLInputElement;
+                      input.value = "";
+                      this.uploadedProducts = undefined;
+                    }}
                     >${msg("Clear")}</sl-button
                   >
                 `

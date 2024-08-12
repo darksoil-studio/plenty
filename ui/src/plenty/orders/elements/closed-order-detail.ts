@@ -30,8 +30,6 @@ import "@vaadin/grid/vaadin-grid.js";
 import "@vaadin/grid/vaadin-grid-column.js";
 import "@vaadin/grid/vaadin-grid-sort-column.js";
 
-import "../../../vaadin-grid-form-field-column.js";
-
 import { appStyles } from "../../../app-styles.js";
 import {
   HouseholdOrder,
@@ -141,6 +139,8 @@ export class ClosedOrderDetail extends SignalWatcher(LitElement) {
         const children = Array.from(
           householdProductOrdersForThisProduct.entries(),
         ).map(([householdHash, productOrder]) => ({
+          householdHash,
+          productHash,
           name: households.get(householdHash)!.entry.name,
           amount_ordered: productOrder.amount,
           // total_price: (
@@ -183,7 +183,8 @@ export class ClosedOrderDetail extends SignalWatcher(LitElement) {
                     msg("Process Delivery"),
                     (closePage) =>
                       html`<create-producer-delivery
-                        .dataProvider=${dataProvider}
+                        style="flex: 1"
+                        .items=${productsItems}
                         @producer-delivery-created=${() => closePage()}
                       ></create-producer-delivery>`,
                   )}

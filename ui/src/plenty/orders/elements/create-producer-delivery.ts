@@ -8,6 +8,7 @@ import {
   AgentPubKey,
   EntryHash,
   encodeHashToBase64,
+  decodeHashFromBase64,
 } from "@holochain/client";
 import { EntryRecord, HoloHashMap } from "@holochain-open-dev/utils";
 import { SignalWatcher } from "@holochain-open-dev/signals";
@@ -24,9 +25,16 @@ import { mdiAlertCircleOutline, mdiDelete } from "@mdi/js";
 import { GridDataProviderCallback } from "@vaadin/grid";
 import { Grid } from "@vaadin/grid/vaadin-grid.js";
 import { SlInput, SlSelect } from "@shoelace-style/shoelace";
+import { ref } from "lit/directives/ref.js";
 
 import "@shoelace-style/shoelace/dist/components/alert/alert.js";
 import "@shoelace-style/shoelace/dist/components/select/select.js";
+
+import "@vaadin/grid/vaadin-grid.js";
+import "@vaadin/grid/vaadin-grid-column.js";
+import "@vaadin/grid/vaadin-grid-sort-column.js";
+
+import "../../../vaadin-grid-form-field-column.js";
 
 import "@holochain-open-dev/elements/dist/elements/display-error.js";
 import SlAlert from "@shoelace-style/shoelace/dist/components/alert/alert.js";
@@ -39,7 +47,6 @@ import { OrdersStore } from "../orders-store.js";
 import { ordersStoreContext } from "../context.js";
 import { ProducerDelivery, ProductDelivery } from "../types.js";
 import { Product, renderPackaging } from "../../producers/types.js";
-import { ref } from "lit/directives/ref.js";
 
 /**
  * @element create-producer-delivery
@@ -79,15 +86,24 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
   creatingProducerDelivery = false;
 
   @property()
-  dataProvider!: GridDataProviderCallback<any>;
+  items!: Array<any>;
 
   render() {
+    const dataProvider: GridDataProviderCallback<any> = (
+      params: any,
+      callback: any,
+    ) => {
+      const items = params.parentItem?.children || this.items;
+      callback(items, items.length);
+    };
     return html`
       <div class="column" style="width: 1200px; padding: 16px">
         <sl-card style="flex: 1">
           <div class="column" style="flex: 1; margin: -20px">
             <vaadin-grid
-              .dataProvider=${this.dataProvider}
+              style="flex: 1"
+              .expandedItems=${this.items}
+              .dataProvider=${dataProvider}
               ${ref((el) => {
                 // Workaround https://github.com/shoelace-style/shoelace/issues/418
                 if (!el) return;
@@ -111,6 +127,7 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
               <vaadin-grid-tree-column
                 .header=${msg("Product")}
                 path="name"
+                width="300px"
               ></vaadin-grid-tree-column>
               <vaadin-grid-column
                 .header=${msg("Packaging")}
@@ -135,16 +152,72 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
                 width="600px"
                 .header=${msg("Delivery")}
                 .getId=${(model: any) =>
-                  encodeHashToBase64(model.item.productHash)}
+                  model.item.householdHash
+                    ? `${encodeHashToBase64(model.item.productHash)}-household-${encodeHashToBase64(model.item.householdHash)}`
+                    : encodeHashToBase64(model.item.productHash)}
                 .templateRenderer=${(
                   id: string,
                   value: ProductDelivery,
                   setValue: (value: ProductDelivery) => void,
                 ) => {
+                  console.log(id);
+                  if (
+                    id.includes("household") &&
+                    (!value || value.type === "Delivered")
+                  ) {
+                    const productHash = id.split("-household-")[0];
+                    const householdHash = id.split("-household-")[1];
+
+                    const product = this.items.find(
+                      (i) => encodeHashToBase64(i.productHash) === productHash,
+                    );
+
+                    const orderedAmount: number = product.children
+                      .filter(
+                        (c: any) =>
+                          encodeHashToBase64(c.householdHash) === householdHash,
+                      )
+                      .reduce(
+                        (acc: number, next: any) => acc + next.amount_ordered,
+                        0,
+                      );
+
+                    let inputValue = orderedAmount;
+                    if (value) {
+                      if (
+                        value.delivered_amount.type === "FixedAmountProduct"
+                      ) {
+                        inputValue = value.delivered_amount.delivered_products
+                          .filter((dp) =>
+                            dp.households_hashes.find(
+                              (h) => encodeHashToBase64(h) === householdHash,
+                            ),
+                          )
+                          .reduce((acc, next) => acc + next.amount, 0);
+                      } else {
+                      }
+                    }
+                    return html` <div
+                      class="row"
+                      style="align-items: center; gap: 12px"
+                    >
+                      <span style="width: 12em"></span>
+                      <sl-input
+                        type="number"
+                        min="0"
+                        step="1"
+                        style="width: 5em"
+                        .value=${inputValue}
+                        @sl-change=${(e: CustomEvent) => {}}
+                      ></sl-input>
+                    </div>`;
+                  }
+
                   const type = value?.type || "Delivered";
                   return html`
-                    <div style="display: flex; flex-direction: row; gap: 8px;">
+                    <div class="row" style="align-items: center; gap: 8px;">
                       <sl-select
+                        style="width: 10em"
                         hoist
                         .value=${type}
                         @sl-change=${(e: CustomEvent) => {
@@ -195,8 +268,8 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
                             }}
                           ></sl-input>`
                         : type === "Delivered"
-                          ? html`<sl-input
-                              .placeholder=${msg("What happened?")}
+                          ? html`<sl-checkbox
+                              checked
                               @sl-change=${(e: CustomEvent) => {
                                 const problem = (e.target as SlInput).value;
                                 setValue({
@@ -204,7 +277,8 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
                                   problem,
                                 });
                               }}
-                            ></sl-input>`
+                              >${msg("Correct Amount")}</sl-checkbox
+                            >`
                           : html``}
                     </div>
                   `;
@@ -254,17 +328,8 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
   static styles = [
     ...appStyles,
     css`
-      vaadin-grid::part(row):nth-of-type(1) {
-        margin-top: 200px;
-      }
-      vaadin-grid::part(row):nth-of-type(2) {
-        z-index: 999999998 !important;
-      }
-      vaadin-grid::part(row):nth-of-type(3) {
-        z-index: 999999997 !important;
-      }
-      vaadin-grid::part(row):nth-of-type(4) {
-        z-index: 999999996 !important;
+      :host {
+        display: flex;
       }
     `,
   ];
