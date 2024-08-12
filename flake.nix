@@ -51,7 +51,10 @@
             inputs'.p2p-shipyard.devShells.holochainTauriDev
           ];
 
-          packages = [ inputs'.scaffolding.packages.hc-scaffold-app-template ];
+          packages = [
+            inputs'.scaffolding.packages.hc-scaffold-app-template
+            pkgs.mprocs
+          ];
         };
 
         devShells.androidDev = pkgs.mkShell {
@@ -60,7 +63,10 @@
             inputs'.p2p-shipyard.devShells.holochainTauriAndroidDev
           ];
 
-          packages = [ inputs'.scaffolding.packages.hc-scaffold-app-template ];
+          packages = [
+            inputs'.scaffolding.packages.hc-scaffold-app-template
+            pkgs.mprocs
+          ];
         };
       };
     };
