@@ -13,8 +13,8 @@
   },
   "dependencies": {
     "@darksoil-studio/notifications": "github:darksoil-studio/notifications#832d1796c665c5ab572f0ed9c8b1054bd97a92c8&path:ui",
-    "@darksoil-studio/roles": "github:darksoil-studio/roles#0499641e7bfdd8ae031afe26cf8452cd5f6e2b84&path:ui",
-    "@darksoil-studio/tasks": "github:darksoil-studio/tasks#18839e61bcd11fb07b1dbac0d02b59454bedfd92&path:ui",
+    "@darksoil-studio/roles": "github:darksoil-studio/roles#dcbac9f6a5adcb2e522c16611ec8afe7c8c15341&path:ui",
+    "@darksoil-studio/tasks": "github:darksoil-studio/tasks#a090350d338f28adb153b05ea295b30561856e58&path:ui",
     "@holochain-open-dev/elements": "^0.300.1",
     "@holochain-open-dev/file-storage": "github:holochain-open-dev/file-storage#d133e4ddf85194d7dcffc30845af8812dc73df97&path:ui",
     "@holochain-open-dev/profiles": "github:holochain-open-dev/profiles#112ac7c452d5a5c775a07a072c0ee14cb81c41ed&path:ui",
