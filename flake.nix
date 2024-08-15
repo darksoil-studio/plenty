@@ -22,10 +22,12 @@
 
   nixConfig = {
     extra-substituters = [
+      "https://holochain-ci.cachix.org"
       "https://holochain-open-dev.cachix.org"
       "https://darksoil-studio.cachix.org"
     ];
     extra-trusted-public-keys = [
+      "holochain-ci.cachix.org-1:5IUSkZc0aoRS53rfkvH9Kid40NpyjwCMCzwRTXy+QN8="
       "holochain-open-dev.cachix.org-1:3Tr+9in6uo44Ga7qiuRIfOTFXog+2+YbyhwI/Z6Cp4U="
       "darksoil-studio.cachix.org-1:UEi+aujy44s41XL/pscLw37KEVpTEIn8N/kn7jO8rkc="
     ];
