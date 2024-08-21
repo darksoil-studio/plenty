@@ -5,9 +5,9 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@darksoil-studio/notifications": "github:darksoil-studio/notifications#88ac1203c96168c16ed6e6ae265a2768efbaa7fb&path:ui",
+    "@darksoil-studio/notifications": "github:darksoil-studio/notifications#7b7ed790b6cb8a84a4b7c9911a532854c95c1049&path:ui",
     "@darksoil-studio/roles": "github:darksoil-studio/roles#9ee09d9bfdf069e4bae73ca6531bb11c630c4cd4&path:ui",
-    "@holochain-open-dev/profiles": "github:holochain-open-dev/profiles#a9f69be0056c631b0d2c23730724418078b55833&path:ui",
+    "@holochain-open-dev/profiles": "github:holochain-open-dev/profiles#f604eab07a69bb822bef2eafcddace5d5234d321&path:ui",
     "@holochain-open-dev/signals": "^0.300.7",
     "@holochain-open-dev/utils": "^0.300.2",
     "@holochain/client": "^0.17.1",
