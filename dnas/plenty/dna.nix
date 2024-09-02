@@ -6,13 +6,13 @@
     (builtins.attrNames (builtins.readDir ./zomes/coordinator)))
     ++ (map (m: "${./.}/zomes/integrity/${m}/zome.nix")
       (builtins.attrNames (builtins.readDir ./zomes/integrity)));
-  perSystem = { inputs', self', lib, ... }: {
+  perSystem = { inputs', self', lib, system, ... }: {
     packages.plenty_dna = inputs.hc-infra.outputs.lib.dna {
       dnaManifest = ./workdir/dna.yaml;
-      holochain = inputs'.holochain;
+      inherit system;
       zomes = {
-    tasks_integrity = inputs'.tasks.packages.tasks_integrity;
-          tasks = inputs'.tasks.packages.tasks;
+        tasks_integrity = inputs'.tasks.packages.tasks_integrity;
+        tasks = inputs'.tasks.packages.tasks;
         notifications_integrity =
           inputs'.notifications.packages.notifications_integrity;
         notifications = inputs'.notifications.packages.notifications;
@@ -32,8 +32,8 @@
         households = self'.packages.households;
         producers_integrity = self'.packages.producers_integrity;
         producers = self'.packages.producers;
-          orders_integrity = self'.packages.orders_integrity;
-          orders = self'.packages.orders;
+        orders_integrity = self'.packages.orders_integrity;
+        orders = self'.packages.orders;
       };
     };
   };
