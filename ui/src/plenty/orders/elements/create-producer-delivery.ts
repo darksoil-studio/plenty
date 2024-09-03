@@ -97,7 +97,7 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
       callback(items, items.length);
     };
     return html`
-      <div class="column" style="width: 1200px; padding: 16px">
+      <div class="column" style="width: 1200px;">
         <sl-card style="flex: 1">
           <div class="column" style="flex: 1; margin: -20px">
             <vaadin-grid

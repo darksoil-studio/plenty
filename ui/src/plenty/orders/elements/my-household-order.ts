@@ -334,22 +334,22 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
           .header=${msg("Maximum Available")}
           path="maximum_available"
         ></vaadin-grid-sort-column>
-        <vaadin-grid-column
+        <!-- <vaadin-grid-column
           .header=${msg("Share")}
           .renderer=${(root: any, _: any, model: any) => {
-            if (!model.value)
-              model.value = productsRandom.get(model.item.productHash);
+          if (!model.value)
+            model.value = productsRandom.get(model.item.productHash);
 
-            // TODO: actually set the value here
-            render(
-              html`<sl-progress-ring
-                .value=${model.value}
-                style="padding-top: 6px; --track-width: 6px; --indicator-width: 6px; --size: 24px; --indicator-transition-duration: 0"
-              ></sl-progress-ring>`,
-              root,
-            );
-          }}
-        ></vaadin-grid-column>
+          // TODO: actually set the value here
+          render(
+            html`<sl-progress-ring
+              .value=${model.value}
+              style="padding-top: 6px; --track-width: 6px; --indicator-width: 6px; --size: 24px; --indicator-transition-duration: 0"
+            ></sl-progress-ring>`,
+            root,
+          );
+        }}
+        ></vaadin-grid-column> -->
         <vaadin-grid-form-field-column
           id="order-column-${encodeHashToBase64(producerHash)}"
           .header=${msg("Order")}
@@ -644,9 +644,9 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
       const order = Array.from(myOrders.entries())[0];
 
       const latestMyHouseholdOrder = order[1].latestVersion.get();
-      if (latestMyHouseholdOrder.status !== "completed")
-        return latestMyHouseholdOrder;
-      myHouseholdOrder = [order[0], latestMyHouseholdOrder.value];
+      if (latestMyHouseholdOrder.status === "completed") {
+        myHouseholdOrder = [order[0], latestMyHouseholdOrder.value];
+      }
     }
     if (availableProductsLatestVersion.status !== "completed")
       return availableProductsLatestVersion;

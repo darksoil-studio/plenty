@@ -71,10 +71,10 @@ export class HouseholdsOrdersSummary extends SignalWatcher(LitElement) {
         .map(([productHash, product]) => {
           const householdProductOrdersForThisProduct = new HoloHashMap<
             ActionHash,
-            ProductOrder
+            [number, ProductOrder]
           >();
 
-          for (const [householdHash, householdOrder] of Array.from(
+          for (const [householdOrderHash, householdOrder] of Array.from(
             householdOrders.entries(),
           )) {
             for (const product of householdOrder.entry.products) {
@@ -82,10 +82,19 @@ export class HouseholdsOrdersSummary extends SignalWatcher(LitElement) {
                 encodeHashToBase64(product.original_product_hash) ===
                 encodeHashToBase64(productHash)
               ) {
-                householdProductOrdersForThisProduct.set(
-                  householdHash,
-                  product,
-                );
+                const previousProductOrder =
+                  householdProductOrdersForThisProduct.get(
+                    householdOrder.entry.household_hash,
+                  );
+                if (
+                  !previousProductOrder ||
+                  previousProductOrder[0] < householdOrder.action.timestamp
+                ) {
+                  householdProductOrdersForThisProduct.set(
+                    householdOrder.entry.household_hash,
+                    [householdOrder.action.timestamp, product],
+                  );
+                }
               }
             }
           }
@@ -102,7 +111,7 @@ export class HouseholdsOrdersSummary extends SignalWatcher(LitElement) {
             householdProductOrdersForThisProduct.entries(),
           ).map(([householdHash, productOrder]) => ({
             name: households.get(householdHash)!.entry.name,
-            amount: productOrder.amount,
+            amount: productOrder[1].amount,
             // total_price: (
             //   Math.round(productOrder.amount * price_with_vat * 100) / 100
             // ).toFixed(2),
@@ -110,7 +119,7 @@ export class HouseholdsOrdersSummary extends SignalWatcher(LitElement) {
 
           const amount = Array.from(
             householdProductOrdersForThisProduct.values(),
-          ).reduce((acc, next) => acc + next.amount, 0);
+          ).reduce((acc, next) => acc + next[1].amount, 0);
           return {
             name: product.entry.name,
             packaging: product.entry.packaging,
@@ -307,11 +316,15 @@ export class HouseholdsOrdersSummary extends SignalWatcher(LitElement) {
     if (householdOrdersLatestVersion.status !== "completed")
       return householdOrdersLatestVersion;
 
+    const householdHashes = uniquify(
+      Array.from(householdOrdersLatestVersion.value.values()).map(
+        (ho) => ho.entry.household_hash,
+      ),
+    );
+
     const householdsLatestVersion = joinAsyncMap(
-      mapValues(householdOrdersLatestVersion.value, (ho) =>
-        this.householdsStore.households
-          .get(ho.entry.household_hash)
-          .latestVersion.get(),
+      mapValues(slice(this.householdsStore.households, householdHashes), (h) =>
+        h.latestVersion.get(),
       ),
     );
     if (householdsLatestVersion.status !== "completed")
