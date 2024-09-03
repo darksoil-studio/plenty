@@ -75,9 +75,8 @@ import { producersStoreContext } from "../../producers/context.js";
 import { sleep } from "../../../utils.js";
 import { orderManagerRoleConfig } from "../../../roles.js";
 import { keyed } from "lit/directives/keyed.js";
+import "../../../vaadin-grid-form-field-column.js";
 import { VaadinGridFormFieldColumn } from "../../../vaadin-grid-form-field-column.js";
-
-const productsRandom = new LazyHoloHashMap(() => Math.random() * 1000);
 
 /**
  * @element my-household-order
@@ -334,22 +333,6 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
           .header=${msg("Maximum Available")}
           path="maximum_available"
         ></vaadin-grid-sort-column>
-        <!-- <vaadin-grid-column
-          .header=${msg("Share")}
-          .renderer=${(root: any, _: any, model: any) => {
-          if (!model.value)
-            model.value = productsRandom.get(model.item.productHash);
-
-          // TODO: actually set the value here
-          render(
-            html`<sl-progress-ring
-              .value=${model.value}
-              style="padding-top: 6px; --track-width: 6px; --indicator-width: 6px; --size: 24px; --indicator-transition-duration: 0"
-            ></sl-progress-ring>`,
-            root,
-          );
-        }}
-        ></vaadin-grid-column> -->
         <vaadin-grid-form-field-column
           id="order-column-${encodeHashToBase64(producerHash)}"
           .header=${msg("Order")}

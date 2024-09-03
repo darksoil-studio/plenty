@@ -12,6 +12,7 @@ import "@shoelace-style/shoelace/dist/components/tab-group/tab-group.js";
 import "@shoelace-style/shoelace/dist/components/tab-panel/tab-panel.js";
 import "@shoelace-style/shoelace/dist/components/tab/tab.js";
 import "@shoelace-style/shoelace/dist/components/icon/icon.js";
+import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
 import { EntryRecord } from "@holochain-open-dev/utils";
 import { consume } from "@lit/context";
 import { msg } from "@lit/localize";

@@ -183,7 +183,7 @@ export class HouseholdsOrdersSummary extends SignalWatcher(LitElement) {
                   ) as SlDialog
                 ).hide();
               }}
-              >${msg("Close Order")}</sl-button
+              >${msg("Cancel")}</sl-button
             >
             <sl-button
               .loading=${this.closingOrder}
