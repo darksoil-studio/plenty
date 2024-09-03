@@ -13,7 +13,7 @@ import {
   pickBy,
   slice,
 } from "@holochain-open-dev/utils";
-import { msg } from "@lit/localize";
+import { msg, str } from "@lit/localize";
 
 import "@shoelace-style/shoelace/dist/components/icon-button/icon-button.js";
 import "@shoelace-style/shoelace/dist/components/card/card.js";
@@ -88,6 +88,7 @@ export class ClosedOrderDetail extends SignalWatcher(LitElement) {
 
   renderProducerTab(
     producerHash: ActionHash,
+    producer: EntryRecord<Producer>,
     orderedProducts: ReadonlyMap<ActionHash, EntryRecord<Product>>,
     households: ReadonlyMap<ActionHash, EntryRecord<Household>>,
     allHouseholdsOrders: ReadonlyMap<ActionHash, EntryRecord<HouseholdOrder>>,
@@ -180,11 +181,13 @@ export class ClosedOrderDetail extends SignalWatcher(LitElement) {
                 variant="primary"
                 @click=${() =>
                   showOverlayPage(
-                    msg("Process Delivery"),
+                    msg(str`Process Delivery for ${producer.entry.name}`),
                     (closePage) =>
                       html`<create-producer-delivery
                         style="flex: 1"
-                        .items=${productsItems}
+                        .producerHash=${producerHash}
+                        .orderHash=${this.orderHash}
+                        .householdOrdersHashes=${this.householdOrdersHashes}
                         @producer-delivery-created=${() => closePage()}
                       ></create-producer-delivery>`,
                   )}
@@ -237,6 +240,7 @@ export class ClosedOrderDetail extends SignalWatcher(LitElement) {
             <sl-tab-panel name="${encodeHashToBase64(producerHash)}"
               >${this.renderProducerTab(
                 producerHash,
+                producer,
                 orderedProducts,
                 households,
                 allHouseholdsOrders,

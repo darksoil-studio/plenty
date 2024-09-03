@@ -1,17 +1,27 @@
 import { SignalWatcher } from "@holochain-open-dev/signals";
 import { LitElement, html, css, TemplateResult, render } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { appStyles } from "./app-styles";
 import { wrapPathInSvg } from "@holochain-open-dev/elements";
 import { mdiClose } from "@mdi/js";
+import { HolochainApp } from "./holochain-app.js";
+import { appStyles } from "./app-styles.js";
 
 export function showOverlayPage(
   title: string,
   body: (closePage: () => void) => TemplateResult,
 ) {
+  const holochainApp = document.querySelector("holochain-app") as HolochainApp;
+  showOverlayPageWithinContainer(title, body, holochainApp.shadowRoot!);
+}
+
+export function showOverlayPageWithinContainer(
+  title: string,
+  body: (closePage: () => void) => TemplateResult,
+  container: Node,
+) {
   const div = document.createElement("div");
   const closePage = () => {
-    document.body.removeChild(div);
+    container.removeChild(div);
   };
   render(
     html`
@@ -21,7 +31,7 @@ export function showOverlayPage(
     `,
     div,
   );
-  document.body.appendChild(div);
+  container.appendChild(div);
 }
 
 @customElement("overlay-page")
@@ -45,7 +55,7 @@ export class OverlayPage extends SignalWatcher(LitElement) {
             <div class="flex-scrollable-y" style="height: 100%;">
               <div
                 class="column"
-                style="min-height: 100%; margin: 16px; align-items: center"
+                style="min-height: calc(100% - 32px); margin: 16px; align-items: center"
               >
                 <slot></slot>
               </div>

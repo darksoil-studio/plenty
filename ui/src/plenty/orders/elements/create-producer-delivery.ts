@@ -3,15 +3,25 @@ import { repeat } from "lit/directives/repeat.js";
 import { state, property, query, customElement } from "lit/decorators.js";
 import {
   ActionHash,
-  Record,
   DnaHash,
   AgentPubKey,
   EntryHash,
   encodeHashToBase64,
   decodeHashFromBase64,
+  ActionHashB64,
 } from "@holochain/client";
-import { EntryRecord, HoloHashMap } from "@holochain-open-dev/utils";
-import { SignalWatcher } from "@holochain-open-dev/signals";
+import {
+  EntryRecord,
+  HoloHashMap,
+  mapValues,
+  pickBy,
+  slice,
+} from "@holochain-open-dev/utils";
+import {
+  joinAsyncMap,
+  SignalWatcher,
+  uniquify,
+} from "@holochain-open-dev/signals";
 import {
   hashProperty,
   notifyError,
@@ -27,14 +37,12 @@ import { Grid } from "@vaadin/grid/vaadin-grid.js";
 import { SlInput, SlSelect } from "@shoelace-style/shoelace";
 import { ref } from "lit/directives/ref.js";
 
+import "@shoelace-style/shoelace/dist/components/card/card.js";
 import "@shoelace-style/shoelace/dist/components/alert/alert.js";
 import "@shoelace-style/shoelace/dist/components/select/select.js";
-
-import "@vaadin/grid/vaadin-grid.js";
-import "@vaadin/grid/vaadin-grid-column.js";
-import "@vaadin/grid/vaadin-grid-sort-column.js";
-
-import "../../../vaadin-grid-form-field-column.js";
+import "@shoelace-style/shoelace/dist/components/tab/tab.js";
+import "@shoelace-style/shoelace/dist/components/tab-group/tab-group.js";
+import "@shoelace-style/shoelace/dist/components/tab-panel/tab-panel.js";
 
 import "@holochain-open-dev/elements/dist/elements/display-error.js";
 import SlAlert from "@shoelace-style/shoelace/dist/components/alert/alert.js";
@@ -45,8 +53,16 @@ import "@shoelace-style/shoelace/dist/components/icon-button/icon-button.js";
 import { appStyles } from "../../../app-styles.js";
 import { OrdersStore } from "../orders-store.js";
 import { ordersStoreContext } from "../context.js";
-import { ProducerDelivery, ProductDelivery } from "../types.js";
+import { HouseholdOrder, ProducerDelivery, ProductDelivery } from "../types.js";
 import { Product, renderPackaging } from "../../producers/types.js";
+import { householdsStoreContext } from "../../households/context.js";
+import { HouseholdsStore } from "../../households/households-store.js";
+import { flatten } from "../../../utils.js";
+import { ProducersStore } from "../../producers/producers-store.js";
+import { producersStoreContext } from "../../producers/context.js";
+import { Household } from "../../households/types.js";
+import { styleMap } from "lit/directives/style-map.js";
+import { encodeDateToTimeSpec } from "@msgpack/msgpack";
 
 /**
  * @element create-producer-delivery
@@ -67,17 +83,29 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
   @property(hashProperty("producer-hash"))
   producerHash!: ActionHash;
 
-  /**
-   * REQUIRED. The products for this ProducerDelivery
-   */
   @property()
-  products!: Array<ActionHash>;
+  householdOrdersHashes!: ActionHash[];
 
   /**
    * @internal
    */
   @consume({ context: ordersStoreContext, subscribe: true })
+  @property()
   ordersStore!: OrdersStore;
+
+  /**
+   * @internal
+   */
+  @consume({ context: producersStoreContext, subscribe: true })
+  @property()
+  producersStore!: ProducersStore;
+
+  /**
+   * @internal
+   */
+  @consume({ context: householdsStoreContext, subscribe: true })
+  @property()
+  householdsStore!: HouseholdsStore;
 
   /**
    * @internal
@@ -85,244 +113,212 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
   @state()
   creatingProducerDelivery = false;
 
-  @property()
-  items!: Array<any>;
+  products: Record<ActionHashB64, ProductDelivery> = {};
+
+  async createProducerDelivery() {
+    if (this.creatingProducerDelivery) return;
+    this.creatingProducerDelivery = true;
+
+    try {
+      const producerDelivery =
+        await this.ordersStore.client.createProducerDelivery({
+          order_hash: this.orderHash,
+          producer_hash: this.producerHash,
+          products: this.products,
+        });
+      this.dispatchEvent(
+        new CustomEvent("producer-delivery-created", {
+          bubbles: true,
+          detail: producerDelivery,
+          composed: true,
+        }),
+      );
+    } catch (e) {
+      console.error(e);
+      notifyError(msg("Error creating the producer delivery."));
+    }
+
+    this.creatingProducerDelivery = false;
+  }
+
+  // <sl-button
+  //   .loading=${this.creatingProducerDelivery}
+  //   variant="primary"
+  //   @click=${async () => {
+  //   }}
+  //   >${msg("Process Delivery")}</sl-button
+  // >
+
+  renderProductTab(
+    productHash: ActionHash,
+    product: EntryRecord<Product>,
+    households: ReadonlyMap<ActionHash, EntryRecord<Household>>,
+    householdOrders: ReadonlyMap<ActionHash, EntryRecord<HouseholdOrder>>,
+  ) {
+    const productDelivery: ProductDelivery | undefined =
+      this.products[encodeHashToBase64(productHash)];
+    return html`
+      <sl-select
+        style="width: 10em"
+        hoist
+        .value=${productDelivery?.type || "Delivered"}
+        @sl-change=${(e: CustomEvent) => {
+          this.requestUpdate();
+          const value = (e.target as SlSelect).value as
+            | "Missing"
+            | "Delivered"
+            | "Problem";
+          // switch (value) {
+          //   case "Missing":
+          // this.products[encodeHashToBase64(productHash)] = {
+          //   type: value,
+          // }
+          //     break;
+          //   case "Delivered":
+          // this.products[encodeHashToBase64(productHash)] = {
+          //   type: value,
+          //   delivered_amount: {
+          //     type: 'FixedAmountProduct'
+          //   }
+          // }
+          //     break;
+          //   case "Problem":
+          //     break;
+          // }
+        }}
+      >
+        <sl-option value="Delivered">${msg("Delivered")}</sl-option>
+        <sl-option value="Missing">${msg("Missing")}</sl-option>
+        <sl-option value="Problem">${msg("Other Problem")}</sl-option>
+      </sl-select>
+
+      ${!productDelivery || productDelivery.type === "Delivered"
+        ? html`<sl-checkbox checked @sl-change=${(e: CustomEvent) => {}}
+              >${msg("Correct Amount")}</sl-checkbox
+            >
+            <sl-input type="number"></sl-input> `
+        : productDelivery.type === "Problem"
+          ? html`<sl-input
+              .placeholder=${msg("What happened?")}
+              @sl-change=${(e: CustomEvent) => {
+                const problem = (e.target as SlInput).value;
+                this.products[encodeHashToBase64(productHash)] = {
+                  type: "Problem",
+                  problem,
+                };
+              }}
+            ></sl-input>`
+          : html``}
+    `;
+  }
+
+  renderProducts(
+    products: ReadonlyMap<ActionHash, EntryRecord<Product>>,
+    households: ReadonlyMap<ActionHash, EntryRecord<Household>>,
+    allHouseholdsOrders: ReadonlyMap<ActionHash, EntryRecord<HouseholdOrder>>,
+  ) {
+    return html`
+      <sl-card style="flex: 1; --padding: 0; width: 1000px">
+        <sl-tab-group placement="start" style="flex: 1">
+          ${Array.from(products.entries()).map(
+            ([productHash, product]) => html`
+              <sl-tab-panel
+                name="${encodeHashToBase64(productHash)}"
+                style="padding: 16px"
+                >${this.renderProductTab(
+                  productHash,
+                  product,
+                  households,
+                  allHouseholdsOrders,
+                )}</sl-tab-panel
+              >
+              <sl-tab panel="${encodeHashToBase64(productHash)}" slot="nav"
+                >${product.entry.name}</sl-tab
+              >
+            `,
+          )}
+        </sl-tab-group></sl-card
+      >
+    `;
+  }
+
+  productsAndHouseholdOrders() {
+    const householdOrders = joinAsyncMap(
+      mapValues(
+        slice(this.ordersStore.householdOrders, this.householdOrdersHashes),
+        (h) => h.latestVersion.get(),
+      ),
+    );
+    if (householdOrders.status !== "completed") return householdOrders;
+
+    const allHouseholdsHashes = uniquify(
+      Array.from(householdOrders.value.values()).map(
+        (ho) => ho.entry.household_hash,
+      ),
+    );
+
+    const households = joinAsyncMap(
+      mapValues(
+        slice(this.householdsStore.households, allHouseholdsHashes),
+        (h) => h.latestVersion.get(),
+      ),
+    );
+
+    const allProductsHashes = uniquify(
+      flatten(
+        Array.from(householdOrders.value.values()).map((ho) =>
+          ho.entry.products.map((p) => p.original_product_hash),
+        ),
+      ),
+    );
+
+    const products = joinAsyncMap(
+      mapValues(slice(this.producersStore.products, allProductsHashes), (h) =>
+        h.latestVersion.get(),
+      ),
+    );
+    if (households.status !== "completed") return households;
+    if (products.status !== "completed") return products;
+
+    const productsForThisProducer = pickBy(
+      products.value,
+      (product) =>
+        encodeHashToBase64(product.entry.producer_hash) ===
+        encodeHashToBase64(this.producerHash),
+    );
+
+    return {
+      status: "completed" as const,
+      value: {
+        products: productsForThisProducer,
+        householdOrders: householdOrders.value,
+        households: households.value,
+      },
+    };
+  }
 
   render() {
-    const dataProvider: GridDataProviderCallback<any> = (
-      params: any,
-      callback: any,
-    ) => {
-      const items = params.parentItem?.children || this.items;
-      callback(items, items.length);
-    };
-    return html`
-      <div class="column" style="width: 1200px;">
-        <sl-card style="flex: 1">
-          <div class="column" style="flex: 1; margin: -20px">
-            <vaadin-grid
-              style="flex: 1"
-              .expandedItems=${this.items}
-              .dataProvider=${dataProvider}
-              ${ref((el) => {
-                // Workaround https://github.com/shoelace-style/shoelace/issues/418
-                if (!el) return;
-                const grid = el as Grid;
-                const fixZindex = () => {
-                  const trs = grid.shadowRoot?.querySelectorAll("tr");
-                  if (!trs) return;
-                  const trsArray = Array.from(trs);
-                  for (let i = 0; i < trs.length; i++) {
-                    trsArray[i].style.zIndex = `${trs.length - i}`;
-                  }
-                };
-                setInterval(() => {
-                  fixZindex();
-                }, 1000);
-                setTimeout(() => {
-                  fixZindex();
-                });
-              })}
-            >
-              <vaadin-grid-tree-column
-                .header=${msg("Product")}
-                path="name"
-                width="300px"
-              ></vaadin-grid-tree-column>
-              <vaadin-grid-column
-                .header=${msg("Packaging")}
-                .renderer=${(root: any, __: any, model: any) => {
-                  const product: Product = model.item;
-                  if (product.packaging) {
-                    root.textContent = renderPackaging(product.packaging);
-                  } else {
-                    root.textContent = "";
-                  }
-                }}
-              ></vaadin-grid-column>
-              <vaadin-grid-sort-column
-                .header=${msg("Price")}
-                path="price_with_vat"
-              ></vaadin-grid-sort-column>
-              <vaadin-grid-column
-                .header=${msg("Amount Ordered")}
-                path="amount_ordered"
-              ></vaadin-grid-column>
-              <vaadin-grid-form-field-column
-                width="600px"
-                .header=${msg("Delivery")}
-                .getId=${(model: any) =>
-                  model.item.householdHash
-                    ? `${encodeHashToBase64(model.item.productHash)}-household-${encodeHashToBase64(model.item.householdHash)}`
-                    : encodeHashToBase64(model.item.productHash)}
-                .templateRenderer=${(
-                  id: string,
-                  value: ProductDelivery,
-                  setValue: (value: ProductDelivery) => void,
-                ) => {
-                  console.log(id);
-                  if (
-                    id.includes("household") &&
-                    (!value || value.type === "Delivered")
-                  ) {
-                    const productHash = id.split("-household-")[0];
-                    const householdHash = id.split("-household-")[1];
+    const details = this.productsAndHouseholdOrders();
 
-                    const product = this.items.find(
-                      (i) => encodeHashToBase64(i.productHash) === productHash,
-                    );
-
-                    const orderedAmount: number = product.children
-                      .filter(
-                        (c: any) =>
-                          encodeHashToBase64(c.householdHash) === householdHash,
-                      )
-                      .reduce(
-                        (acc: number, next: any) => acc + next.amount_ordered,
-                        0,
-                      );
-
-                    let inputValue = orderedAmount;
-                    if (value) {
-                      if (
-                        value.delivered_amount.type === "FixedAmountProduct"
-                      ) {
-                        inputValue = value.delivered_amount.delivered_products
-                          .filter((dp) =>
-                            dp.households_hashes.find(
-                              (h) => encodeHashToBase64(h) === householdHash,
-                            ),
-                          )
-                          .reduce((acc, next) => acc + next.amount, 0);
-                      } else {
-                      }
-                    }
-                    return html` <div
-                      class="row"
-                      style="align-items: center; gap: 12px"
-                    >
-                      <span style="width: 12em"></span>
-                      <sl-input
-                        type="number"
-                        min="0"
-                        step="1"
-                        style="width: 5em"
-                        .value=${inputValue}
-                        @sl-change=${(e: CustomEvent) => {}}
-                      ></sl-input>
-                    </div>`;
-                  }
-
-                  const type = value?.type || "Delivered";
-                  return html`
-                    <div class="row" style="align-items: center; gap: 8px;">
-                      <sl-select
-                        style="width: 10em"
-                        hoist
-                        .value=${type}
-                        @sl-change=${(e: CustomEvent) => {
-                          const value = (e.target as SlSelect).value as
-                            | "Missing"
-                            | "Delivered"
-                            | "Problem";
-                          switch (value) {
-                            case "Missing":
-                              setValue({
-                                type: "Missing",
-                              });
-                              break;
-                            case "Delivered":
-                              // setValue({
-
-                              //   type: 'Delivered',
-                              //   delivered_amount: {
-
-                              //   }
-                              // });
-                              break;
-                            case "Problem":
-                              setValue({
-                                type: "Problem",
-                                problem: "",
-                              });
-                              break;
-                          }
-                        }}
-                      >
-                        <sl-option value="Delivered"
-                          >${msg("Delivered")}</sl-option
-                        >
-                        <sl-option value="Missing">${msg("Missing")}</sl-option>
-                        <sl-option value="Problem">${msg("Problem")}</sl-option>
-                      </sl-select>
-
-                      ${type === "Problem"
-                        ? html`<sl-input
-                            .placeholder=${msg("What happened?")}
-                            @sl-change=${(e: CustomEvent) => {
-                              const problem = (e.target as SlInput).value;
-                              setValue({
-                                type: "Problem",
-                                problem,
-                              });
-                            }}
-                          ></sl-input>`
-                        : type === "Delivered"
-                          ? html`<sl-checkbox
-                              checked
-                              @sl-change=${(e: CustomEvent) => {
-                                const problem = (e.target as SlInput).value;
-                                setValue({
-                                  type: "Problem",
-                                  problem,
-                                });
-                              }}
-                              >${msg("Correct Amount")}</sl-checkbox
-                            >`
-                          : html``}
-                    </div>
-                  `;
-                }}
-              >
-              </vaadin-grid-form-field-column>
-            </vaadin-grid>
-            <div style="display: flex; flex-direction: row; padding: 16px">
-              <span style="flex: 1"></span>
-              <sl-button
-                .loading=${this.creatingProducerDelivery}
-                variant="primary"
-                @click=${async () => {
-                  if (this.creatingProducerDelivery) return;
-                  this.creatingProducerDelivery = true;
-
-                  try {
-                    const producerDelivery =
-                      await this.ordersStore.client.createProducerDelivery({
-                        order_hash: this.orderHash,
-                        producer_hash: this.producerHash,
-                        products: {},
-                      });
-                    this.dispatchEvent(
-                      new CustomEvent("producer-delivery-created", {
-                        bubbles: true,
-                        detail: producerDelivery,
-                        composed: true,
-                      }),
-                    );
-                  } catch (e) {
-                    console.error(e);
-                    notifyError(msg("Error creating the producer delivery."));
-                  }
-
-                  this.creatingProducerDelivery = false;
-                }}
-                >${msg("Process Delivery")}</sl-button
-              >
-            </div>
-          </div>
-        </sl-card>
-      </div>
-    `;
+    switch (details.status) {
+      case "pending":
+        return html`<div
+          style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1;"
+        >
+          <sl-spinner style="font-size: 2rem;"></sl-spinner>
+        </div>`;
+      case "error":
+        return html`<display-error
+          .headline=${msg("Error fetching the order details")}
+          .error=${details.error}
+        ></display-error>`;
+      case "completed":
+        return this.renderProducts(
+          details.value.products,
+          details.value.households,
+          details.value.householdOrders,
+        );
+    }
   }
 
   static styles = [
