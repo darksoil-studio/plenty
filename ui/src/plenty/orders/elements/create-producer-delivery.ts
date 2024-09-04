@@ -30,7 +30,7 @@ import {
   wrapPathInSvg,
 } from "@holochain-open-dev/elements";
 import { consume } from "@lit/context";
-import { localized, msg } from "@lit/localize";
+import { localized, msg, str } from "@lit/localize";
 import { mdiAlertCircleOutline, mdiDelete } from "@mdi/js";
 import { GridDataProviderCallback } from "@vaadin/grid";
 import { Grid } from "@vaadin/grid/vaadin-grid.js";
@@ -119,12 +119,30 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
   @state()
   creatingProducerDelivery = false;
 
+  /**
+   * @internal
+   */
+  @state()
+  processingProduct:
+    | {
+        correctAmount: boolean | undefined;
+        actualAmount: number | undefined;
+        delivery: ProductDelivery | undefined;
+      }
+    | undefined;
+
+  /**
+   * @internal
+   */
+  @state()
+  processingProductHash: ActionHashB64 | undefined;
+
   products: Record<
     ActionHashB64,
     {
       correctAmount: boolean | undefined;
       actualAmount: number | undefined;
-      delivery: ProductDelivery;
+      delivery: ProductDelivery | undefined;
     }
   > = {};
 
@@ -135,7 +153,7 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
     try {
       const products: Record<ActionHashB64, ProductDelivery> = {};
       for (const [productHash, delivery] of Object.entries(this.products)) {
-        products[productHash] = delivery.delivery;
+        products[productHash] = delivery.delivery!;
       }
       const producerDelivery =
         await this.ordersStore.client.createProducerDelivery({
@@ -158,21 +176,16 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
     this.creatingProducerDelivery = false;
   }
 
-  // <sl-button
-  //   .loading=${this.creatingProducerDelivery}
-  //   variant="primary"
-  //   @click=${async () => {
-  //   }}
-  //   >${msg("Process Delivery")}</sl-button
-  // >
-
   renderProductTab(
     productHash: ActionHash,
     product: EntryRecord<Product>,
     households: ReadonlyMap<ActionHash, EntryRecord<Household>>,
     householdOrders: ReadonlyMap<ActionHash, EntryRecord<HouseholdOrder>>,
   ) {
-    const productDelivery = this.products[encodeHashToBase64(productHash)];
+    const productDelivery =
+      this.processingProductHash === encodeHashToBase64(productHash)
+        ? this.processingProduct
+        : this.products[encodeHashToBase64(productHash)];
 
     const productOrdersByHousehold = new HoloHashMap<
       ActionHash,
@@ -207,6 +220,7 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
       productOrdersByHousehold.values(),
     ).reduce((acc, next) => acc + next[1].amount, 0);
 
+    const errorInProcessing = this.errorInProcessing(productHash);
     return html`
       <div class="column" style="gap: 12px; flex:1">
         <div class="row" style="gap: 12px; align-items:center">
@@ -226,60 +240,51 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
           </div>
         </div>
 
-        <span class="title" style="margin-top: 12px"
-          >${msg("Product Delivery")}</span
-        >
+        <div class="row" style="align-items: center; gap: 12px">
+          <span class="title" style="margin-top: 12px"
+            >${msg("Product Delivery")}</span
+          >
+          <span style="flex: 1"></span>
+        </div>
         <sl-divider style="--spacing:0"></sl-divider>
         <div class="column" style="gap: 16px;">
           <sl-select
             style="width: 20em"
             .label=${msg("Was the product delivered correctly?")}
             @sl-change=${(e: CustomEvent) => {
-              this.requestUpdate();
               const value = (e.target as SlSelect).value as
                 | "Missing"
                 | "Delivered"
                 | "Problem";
               switch (value) {
                 case "Missing":
-                  this.products[encodeHashToBase64(productHash)] = {
-                    correctAmount: undefined,
-                    actualAmount: undefined,
-                    delivery: {
-                      type: "Missing",
-                    },
+                  this.processingProduct!.delivery = {
+                    type: "Missing",
                   };
                   break;
                 case "Delivered":
-                  this.products[encodeHashToBase64(productHash)] = {
-                    correctAmount: undefined,
-                    actualAmount: undefined,
-                    delivery: {
-                      type: value,
-                      delivered_amount: {
-                        type: "FixedAmountProduct",
-                        delivered_products: Array.from(
-                          productOrdersByHousehold.entries(),
-                        ).map(([householdHash, productOrder]) => ({
-                          amount: productOrder[1].amount,
-                          households_hashes: [householdHash],
-                        })),
-                        price_cents_per_unit_changed: undefined,
-                      },
+                  this.processingProduct!.delivery = {
+                    type: "Delivered",
+                    delivered_amount: {
+                      type: "FixedAmountProduct",
+                      delivered_products: Array.from(
+                        productOrdersByHousehold.entries(),
+                      ).map(([householdHash, productOrder]) => ({
+                        amount: productOrder[1].amount,
+                        households_hashes: [householdHash],
+                      })),
+                      price_cents_per_unit_changed: undefined,
                     },
                   };
                   break;
                 case "Problem":
-                  this.products[encodeHashToBase64(productHash)] = {
-                    correctAmount: undefined,
-                    actualAmount: undefined,
-                    delivery: {
-                      type: "Problem",
-                      problem: "",
-                    },
+                  this.processingProduct!.delivery = {
+                    type: "Problem",
+                    problem: "",
                   };
                   break;
               }
+              this.requestUpdate();
             }}
           >
             <sl-option value="Delivered">${msg("Delivered")}</sl-option>
@@ -292,7 +297,7 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
           <div
             style=${styleMap({
               display:
-                productDelivery?.delivery.type === "Problem" ? "flex" : "none",
+                productDelivery?.delivery?.type === "Problem" ? "flex" : "none",
             })}
           >
             <sl-textarea
@@ -300,7 +305,7 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
               .label=${msg("What happened?")}
               @sl-change=${(e: CustomEvent) => {
                 const problem = (e.target as SlInput).value;
-                this.products[encodeHashToBase64(productHash)].delivery = {
+                this.processingProduct!.delivery = {
                   type: "Problem",
                   problem,
                 };
@@ -312,7 +317,7 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
             class="column"
             style=${styleMap({
               display:
-                productDelivery?.delivery.type === "Delivered"
+                productDelivery?.delivery?.type === "Delivered"
                   ? "flex"
                   : "none",
               gap: "24px",
@@ -330,9 +335,7 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
                   .value=${productDelivery?.correctAmount}
                   @sl-change=${(e: CustomEvent) => {
                     const checked = (e.target as SlCheckbox).checked;
-                    this.products[
-                      encodeHashToBase64(productHash)
-                    ].correctAmount = checked;
+                    this.processingProduct!.correctAmount = checked;
                     this.requestUpdate();
                   }}
                   >${msg("Correct amount")}</sl-checkbox
@@ -348,9 +351,7 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
                   .label=${msg("Actual amount delivered")}
                   @input=${(e: InputEvent) => {
                     const value = parseInt((e.target as SlInput).value);
-                    this.products[
-                      encodeHashToBase64(productHash)
-                    ].actualAmount = value;
+                    this.processingProduct!.actualAmount = value;
                     this.requestUpdate();
                   }}
                 ></sl-input>
@@ -364,7 +365,7 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
                   ([householdHash, productOrder]) => html`
                     <div
                       class="row"
-                      style="align-items: center; width: 12em; gap: 12px;"
+                      style="align-items: center; width: 24em; gap: 12px;"
                     >
                       <show-image
                         style="width: 32px; height: 32px;"
@@ -382,8 +383,6 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
                           : productOrder[1].amount}
                         @input=${(e: InputEvent) => {
                           const value = parseInt((e.target as SlInput).value);
-                          this.products[encodeHashToBase64(productHash)]
-                            .delivery;
                           this.requestUpdate();
                         }}
                       ></sl-input>
@@ -398,8 +397,28 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
     `;
   }
 
-  renderTag(tagType: "Delivered" | "Missing" | "Problem") {
-    switch (tagType) {
+  errorInProcessing(productHash: ActionHash): string | undefined {
+    const product = this.products[encodeHashToBase64(productHash)];
+    if (!product) return undefined;
+    if (!product.delivery) return msg("was the product delivered?");
+    if (product.delivery.type === "Delivered") {
+      // if (product.actualAmount === undefined) return false;
+      if (product.correctAmount === undefined)
+        return msg("was the product delivered in the correct amount?");
+    }
+
+    return undefined;
+  }
+
+  renderTag(productHash: ActionHash) {
+    const product = this.products[encodeHashToBase64(productHash)];
+    if (!product) return html`<sl-tag style="opacity: 0"></sl-tag>`;
+
+    const error = this.errorInProcessing(productHash);
+
+    if (error) return html`<sl-tag variant="danger">${msg("Error")}</sl-tag>`;
+
+    switch (product.delivery!.type) {
       case "Delivered":
         return html`<sl-tag variant="success">${msg("Delivered")}</sl-tag>`;
       case "Missing":
@@ -414,38 +433,110 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
     households: ReadonlyMap<ActionHash, EntryRecord<Household>>,
     allHouseholdsOrders: ReadonlyMap<ActionHash, EntryRecord<HouseholdOrder>>,
   ) {
+    const errorInProcessing = Object.keys(this.products).find(
+      (productHash) =>
+        this.errorInProcessing(decodeHashFromBase64(productHash)) !== undefined,
+    );
+    const productsRemaining = products.size - Object.keys(this.products).length;
     return html`
       <sl-card style="flex: 1; --padding: 0; width: 1000px">
-        <sl-tab-group placement="start" style="flex: 1">
-          ${Array.from(products.entries()).map(
-            ([productHash, product]) => html`
-              <sl-tab-panel
-                name="${encodeHashToBase64(productHash)}"
-                style="padding: 16px"
-                >${this.renderProductTab(
-                  productHash,
-                  product,
-                  households,
-                  allHouseholdsOrders,
-                )}</sl-tab-panel
-              >
-              <sl-tab panel="${encodeHashToBase64(productHash)}" slot="nav">
-                <div
-                  class="row"
-                  style="align-items: center; gap: 12px; width: 15em"
+        <div class="column" style="flex: 1;">
+          <div
+            class="row"
+            style="align-items: center; gap: 12px; margin: 12px; "
+          >
+            <span class="title" style="flex: 1">${msg("Products")}</span>
+
+            ${errorInProcessing
+              ? html`
+                  <span
+                    >${msg(
+                      str`Error in product "${products.get(decodeHashFromBase64(errorInProcessing))!.entry.name}": `,
+                    )}${this.errorInProcessing(
+                      decodeHashFromBase64(errorInProcessing),
+                    )}</span
+                  >
+                `
+              : productsRemaining !== 0
+                ? html`<span class="placeholder"
+                    >${msg(str`${productsRemaining} products remaining`)}</span
+                  >`
+                : html`<span class="placeholder"
+                    >${msg("All products done")}</span
+                  >`}
+
+            <sl-button
+              .loading=${this.creatingProducerDelivery}
+              variant="primary"
+              .disabled=${errorInProcessing !== undefined ||
+              productsRemaining !== 0}
+              @click=${async () => {
+                this.createProducerDelivery();
+              }}
+              >${msg("Process Delivery")}</sl-button
+            >
+          </div>
+          <sl-divider style="--spacing:0; "></sl-divider>
+          <sl-tab-group
+            placement="start"
+            style="flex: 1"
+            ${ref(() => {
+              if (!this.processingProductHash) {
+                this.processingProductHash = encodeHashToBase64(
+                  Array.from(products.keys())[0],
+                );
+                this.processingProduct = {
+                  actualAmount: undefined,
+                  correctAmount: undefined,
+                  delivery: undefined,
+                };
+              }
+            })}
+            @sl-tab-show=${(e: CustomEvent) => {
+              if (this.processingProductHash && this.processingProduct) {
+                this.products[this.processingProductHash] =
+                  this.processingProduct;
+              }
+
+              const newProductHash: ActionHashB64 = e.detail.name;
+
+              if (this.products[newProductHash]) {
+                this.processingProduct = this.products[newProductHash];
+              } else {
+                this.processingProduct = {
+                  actualAmount: undefined,
+                  correctAmount: undefined,
+                  delivery: undefined,
+                };
+              }
+              this.processingProductHash = newProductHash;
+            }}
+          >
+            ${Array.from(products.entries()).map(
+              ([productHash, product]) => html`
+                <sl-tab-panel
+                  name="${encodeHashToBase64(productHash)}"
+                  style="padding: 16px"
+                  >${this.renderProductTab(
+                    productHash,
+                    product,
+                    households,
+                    allHouseholdsOrders,
+                  )}</sl-tab-panel
                 >
-                  <span style="flex: 1"> ${product.entry.name} </span> ${this
-                    .products[encodeHashToBase64(productHash)]
-                    ? this.renderTag(
-                        this.products[encodeHashToBase64(productHash)].delivery
-                          .type,
-                      )
-                    : html`<sl-tag style="opacity: 0"></sl-tag>`}
-                </div>
-              </sl-tab>
-            `,
-          )}
-        </sl-tab-group></sl-card
+                <sl-tab panel="${encodeHashToBase64(productHash)}" slot="nav">
+                  <div
+                    class="row"
+                    style="align-items: center; gap: 12px; width: 15em"
+                  >
+                    <span style="flex: 1"> ${product.entry.name} </span>
+                    ${this.renderTag(productHash)}
+                  </div>
+                </sl-tab>
+              `,
+            )}
+          </sl-tab-group>
+        </div></sl-card
       >
     `;
   }
