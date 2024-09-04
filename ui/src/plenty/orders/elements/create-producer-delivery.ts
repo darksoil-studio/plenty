@@ -245,6 +245,12 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
             >${msg("Product Delivery")}</span
           >
           <span style="flex: 1"></span>
+
+          ${errorInProcessing
+            ? html`<sl-tag
+                >${msg("Incomplete:")}&nbsp;${errorInProcessing}</sl-tag
+              >`
+            : html``}
         </div>
         <sl-divider style="--spacing:0"></sl-divider>
         <div class="column" style="gap: 16px;">
@@ -416,7 +422,8 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
 
     const error = this.errorInProcessing(productHash);
 
-    if (error) return html`<sl-tag variant="danger">${msg("Error")}</sl-tag>`;
+    if (error)
+      return html`<sl-tag variant="danger">${msg("Incomplete")}</sl-tag>`;
 
     switch (product.delivery!.type) {
       case "Delivered":
@@ -451,9 +458,7 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
               ? html`
                   <span
                     >${msg(
-                      str`Error in product "${products.get(decodeHashFromBase64(errorInProcessing))!.entry.name}": `,
-                    )}${this.errorInProcessing(
-                      decodeHashFromBase64(errorInProcessing),
+                      str`Product "${products.get(decodeHashFromBase64(errorInProcessing))!.entry.name}" is incomplete`,
                     )}</span
                   >
                 `
