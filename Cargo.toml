@@ -35,6 +35,3 @@ path = "dnas/plenty/zomes/coordinator/producers"
 
 [workspace.dependencies.producers_integrity]
 path = "dnas/plenty/zomes/integrity/producers"
-
-[patch.crates-io]
-tx5-go-pion-sys = { path="../tx5/crates/tx5-go-pion-sys"}
