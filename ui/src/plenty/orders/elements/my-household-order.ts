@@ -127,46 +127,76 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
   @query("#create-form")
   form!: HTMLFormElement;
 
+  timeout: any;
+
+  setHouseholdProductOrderWithDebounce(
+    householdHash: ActionHash,
+    previousOrder: [ActionHash, EntryRecord<HouseholdOrder>] | undefined,
+    allProducersHashes: ActionHash[],
+  ) {
+    if (this.timeout) clearTimeout(this.timeout);
+    this.timeout = setTimeout(() => {
+      try {
+        this.setHouseholdProductOrder(
+          householdHash,
+          previousOrder,
+          allProducersHashes,
+        );
+      } catch (e) {
+        setTimeout(
+          () =>
+            this.setHouseholdProductOrderWithDebounce(
+              householdHash,
+              previousOrder,
+              allProducersHashes,
+            ),
+          100,
+        );
+      }
+    }, 500);
+  }
+
   async setHouseholdProductOrder(
     householdHash: ActionHash,
     previousOrder: [ActionHash, EntryRecord<HouseholdOrder>] | undefined,
-    producerHash: ActionHash,
-    productsForThisProducer: ReadonlyMap<ActionHash, EntryRecord<Product>>,
+    allProducersHashes: ActionHash[],
   ) {
-    if (this.committing) return;
     this.committing = true;
-    await sleep(500);
-
     if (this.orderHash === undefined)
       throw new Error(
         "Cannot create a new Household Order without its order_hash field",
       );
 
-    const orderValue: {
-      [key: string]: { amount: number; ordered_product_hash: ActionHash };
-    } = (
-      this.shadowRoot?.getElementById(
-        `order-column-${encodeHashToBase64(producerHash)}`,
-      ) as any as VaadinGridFormFieldColumn
-    ).values;
-    this.committing = false;
+    let products: ProductOrder[] = [];
 
-    const orderedProductsForThisProducer: Array<ProductOrder> = Object.entries(
-      orderValue,
-    )
-      .map(([productHashB64, { amount, ordered_product_hash }]) => ({
-        original_product_hash: decodeHashFromBase64(productHashB64),
-        amount,
-        ordered_product_hash,
-      }))
-      .filter((po) => po.amount > 0);
+    for (const producerHash of allProducersHashes) {
+      const orderValue: {
+        [key: string]: { amount: number; ordered_product_hash: ActionHash };
+      } = (
+        this.shadowRoot?.getElementById(
+          `order-column-${encodeHashToBase64(producerHash)}`,
+        ) as any as VaadinGridFormFieldColumn
+      ).values;
+
+      const orderedProductsForThisProducer: Array<ProductOrder> =
+        Object.entries(orderValue)
+          .map(([productHashB64, { amount, ordered_product_hash }]) => ({
+            original_product_hash: decodeHashFromBase64(productHashB64),
+            amount,
+            ordered_product_hash,
+          }))
+          .filter((po) => po.amount > 0);
+      products = [...products, ...orderedProductsForThisProducer];
+    }
+
+    this.committing = false;
 
     try {
       if (!previousOrder) {
         const householdOrder: HouseholdOrder = {
           household_hash: householdHash,
           order_hash: this.orderHash,
-          products: orderedProductsForThisProducer,
+          products,
         };
         const record: EntryRecord<HouseholdOrder> =
           await this.ordersStore.client.createHouseholdOrder(householdOrder);
@@ -181,16 +211,10 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
           }),
         );
       } else {
-        let otherProducersProducts = previousOrder[1].entry.products.filter(
-          (p) => !productsForThisProducer.get(p.original_product_hash),
-        );
         const householdOrder: HouseholdOrder = {
           order_hash: this.orderHash!,
           household_hash: householdHash!,
-          products: [
-            ...orderedProductsForThisProducer,
-            ...otherProducersProducts,
-          ],
+          products,
         };
         const record: EntryRecord<HouseholdOrder> =
           await this.ordersStore.client.updateHouseholdOrder(
@@ -212,16 +236,6 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
     } catch (e: unknown) {
       console.warn(e);
       // notifyError(msg("Error updating the household order"));
-      setTimeout(
-        () =>
-          this.setHouseholdProductOrder(
-            householdHash,
-            previousOrder,
-            producerHash,
-            productsForThisProducer,
-          ),
-        100,
-      );
     }
   }
 
@@ -245,6 +259,7 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
   renderProducerProducts(
     myHouseholdHash: ActionHash,
     myHouseholdOrder: [ActionHash, EntryRecord<HouseholdOrder>] | undefined,
+    allProducersHashes: Array<ActionHash>,
     producerHash: ActionHash,
     producer: EntryRecord<Producer>,
     availableProducts: EntryRecord<AvailableProducts>,
@@ -362,11 +377,10 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
                     .actionHash,
                 });
                 this.requestUpdate();
-                this.setHouseholdProductOrder(
+                this.setHouseholdProductOrderWithDebounce(
                   myHouseholdHash,
                   myHouseholdOrder,
-                  producerHash,
-                  products,
+                  allProducersHashes,
                 );
               }}
             ></sl-input>
@@ -552,6 +566,7 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
     >,
     iAmOrderManager: boolean,
   ) {
+    const allProducersHashes = Array.from(availableProducers.keys());
     return html` <sl-card style="flex: 1;">
       <sl-tab-group placement="bottom" style="flex: 1">
         ${Array.from(availableProducers.entries()).map(
@@ -563,6 +578,7 @@ export class MyHouseholdOrder extends SignalWatcher(LitElement) {
               >${this.renderProducerProducts(
                 householdHash,
                 myHouseholdOrder,
+                allProducersHashes,
                 producerHash,
                 producer.producer,
                 producer.availableProducts,

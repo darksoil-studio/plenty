@@ -785,6 +785,7 @@ export async function sampleProducerDelivery(
             ],
             price_cents_per_unit_changed: undefined,
           },
+          comment: undefined,
         },
       },
     },

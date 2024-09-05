@@ -31,9 +31,11 @@ pub enum DeliveredAmount {
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 #[serde(tag = "type")]
 pub enum ProductDelivery {
+    Delivered {
+        delivered_amount: DeliveredAmount,
+        comment: Option<String>,
+    },
     Missing,
-    Problem { problem: String },
-    Delivered { delivered_amount: DeliveredAmount },
 }
 
 #[derive(Clone, PartialEq)]

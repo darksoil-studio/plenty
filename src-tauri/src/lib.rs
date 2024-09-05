@@ -3,7 +3,7 @@ use lair_keystore::dependencies::sodoken::{BufRead, BufWrite};
 use std::path::PathBuf;
 use tauri::Emitter;
 use tauri_plugin_deep_link::DeepLinkExt;
-use tauri_plugin_holochain::{HolochainExt, HolochainPluginConfig};
+use tauri_plugin_holochain::{HolochainExt, HolochainPluginConfig, WANNetworkConfig};
 use tauri_plugin_log::Target;
 use url2::Url2;
 
@@ -13,12 +13,6 @@ const APP_ID: &'static str = "plenty";
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let mut context = tauri::generate_context!();
-    if tauri::is_dev() {
-        let identifier = context.config().identifier.clone();
-        context.config_mut().identifier = format!("{}{}", identifier, uuid::Uuid::new_v4());
-    }
-
     tauri::Builder::default()
         .plugin(
             tauri_plugin_log::Builder::default()
@@ -38,11 +32,7 @@ pub fn run() {
         .plugin(tauri_plugin_deep_link::init())
         .plugin(tauri_plugin_holochain::init(
             vec_to_locked(vec![]).expect("Can't build passphrase"),
-            HolochainPluginConfig {
-                signal_url: signal_url(),
-                bootstrap_url: bootstrap_url(),
-                holochain_dir: holochain_dir(),
-            },
+            HolochainPluginConfig::new(holochain_dir(), wan_network_config()),
         ))
         .invoke_handler(tauri::generate_handler![
             commands::create_plenty_instance,
@@ -92,8 +82,20 @@ pub fn run() {
 
             Ok(())
         })
-        .run(context)
+        .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+fn wan_network_config() -> Option<WANNetworkConfig> {
+    // Resolved at compile time to be able to point to local services
+    if tauri::is_dev() {
+        None
+    } else {
+        Some(WANNetworkConfig {
+            signal_url: url2::url2!("wss://signal.holo.host"),
+            bootstrap_url: url2::url2!("https://bootstrap.holo.host"),
+        })
+    }
 }
 
 pub fn vec_to_locked(mut pass_tmp: Vec<u8>) -> std::io::Result<BufRead> {
@@ -110,26 +112,6 @@ pub fn vec_to_locked(mut pass_tmp: Vec<u8>) -> std::io::Result<BufRead> {
             }
             Ok(p.to_read())
         }
-    }
-}
-
-fn bootstrap_url() -> Url2 {
-    // Resolved at compile time to be able to point to local services
-    if tauri::is_dev() {
-        // Invalid URL: switch to mDNS
-        url2::url2!("http://127.0.0.1:8888")
-    } else {
-        url2::url2!("https://bootstrap.holo.host")
-    }
-}
-
-fn signal_url() -> Url2 {
-    // Resolved at compile time to be able to point to local services
-    if tauri::is_dev() {
-        // Invalid URL: switch to mDNS
-        url2::url2!("ws://127.0.0.1:8888")
-    } else {
-        url2::url2!("wss://signal.holo.host")
     }
 }
 

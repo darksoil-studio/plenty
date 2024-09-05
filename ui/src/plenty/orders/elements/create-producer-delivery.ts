@@ -36,11 +36,13 @@ import { GridDataProviderCallback } from "@vaadin/grid";
 import { Grid } from "@vaadin/grid/vaadin-grid.js";
 import { SlCheckbox, SlInput, SlSelect } from "@shoelace-style/shoelace";
 import { ref } from "lit/directives/ref.js";
+import { join } from "lit/directives/join.js";
 
 import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
 import "@shoelace-style/shoelace/dist/components/card/card.js";
 import "@shoelace-style/shoelace/dist/components/alert/alert.js";
 import "@shoelace-style/shoelace/dist/components/select/select.js";
+import "@shoelace-style/shoelace/dist/components/tooltip/tooltip.js";
 import "@shoelace-style/shoelace/dist/components/tab/tab.js";
 import "@shoelace-style/shoelace/dist/components/tab-group/tab-group.js";
 import "@shoelace-style/shoelace/dist/components/tab-panel/tab-panel.js";
@@ -125,8 +127,8 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
   @state()
   processingProduct:
     | {
-        correctAmount: boolean | undefined;
-        actualAmount: number | undefined;
+        correctAmount: boolean;
+        deliveredAmount: number;
         delivery: ProductDelivery | undefined;
       }
     | undefined;
@@ -140,8 +142,8 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
   products: Record<
     ActionHashB64,
     {
-      correctAmount: boolean | undefined;
-      actualAmount: number | undefined;
+      correctAmount: boolean;
+      deliveredAmount: number;
       delivery: ProductDelivery | undefined;
     }
   > = {};
@@ -176,17 +178,10 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
     this.creatingProducerDelivery = false;
   }
 
-  renderProductTab(
+  productOrdersByHouseholdForProduct(
     productHash: ActionHash,
-    product: EntryRecord<Product>,
-    households: ReadonlyMap<ActionHash, EntryRecord<Household>>,
     householdOrders: ReadonlyMap<ActionHash, EntryRecord<HouseholdOrder>>,
   ) {
-    const productDelivery =
-      this.processingProductHash === encodeHashToBase64(productHash)
-        ? this.processingProduct
-        : this.products[encodeHashToBase64(productHash)];
-
     const productOrdersByHousehold = new HoloHashMap<
       ActionHash,
       [number, ProductOrder]
@@ -216,6 +211,24 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
       }
     }
 
+    return productOrdersByHousehold;
+  }
+
+  renderProductTab(
+    productHash: ActionHash,
+    product: EntryRecord<Product>,
+    households: ReadonlyMap<ActionHash, EntryRecord<Household>>,
+    householdOrders: ReadonlyMap<ActionHash, EntryRecord<HouseholdOrder>>,
+  ) {
+    const productDelivery =
+      this.processingProductHash === encodeHashToBase64(productHash)
+        ? this.processingProduct
+        : this.products[encodeHashToBase64(productHash)];
+
+    const productOrdersByHousehold = this.productOrdersByHouseholdForProduct(
+      productHash,
+      householdOrders,
+    );
     const totalAmountOrdered = Array.from(
       productOrdersByHousehold.values(),
     ).reduce((acc, next) => acc + next[1].amount, 0);
@@ -223,8 +236,12 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
     const errorInProcessing = this.errorInProcessing(productHash);
     return html`
       <div class="column" style="gap: 12px; flex:1">
-        <div class="row" style="gap: 12px; align-items:center">
-          <div class="column" style="gap: 12px">
+        <div class="row" style="gap: 12px;">
+          <div class="column" style="gap: 12px; flex: 1">
+            <div class="row" style="gap: 12px;">
+              <span>${msg("Product:")}</span>
+              <span>${product.entry.name}</span>
+            </div>
             <div class="row" style="gap: 12px;">
               <span>${msg("Price:")}</span>
               <span>${product.entry.price_cents * 100}</span>
@@ -240,85 +257,62 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
           </div>
         </div>
 
-        <div class="row" style="align-items: center; gap: 12px">
-          <span class="title" style="margin-top: 12px"
-            >${msg("Product Delivery")}</span
-          >
+        <div
+          class="row"
+          style="align-items: center; gap: 12px; margin-top: 12px"
+        >
+          <span class="title">${msg("Product Delivery")}</span>
           <span style="flex: 1"></span>
-
-          ${errorInProcessing
-            ? html`<sl-tag
-                >${msg("Incomplete:")}&nbsp;${errorInProcessing}</sl-tag
-              >`
-            : html``}
         </div>
         <sl-divider style="--spacing:0"></sl-divider>
-        <div class="column" style="gap: 16px;">
-          <sl-select
-            style="width: 20em"
-            .label=${msg("Was the product delivered correctly?")}
-            @sl-change=${(e: CustomEvent) => {
-              const value = (e.target as SlSelect).value as
-                | "Missing"
-                | "Delivered"
-                | "Problem";
-              switch (value) {
-                case "Missing":
-                  this.processingProduct!.delivery = {
-                    type: "Missing",
-                  };
-                  break;
-                case "Delivered":
-                  this.processingProduct!.delivery = {
-                    type: "Delivered",
-                    delivered_amount: {
-                      type: "FixedAmountProduct",
-                      delivered_products: Array.from(
-                        productOrdersByHousehold.entries(),
-                      ).map(([householdHash, productOrder]) => ({
-                        amount: productOrder[1].amount,
-                        households_hashes: [householdHash],
-                      })),
-                      price_cents_per_unit_changed: undefined,
-                    },
-                  };
-                  break;
-                case "Problem":
-                  this.processingProduct!.delivery = {
-                    type: "Problem",
-                    problem: "",
-                  };
-                  break;
-              }
-              this.requestUpdate();
-            }}
+        <div class="column" style="gap: 24px;">
+          <sl-tooltip
+            placement="right"
+            trigger="manual"
+            .content=${msg("Select one of the options")}
+            .open=${this.errorInProcessing(productHash) ===
+            "product-delivered-not-set"}
           >
-            <sl-option value="Delivered">${msg("Delivered")}</sl-option>
-            <sl-option value="Missing">${msg("Product is missing")}</sl-option>
-            <sl-option value="Problem"
-              >${msg("There is a problem...")}</sl-option
-            >
-          </sl-select>
-
-          <div
-            style=${styleMap({
-              display:
-                productDelivery?.delivery?.type === "Problem" ? "flex" : "none",
-            })}
-          >
-            <sl-textarea
-              style="flex:1"
-              .label=${msg("What happened?")}
+            <sl-select
+              style="width: 20em"
+              .label=${msg("Was the product delivered correctly?")}
               @sl-change=${(e: CustomEvent) => {
-                const problem = (e.target as SlInput).value;
-                this.processingProduct!.delivery = {
-                  type: "Problem",
-                  problem,
-                };
+                const value = (e.target as SlSelect).value as
+                  | "Missing"
+                  | "Delivered";
+                switch (value) {
+                  case "Missing":
+                    this.processingProduct!.delivery = {
+                      type: "Missing",
+                    };
+                    break;
+                  case "Delivered":
+                    this.processingProduct!.delivery = {
+                      type: "Delivered",
+                      delivered_amount: {
+                        type: "FixedAmountProduct",
+                        delivered_products: Array.from(
+                          productOrdersByHousehold.entries(),
+                        ).map(([householdHash, productOrder]) => ({
+                          amount: productOrder[1].amount,
+                          households_hashes: [householdHash],
+                        })),
+                        price_cents_per_unit_changed: undefined,
+                      },
+                      comment: undefined,
+                    };
+                    break;
+                }
                 this.requestUpdate();
               }}
-            ></sl-textarea>
-          </div>
+            >
+              <sl-option value="Delivered">${msg("Delivered")}</sl-option>
+              <sl-option value="Missing"
+                >${msg("Product is missing")}</sl-option
+              >
+            </sl-select>
+          </sl-tooltip>
+
           <div
             class="column"
             style=${styleMap({
@@ -335,29 +329,41 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
                   "Was the product delivered in the correct amount?",
                 )}</span
               >
-              <div class="row" style="align-items: center; gap: 24px">
+              <div class="row" style="align-items: center; gap: 12px">
                 <sl-checkbox
-                  indeterminate
-                  .value=${productDelivery?.correctAmount}
+                  .checked=${!productDelivery || productDelivery.correctAmount}
                   @sl-change=${(e: CustomEvent) => {
                     const checked = (e.target as SlCheckbox).checked;
                     this.processingProduct!.correctAmount = checked;
+                    this.processingProduct!.deliveredAmount =
+                      totalAmountOrdered;
                     this.requestUpdate();
                   }}
                   >${msg("Correct amount")}</sl-checkbox
                 >
+                <span
+                  style=${styleMap({
+                    opacity:
+                      !productDelivery || productDelivery?.correctAmount
+                        ? "0"
+                        : "1",
+                  })}
+                  >${msg("Actual amount delivered")}</span
+                >
                 <sl-input
+                  style=${styleMap({
+                    opacity:
+                      !productDelivery || productDelivery?.correctAmount
+                        ? "0"
+                        : "1",
+                  })}
                   type="number"
-                  .value=${productDelivery?.actualAmount
-                    ? productDelivery.actualAmount
+                  .value=${productDelivery?.deliveredAmount
+                    ? productDelivery.deliveredAmount
                     : totalAmountOrdered}
-                  .disabled=${productDelivery?.correctAmount === undefined
-                    ? true
-                    : productDelivery?.correctAmount}
-                  .label=${msg("Actual amount delivered")}
                   @input=${(e: InputEvent) => {
                     const value = parseInt((e.target as SlInput).value);
-                    this.processingProduct!.actualAmount = value;
+                    this.processingProduct!.deliveredAmount = value;
                     this.requestUpdate();
                   }}
                 ></sl-input>
@@ -365,52 +371,163 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
             </div>
 
             <div class="column" style="gap: 12px">
-              <span>${msg("Households that ordered this product:")}</span>
-              <div class="column" style=" gap: 12px">
-                ${Array.from(productOrdersByHousehold.entries()).map(
-                  ([householdHash, productOrder]) => html`
-                    <div
-                      class="row"
-                      style="align-items: center; width: 24em; gap: 12px;"
-                    >
-                      <show-image
-                        style="width: 32px; height: 32px;"
-                        .imageHash=${households.get(householdHash)!.entry
-                          .avatar}
-                      ></show-image>
-                      <span style="flex:1"
-                        >${households.get(householdHash)!.entry.name}</span
-                      >
-                      <sl-input
-                        type="number"
-                        style="width: 6em"
-                        .value=${productDelivery?.actualAmount
-                          ? productDelivery.actualAmount
-                          : productOrder[1].amount}
-                        @input=${(e: InputEvent) => {
-                          const value = parseInt((e.target as SlInput).value);
-                          this.requestUpdate();
-                        }}
-                      ></sl-input>
-                    </div>
-                  `,
-                )}
-              </div>
+              <span>${msg("How many does each household get?")}</span>
+              <table style="width: 500px;">
+                <thead>
+                  <th style="text-align: left; font-weight: normal">
+                    ${msg("Household")}
+                  </th>
+
+                  <th style="text-align: center; font-weight: normal">
+                    ${msg("Amount ordered")}
+                  </th>
+                  <th style="text-align: center; font-weight: normal">
+                    ${msg("Amount they will receive")}
+                  </th>
+                </thead>
+                <tbody>
+                  ${Array.from(productOrdersByHousehold.entries()).map(
+                    ([householdHash, productOrder]) => html`
+                      <tr>
+                        <td>
+                          <div
+                            class="row"
+                            style="gap: 12px; align-items: center"
+                          >
+                            <show-image
+                              style="width: 32px; height: 32px;"
+                              .imageHash=${households.get(householdHash)!.entry
+                                .avatar}
+                            ></show-image>
+                            <span style="flex:1"
+                              >${households.get(householdHash)!.entry
+                                .name}</span
+                            >
+                          </div>
+                        </td>
+                        <td style="text-align: center">
+                          ${productOrder[1].amount}
+                        </td>
+                        <td style="text-align: center">
+                          <div class="column" style="width: 100%">
+                            <sl-input
+                              type="number"
+                              style="width: 6em; align-self: center"
+                              .value=${productDelivery?.delivery?.type ===
+                                "Delivered" &&
+                              productDelivery.delivery.delivered_amount.type ===
+                                "FixedAmountProduct" &&
+                              productDelivery.delivery.delivered_amount.delivered_products.find(
+                                (d) =>
+                                  !!d.households_hashes.find(
+                                    (h) =>
+                                      encodeHashToBase64(h) ===
+                                      encodeHashToBase64(householdHash),
+                                  ),
+                              )
+                                ? productDelivery.delivery.delivered_amount.delivered_products.find(
+                                    (d) =>
+                                      !!d.households_hashes.find(
+                                        (h) =>
+                                          encodeHashToBase64(h) ===
+                                          encodeHashToBase64(householdHash),
+                                      ),
+                                  )?.amount
+                                : productOrder[1].amount}
+                              @input=${(e: InputEvent) => {
+                                const value = parseInt(
+                                  (e.target as SlInput).value,
+                                );
+                                if (
+                                  productDelivery?.delivery?.type ===
+                                    "Delivered" &&
+                                  productDelivery?.delivery?.delivered_amount
+                                    .type === "FixedAmountProduct"
+                                ) {
+                                  const deliveryForThisHousehold =
+                                    productDelivery.delivery.delivered_amount.delivered_products.find(
+                                      (d) =>
+                                        d.households_hashes.find(
+                                          (h) =>
+                                            encodeHashToBase64(h) ===
+                                            encodeHashToBase64(householdHash),
+                                        ),
+                                    );
+                                  if (deliveryForThisHousehold) {
+                                    deliveryForThisHousehold.amount = value;
+                                  } else {
+                                    productDelivery.delivery.delivered_amount.delivered_products.push(
+                                      {
+                                        amount: value,
+                                        households_hashes: [householdHash],
+                                      },
+                                    );
+                                  }
+                                }
+
+                                this.requestUpdate();
+                              }}
+                            >
+                            </sl-input>
+                          </div>
+                        </td>
+                      </tr>
+                    `,
+                  )}
+                </tbody>
+              </table>
             </div>
+            <sl-tooltip
+              placement="right"
+              trigger="manual"
+              .content=${msg(
+                "The sum given to each household is incorrect: add a comment explaining why.",
+              )}
+              .open=${this.errorInProcessing(productHash) ===
+              "households-amount-mismatch-without-comment"}
+            >
+              <sl-textarea
+                style="flex: 1; "
+                .label=${msg("Additional comment")}
+                @input=${(e: InputEvent) => {
+                  const comment = (e.target as SlInput).value;
+                  if (productDelivery?.delivery?.type === "Delivered") {
+                    productDelivery.delivery.comment =
+                      comment === "" ? undefined : comment;
+                  }
+                  this.requestUpdate();
+                }}
+              ></sl-textarea>
+            </sl-tooltip>
           </div>
         </div>
       </div>
     `;
   }
 
-  errorInProcessing(productHash: ActionHash): string | undefined {
+  errorInProcessing(
+    productHash: ActionHash,
+  ):
+    | "product-delivered-not-set"
+    | "households-amount-mismatch-without-comment"
+    | undefined {
     const product = this.products[encodeHashToBase64(productHash)];
     if (!product) return undefined;
-    if (!product.delivery) return msg("was the product delivered?");
+    // if (!product.delivery) return msg("Was the product delivered?");
+    if (!product.delivery) return "product-delivered-not-set";
     if (product.delivery.type === "Delivered") {
-      // if (product.actualAmount === undefined) return false;
-      if (product.correctAmount === undefined)
-        return msg("was the product delivered in the correct amount?");
+      if (product.delivery.delivered_amount.type === "FixedAmountProduct") {
+        const actualAmount = product.deliveredAmount;
+        const sum = product.delivery.delivered_amount.delivered_products.reduce(
+          (acc, next) => acc + next.amount,
+          0,
+        );
+        if (actualAmount !== sum && product.delivery.comment === undefined)
+          return "households-amount-mismatch-without-comment";
+        //           return msg(
+        //   ,
+        // );
+      }
     }
 
     return undefined;
@@ -422,16 +539,13 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
 
     const error = this.errorInProcessing(productHash);
 
-    if (error)
-      return html`<sl-tag variant="danger">${msg("Incomplete")}</sl-tag>`;
+    if (error) return html`<sl-tag>${msg("Incomplete")}</sl-tag>`;
 
     switch (product.delivery!.type) {
       case "Delivered":
         return html`<sl-tag variant="success">${msg("Delivered")}</sl-tag>`;
       case "Missing":
         return html`<sl-tag variant="warning">${msg("Missing")}</sl-tag>`;
-      case "Problem":
-        return html`<sl-tag variant="warning">${msg("Problem")}</sl-tag>`;
     }
   }
 
@@ -458,7 +572,7 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
               ? html`
                   <span
                     >${msg(
-                      str`Product "${products.get(decodeHashFromBase64(errorInProcessing))!.entry.name}" is incomplete`,
+                      str`Product "${products.get(decodeHashFromBase64(errorInProcessing))!.entry.name}" is incomplete.`,
                     )}</span
                   >
                 `
@@ -490,9 +604,17 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
                 this.processingProductHash = encodeHashToBase64(
                   Array.from(products.keys())[0],
                 );
+                const productOrdersByHousehold =
+                  this.productOrdersByHouseholdForProduct(
+                    decodeHashFromBase64(this.processingProductHash),
+                    allHouseholdsOrders,
+                  );
+                const totalAmountOrdered = Array.from(
+                  productOrdersByHousehold.values(),
+                ).reduce((acc, next) => acc + next[1].amount, 0);
                 this.processingProduct = {
-                  actualAmount: undefined,
-                  correctAmount: undefined,
+                  deliveredAmount: totalAmountOrdered,
+                  correctAmount: true,
                   delivery: undefined,
                 };
               }
@@ -508,9 +630,17 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
               if (this.products[newProductHash]) {
                 this.processingProduct = this.products[newProductHash];
               } else {
+                const productOrdersByHousehold =
+                  this.productOrdersByHouseholdForProduct(
+                    decodeHashFromBase64(newProductHash),
+                    allHouseholdsOrders,
+                  );
+                const totalAmountOrdered = Array.from(
+                  productOrdersByHousehold.values(),
+                ).reduce((acc, next) => acc + next[1].amount, 0);
                 this.processingProduct = {
-                  actualAmount: undefined,
-                  correctAmount: undefined,
+                  deliveredAmount: totalAmountOrdered,
+                  correctAmount: true,
                   delivery: undefined,
                 };
               }
@@ -534,7 +664,9 @@ export class CreateProducerDelivery extends SignalWatcher(LitElement) {
                     class="row"
                     style="align-items: center; gap: 12px; width: 15em"
                   >
-                    <span style="flex: 1"> ${product.entry.name} </span>
+                    <span style="flex: 1; overflow: hidden">
+                      ${product.entry.name}
+                    </span>
                     ${this.renderTag(productHash)}
                   </div>
                 </sl-tab>

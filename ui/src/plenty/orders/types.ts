@@ -120,12 +120,9 @@ export type ProductDelivery =
       type: "Missing";
     }
   | {
-      type: "Problem";
-      problem: string;
-    }
-  | {
       type: "Delivered";
       delivered_amount: DeliveredAmount;
+      comment: string | undefined;
     };
 
 export interface ProducerDelivery {
