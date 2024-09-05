@@ -420,7 +420,7 @@ dependencies = [
  "futures-lite 2.3.0",
  "parking",
  "polling 3.7.3",
- "rustix 0.38.35",
+ "rustix 0.38.36",
  "slab",
  "tracing",
  "windows-sys 0.59.0",
@@ -465,7 +465,7 @@ dependencies = [
  "cfg-if 1.0.0",
  "event-listener 3.1.0",
  "futures-lite 1.13.0",
- "rustix 0.38.35",
+ "rustix 0.38.36",
  "windows-sys 0.48.0",
 ]
 
@@ -484,7 +484,7 @@ dependencies = [
  "cfg-if 1.0.0",
  "event-listener 5.3.1",
  "futures-lite 2.3.0",
- "rustix 0.38.35",
+ "rustix 0.38.36",
  "tracing",
  "windows-sys 0.59.0",
 ]
@@ -512,7 +512,7 @@ dependencies = [
  "cfg-if 1.0.0",
  "futures-core",
  "futures-io",
- "rustix 0.38.35",
+ "rustix 0.38.36",
  "signal-hook-registry",
  "slab",
  "windows-sys 0.59.0",
@@ -1809,9 +1809,9 @@ dependencies = [
 
 [[package]]
 name = "dashmap"
-version = "6.0.1"
+version = "6.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "804c8821570c3f8b70230c2ba75ffa5c0f9a4189b9a432b6656c536712acae28"
+checksum = "5041cc499144891f3790297212f32a74fb938e5136a14943f338ef9e0ae276cf"
 dependencies = [
  "cfg-if 1.0.0",
  "crossbeam-utils",
@@ -4269,7 +4269,7 @@ dependencies = [
  "httpdate",
  "itoa 1.0.11",
  "pin-project-lite",
- "socket2 0.5.7",
+ "socket2 0.4.10",
  "tokio",
  "tower-service",
  "tracing",
@@ -4534,7 +4534,7 @@ dependencies = [
  "clap 4.5.17",
  "crossbeam-channel",
  "crossbeam-utils",
- "dashmap 6.0.1",
+ "dashmap 6.1.0",
  "env_logger",
  "indexmap 2.5.0",
  "is-terminal",
@@ -6826,7 +6826,7 @@ dependencies = [
  "concurrent-queue",
  "hermit-abi 0.4.0",
  "pin-project-lite",
- "rustix 0.38.35",
+ "rustix 0.38.36",
  "tracing",
  "windows-sys 0.59.0",
 ]
@@ -7927,9 +7927,9 @@ dependencies = [
 
 [[package]]
 name = "rustix"
-version = "0.38.35"
+version = "0.38.36"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a85d50532239da68e9addb745ba38ff4612a242c1c7ceea689c4bc7c2f43c36f"
+checksum = "3f55e80d50763938498dd5ebb18647174e0c76dc38c5505294bb224624f30f36"
 dependencies = [
  "bitflags 2.6.0",
  "errno",
@@ -9508,7 +9508,7 @@ dependencies = [
  "cfg-if 1.0.0",
  "fastrand 2.1.1",
  "once_cell",
- "rustix 0.38.35",
+ "rustix 0.38.36",
  "windows-sys 0.59.0",
 ]
 
@@ -9529,7 +9529,7 @@ version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "21bebf2b7c9e0a515f6e0f8c51dc0f8e4696391e6f1ff30379559f8365fb0df7"
 dependencies = [
- "rustix 0.38.35",
+ "rustix 0.38.36",
  "windows-sys 0.48.0",
 ]
 
@@ -9806,9 +9806,9 @@ dependencies = [
 
 [[package]]
 name = "tokio-stream"
-version = "0.1.15"
+version = "0.1.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "267ac89e0bec6e691e5813911606935d77c476ff49024f98abcea3e7b15e37af"
+checksum = "4f4e6ce100d0eb49a2734f8c0812bcd324cf357d21810932c5df6b96ef2b86f1"
 dependencies = [
  "futures-core",
  "pin-project-lite",
@@ -10151,9 +10151,26 @@ dependencies = [
  "serde_json",
  "tokio",
  "tracing",
- "tx5-core",
+ "tx5-core 0.0.14-alpha (registry+https://github.com/rust-lang/crates.io-index)",
  "tx5-go-pion",
  "tx5-signal",
+ "url",
+]
+
+[[package]]
+name = "tx5-core"
+version = "0.0.14-alpha"
+dependencies = [
+ "app_dirs2",
+ "base64 0.13.1",
+ "once_cell",
+ "rand 0.8.5",
+ "serde",
+ "serde_json",
+ "sha2",
+ "tempfile",
+ "tokio",
+ "tracing",
  "url",
 ]
 
@@ -10193,8 +10210,6 @@ dependencies = [
 [[package]]
 name = "tx5-go-pion-sys"
 version = "0.0.14-alpha"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ad305853b0675d30b18183d072f4b3e326ea186ab38e2778a7a5d40072271853"
 dependencies = [
  "Inflector",
  "base64 0.13.1",
@@ -10205,7 +10220,7 @@ dependencies = [
  "ouroboros",
  "sha2",
  "tracing",
- "tx5-core",
+ "tx5-core 0.0.14-alpha",
  "zip 0.6.6",
 ]
 
@@ -10223,7 +10238,7 @@ dependencies = [
  "sha2",
  "tokio",
  "tracing",
- "tx5-core",
+ "tx5-core 0.0.14-alpha (registry+https://github.com/rust-lang/crates.io-index)",
  "zip 0.6.6",
 ]
 
@@ -10251,7 +10266,7 @@ dependencies = [
  "tokio-rustls 0.23.4",
  "tokio-tungstenite 0.18.0",
  "tracing",
- "tx5-core",
+ "tx5-core 0.0.14-alpha (registry+https://github.com/rust-lang/crates.io-index)",
  "url",
  "webpki-roots 0.23.1",
 ]
@@ -10273,7 +10288,7 @@ dependencies = [
  "tokio",
  "tracing",
  "tracing-subscriber",
- "tx5-core",
+ "tx5-core 0.0.14-alpha (registry+https://github.com/rust-lang/crates.io-index)",
  "warp",
 ]
 
@@ -11664,7 +11679,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5d91ffca73ee7f68ce055750bf9f6eca0780b8c85eff9bc046a3b0da41755e12"
 dependencies = [
  "gethostname",
- "rustix 0.38.35",
+ "rustix 0.38.36",
  "x11rb-protocol",
 ]
 
@@ -11682,7 +11697,7 @@ checksum = "8da84f1a25939b27f6820d92aed108f83ff920fdf11a7b19366c27c4cda81d4f"
 dependencies = [
  "libc",
  "linux-raw-sys 0.4.14",
- "rustix 0.38.35",
+ "rustix 0.38.36",
 ]
 
 [[package]]
