@@ -64,6 +64,7 @@ runs:
 
     - name: Extend macos
       if: matrix.platform == 'macos-latest' ||  matrix.platform == 'macos-13'
+      shell: "bash"
       run: |
         set -e
         set -u
