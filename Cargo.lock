@@ -919,9 +919,9 @@ dependencies = [
 
 [[package]]
 name = "bytemuck"
-version = "1.17.1"
+version = "1.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "773d90827bc3feecfb67fab12e24de0749aad83c74b9504ecde46237b5cd24e2"
+checksum = "94bbb0ad554ad961ddc5da507a12a29b14e4ae5bda06b19f575a3e6079d2e2ae"
 
 [[package]]
 name = "byteorder"
@@ -1475,9 +1475,9 @@ dependencies = [
 
 [[package]]
 name = "cpufeatures"
-version = "0.2.13"
+version = "0.2.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "51e852e6dc9a5bed1fae92dd2375037bf2b768725bf3be87811edee3249d09ad"
+checksum = "608697df725056feaccfa42cffdaeeec3fccc4ffc38358ecd19b243e716a78e0"
 dependencies = [
  "libc",
 ]
@@ -6750,7 +6750,7 @@ checksum = "d231b230927b5e4ad203db57bbcbee2802f6bce620b1e4a9024a07d94e2907ec"
 
 [[package]]
 name = "plenty"
-version = "0.0.3"
+version = "0.0.4"
 dependencies = [
  "anyhow",
  "app_dirs2",
@@ -7827,7 +7827,7 @@ dependencies = [
 [[package]]
 name = "roles_types"
 version = "0.0.1"
-source = "git+https://github.com/darksoil-studio/roles?branch=main#dc619015e2abf053dea542c8cfcfe43f52e746e3"
+source = "git+https://github.com/darksoil-studio/roles?branch=main#3d7bd8e917bf2b3e9ef3d0a6e3f8e683caf04b0a"
 dependencies = [
  "hdi",
  "holo_hash",
@@ -9319,7 +9319,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-holochain"
 version = "0.0.0"
-source = "git+https://github.com/darksoil-studio/tauri-plugin-holochain?branch=develop#ac810ad8a7aaa6a3515c02abd07b13906cd4cd90"
+source = "git+https://github.com/darksoil-studio/tauri-plugin-holochain?branch=develop#9ae0868fa95f7258be3ad812654790789d3f61dc"
 dependencies = [
  "anyhow",
  "async-std",
