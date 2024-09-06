@@ -58,6 +58,7 @@ runs:
                                                    -e 'test-unit' \
                                                    -e 'thwait' \
                                                    -e 'tracer' \
+                                                   -e 'typeprof' \
                                                    -e 'webrick' \
                                                    -e 'xmlrpc' \
                                                    -e 'zlib' \
