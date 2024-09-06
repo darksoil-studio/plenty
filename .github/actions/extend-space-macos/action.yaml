@@ -47,6 +47,7 @@ runs:
                                                    -e 'rake' \
                                                    -e 'rexml' \
                                                    -e 'rdoc' \
+                                                   -e 'rbs' \
                                                    -e 'rss' \
                                                    -e 'scanf' \
                                                    -e 'shell' \
