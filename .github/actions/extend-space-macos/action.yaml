@@ -87,13 +87,13 @@ runs:
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)" -- --force
         fi
 
-        # Uninstall Xcode and Command Line Tools
-        mkdir -p /tmp/trash
-        for trash in /Applications/Xcode*.app /Library/Developer/CommandLineTools; do
-          sudo mv "$trash" /tmp/trash/
-        done
-        sudo pkgutil --forget com.apple.pkg.CLTools_Executables
-        sudo xcode-select --reset
+        # # Uninstall Xcode and Command Line Tools
+        # mkdir -p /tmp/trash
+        # for trash in /Applications/Xcode*.app /Library/Developer/CommandLineTools; do
+        #   sudo mv "$trash" /tmp/trash/
+        # done
+        # sudo pkgutil --forget com.apple.pkg.CLTools_Executables
+        # sudo xcode-select --reset
 
         # Clean environment.
         for trash in ~/.DS_Store \
