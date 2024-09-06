@@ -125,7 +125,7 @@ jobs:
           APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         with:
-          tauriScript: nix develop --no-update-lock-file --command pnpm tauri build
+          tauriScript: nix develop --no-update-lock-file --command pnpm tauri
           releaseId: ${{ needs.publish-happ.outputs.releaseId }}
           args: ${{ matrix.args }}
 
