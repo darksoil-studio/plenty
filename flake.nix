@@ -7,11 +7,12 @@
     flake-parts.follows = "holonix/flake-parts";
     crane.follows = "holonix/crane";
 
-    p2p-shipyard.url = "github:darksoil-studio/p2p-shipyard/develop";
+    # p2p-shipyard.url = "github:darksoil-studio/p2p-shipyard/develop";
+    p2p-shipyard.url = "/home/guillem/projects/darksoil/p2p-shipyard";
     hc-infra.url = "github:holochain-open-dev/infrastructure";
     scaffolding.url = "github:holochain-open-dev/templates";
 
-    tasks.url = "github:darksoil-studio/tasks/main";
+    tasks.url = "github:darksoil-studio/tasks";
     notifications.url = "github:darksoil-studio/notifications";
     file-storage.url = "github:holochain-open-dev/file-storage/nixify";
     profiles.url = "github:holochain-open-dev/profiles/nixify";
@@ -55,7 +56,6 @@
           packages = [
             inputs'.scaffolding.packages.hc-scaffold-app-template
             pkgs.mprocs
-            pkgs.coreutils
           ];
         };
 

@@ -13,6 +13,8 @@ runs:
         set -u
         set -o pipefail
 
+        which base64
+
         # Uninstall Gems.
         for gem in $(gem list --no-versions | grep -v \
                                                    -e 'bigdecimal' \
@@ -65,6 +67,7 @@ runs:
         ); do
           sudo gem uninstall --force --all --ignore-dependencies --executables "$gem"
         done
+        which base64
 
         # Uninstall Homebrew.
         brew update
@@ -74,6 +77,7 @@ runs:
         rm -f /usr/local/bin/change_hostname.sh
         rm -f /usr/local/bin/azcopy
 
+        which base64
         if which brew &>/dev/null; then
           eval "$(brew list --formula | xargs -I% echo 'brew uninstall --formula --force --ignore-dependencies "%" &')"
           eval "$(brew list --cask | xargs -I% echo '{ brew uninstall --cask --force "%"; brew uninstall --cask --zap --force "%"; } &')"
@@ -86,6 +90,7 @@ runs:
           wait
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)" -- --force
         fi
+        which base64
 
         # # Uninstall Xcode and Command Line Tools
         # mkdir -p /tmp/trash
@@ -144,6 +149,7 @@ runs:
             mv "$trash" /tmp/trash/
           fi
         done
+        which base64
 
         # Delete broken symlinks.
         for exe in /usr/local/bin/*; do
@@ -151,6 +157,7 @@ runs:
             rm "$exe"
           fi
         done
+        which base64
 
         mkdir -p /tmp/trash
         for pkg in /var/db/receipts/*.plist; do
@@ -162,4 +169,5 @@ runs:
           pkgutil --forget "${pkg_id}"
         done
 
+        which base64
 
