@@ -55,6 +55,7 @@
           packages = [
             inputs'.scaffolding.packages.hc-scaffold-app-template
             pkgs.mprocs
+            pkgs.coreutils
           ];
         };
 
