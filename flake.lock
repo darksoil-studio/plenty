@@ -8628,11 +8628,11 @@
         "webkitgtknixpkgs": "webkitgtknixpkgs"
       },
       "locked": {
-        "lastModified": 1725904595,
-        "narHash": "sha256-ym16SHuU7eAu6SzoBXBXvnHHpFHy5/T8XQcrrMGbPBM=",
+        "lastModified": 1725916346,
+        "narHash": "sha256-KVKgdIIJmjcQ2fZ1K7YoK9ZnUgiK3p85kaEWtevkWjc=",
         "owner": "darksoil-studio",
         "repo": "p2p-shipyard",
-        "rev": "09e2c1345aa1169249105c85cd2d5cdf77b5e00d",
+        "rev": "4031d247421c43d997e86ec1100ea774dcf8ea10",
         "type": "github"
       },
       "original": {

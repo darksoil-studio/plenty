@@ -84,7 +84,7 @@ runs:
           brew uninstall --cask --zap --force xamarin-ios &
           brew uninstall --cask --zap --force xamarin-mac &
           wait
-          # /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)" -- --force
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)" -- --force
         fi
 
         # # Uninstall Xcode and Command Line Tools
@@ -145,21 +145,21 @@ runs:
           fi
         done
 
-        # # Delete broken symlinks.
-        # for exe in /usr/local/bin/*; do
-        #   if [[ -L "$exe" ]] && ! [[ -e "$exe" ]]; then
-        #     rm "$exe"
-        #   fi
-        # done
+        # Delete broken symlinks.
+        for exe in /usr/local/bin/*; do
+          if [[ -L "$exe" ]] && ! [[ -e "$exe" ]]; then
+            rm "$exe"
+          fi
+        done
 
-        # mkdir -p /tmp/trash
-        # for pkg in /var/db/receipts/*.plist; do
-        #   pkg_id="$(basename "${pkg}" .plist)"
-        #   volume="$(pkgutil --pkg-info "${pkg_id}" | sed -n -e 's/^volume: //p')"
-        #   location="$(pkgutil --pkg-info "${pkg_id}" | sed -n -e 's/^location: //p')"
-        #   pkgutil --only-files --files "${pkg_id}" | xargs -I% sudo mv -f "${volume}${location}/%" /tmp/trash/ || true
-        #   pkgutil --only-dirs --files "${pkg_id}" | xargs -I% sudo rmdir -p "${volume}${location}/%" || true
-        #   pkgutil --forget "${pkg_id}"
-        # done
+        mkdir -p /tmp/trash
+        for pkg in /var/db/receipts/*.plist; do
+          pkg_id="$(basename "${pkg}" .plist)"
+          volume="$(pkgutil --pkg-info "${pkg_id}" | sed -n -e 's/^volume: //p')"
+          location="$(pkgutil --pkg-info "${pkg_id}" | sed -n -e 's/^location: //p')"
+          pkgutil --only-files --files "${pkg_id}" | xargs -I% sudo mv -f "${volume}${location}/%" /tmp/trash/ || true
+          pkgutil --only-dirs --files "${pkg_id}" | xargs -I% sudo rmdir -p "${volume}${location}/%" || true
+          pkgutil --forget "${pkg_id}"
+        done
 
 
