@@ -14,7 +14,7 @@
   "dependencies": {
     "@darksoil-studio/notifications": "github:darksoil-studio/notifications#d23ad31d94ad18a7bd140272102c78fca96365cc&path:ui",
     "@darksoil-studio/roles": "github:darksoil-studio/roles#b6eb55cff89657597d4e456c1e4e3f91f75a5cfb&path:ui",
-    "@darksoil-studio/tasks": "github:darksoil-studio/tasks#b3e5b96e30f502b2c178ddfcae47fb603f64914b&path:ui",
+    "@darksoil-studio/tasks": "github:darksoil-studio/tasks#a7f3b5a10c4bbbd92e1ef0014a908f25721de79c&path:ui",
     "@holochain-open-dev/elements": "^0.300.1",
     "@holochain-open-dev/file-storage": "github:holochain-open-dev/file-storage#c503070441d29a1c448abf1b0949762fe4ef314d&path:ui",
     "@holochain-open-dev/profiles": "github:holochain-open-dev/profiles#6000dc6c04194429f2768517670366c411c4a03a&path:ui",
