@@ -3,7 +3,7 @@
 
   inputs = {
     holonix.url = "github:holochain/holonix/main-0.3";
-    nixpkgs.follows = "holonix/nixpkgs";
+    nixpkgs.follows = "hc-infra/nixpkgs";
     flake-parts.follows = "holonix/flake-parts";
     crane.follows = "holonix/crane";
 
@@ -46,11 +46,6 @@
           };
 
         devShells.default = pkgs.mkShell {
-          stdenv = if pkgs.stdenv.isDarwin then
-            pkgs.overrideSDK pkgs.stdenv "11.0"
-          else
-            pkgs.stdenv;
-
           inputsFrom = [
             inputs'.hc-infra.devShells.synchronized-pnpm
             inputs'.p2p-shipyard.devShells.holochainTauriDev
