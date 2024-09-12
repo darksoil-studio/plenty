@@ -46,14 +46,7 @@
             ui_port = 8888;
           };
 
-        devShells.default = let
-          mkShell' = pkgs.mkShell.override {
-            stdenv = if pkgs.stdenv.isDarwin then
-              pkgs.overrideSDK pkgs.stdenv "11.0"
-            else
-              pkgs.stdenv;
-          };
-        in mkShell' {
+        devShells.default = pkgs.mkShell {
           inputsFrom = [
             inputs'.hc-infra.devShells.synchronized-pnpm
             inputs'.p2p-shipyard.devShells.holochainTauriDev
