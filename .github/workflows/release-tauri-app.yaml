@@ -39,8 +39,10 @@ jobs:
           name: darksoil-studio
 
       - name: Build .webhapp
+        env:
+          CACHIX_AUTH_TOKEN: "${{ secrets.DARKSOIL_CACHIX_AUTH_TOKEN }}"
         run: |
-          nix develop --no-update-lock-file --accept-flake-config --command bash -c "pnpm install && pnpm happ:build"
+          cachix watch-exec darksoil-studio -- nix develop --no-update-lock-file --accept-flake-config --command bash -c "pnpm install && pnpm happ:build"
 
       - name: Retrieve version
         run: |
@@ -171,15 +173,7 @@ jobs:
       - name: install dependencies (ubuntu only)
         run: |
           sudo apt update
-          sudo apt install libwebkit2gtk-4.1-dev \
-            build-essential \
-            curl \
-            wget \
-            file \
-            libxdo-dev \
-            libssl-dev \
-            libayatana-appindicator3-dev \
-            librsvg2-dev
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
       - name: Install and prepare
         run: |
