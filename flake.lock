@@ -9138,7 +9138,7 @@
         "hc-infra": "hc-infra_2",
         "holonix": "holonix_4",
         "nixpkgs": [
-          "hc-infra",
+          "holonix",
           "nixpkgs"
         ],
         "notifications": "notifications",
