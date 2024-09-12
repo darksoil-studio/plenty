@@ -3,7 +3,8 @@
 
   inputs = {
     holonix.url = "github:holochain/holonix/main-0.3";
-    nixpkgs.follows = "holonix/nixpkgs";
+    # nixpkgs.follows = "holonix/nixpkgs";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.05";
     flake-parts.follows = "holonix/flake-parts";
     crane.follows = "holonix/crane";
 
