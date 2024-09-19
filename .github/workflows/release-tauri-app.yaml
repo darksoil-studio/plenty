@@ -69,7 +69,7 @@ jobs:
         include:
           - platform: 'macos-latest' # for Arm based macs (M1 and above).
           - platform: 'macos-13' # for Intel based macs.
-          # - platform: 'ubuntu-22.04' 
+          - platform: 'ubuntu-22.04' 
 
     env:
       MACOSX_DEPLOYMENT_TARGET: 10.13
@@ -136,64 +136,6 @@ jobs:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         with:
           tauriScript: nix develop --no-update-lock-file --command pnpm tauri
-          releaseId: ${{ needs.publish-happ.outputs.releaseId }}
-
-  release-tauri-app-linux:
-    permissions: write-all
-    needs: publish-happ
-
-    runs-on: ubuntu-22.04
-    steps:
-
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      # Checks out a copy of your repository on the ubuntu-latest machine
-      - uses: actions/checkout@v3
-
-      - name: setup node
-        uses: actions/setup-node@v1
-        with:
-          node-version: 20
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3 # docs https://pnpm.io/continuous-integration#github-actions
-        with:
-            version: 9  # Optional: specify a pnpm version
-
-      - name: install Rust stable
-        uses: actions-rs/toolchain@v1
-        with:
-          override: true
-          toolchain: 1.77.2
-
-      - name: install Go stable
-        uses: actions/setup-go@v4
-        with:
-          go-version: "stable"
-
-      - name: install dependencies (ubuntu only)
-        run: |
-          sudo apt update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
-
-      - name: Install and prepare
-        run: |
-          pnpm install
-
-      - name: Download release of the .happ
-        uses: robinraju/release-downloader@v1.10
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with: 
-          token: ${{ secrets.GITHUB_TOKEN }}
-          releaseId: ${{ needs.publish-happ.outputs.releaseId }}
-          fileName: 'plenty.webhapp'
-          out-file-path: 'workdir/'
-
-      - name: build the app
-        uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
           releaseId: ${{ needs.publish-happ.outputs.releaseId }}
 
   release-tauri-app-windows:
