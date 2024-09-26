@@ -7,9 +7,8 @@
     ++ (map (m: "${./.}/zomes/integrity/${m}/zome.nix")
       (builtins.attrNames (builtins.readDir ./zomes/integrity)));
   perSystem = { inputs', self', lib, system, ... }: {
-    packages.plenty_dna = inputs.hc-infra.outputs.lib.dna {
+    packages.plenty_dna = inputs.hc-infra.outputs.builders.${system}.dna {
       dnaManifest = ./workdir/dna.yaml;
-      inherit system;
       zomes = {
         tasks_integrity = inputs'.tasks.packages.tasks_integrity;
         tasks = inputs'.tasks.packages.tasks;
